@@ -1,0 +1,37 @@
+# Local persistence stack (roadmap V013).
+#
+# Local development only. This file must never be used to reach a shared or
+# production database: tools/db.mjs refuses destructive commands against any
+# host that is not loopback.
+services:
+  postgres:
+    build: ./docker/postgres
+    container_name: vision-postgres
+    environment:
+      POSTGRES_USER: vision
+      POSTGRES_PASSWORD: vision_local_dev_only
+      POSTGRES_DB: vision_dev
+    ports:
+      # Bound to loopback so the container is unreachable from the network.
+      - "127.0.0.1:5432:5432"
+    command:
+      # Bounded resources so local behaviour resembles the V006 §5 budget.
+      - postgres
+      - -c
+      - max_connections=50
+      - -c
+      - statement_timeout=15000
+      - -c
+      - idle_in_transaction_session_timeout=30000
+      - -c
+      - log_min_duration_statement=500
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vision -d vision_dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - vision-pgdata:/var/lib/postgresql/data
+
+volumes:
+  vision-pgdata:

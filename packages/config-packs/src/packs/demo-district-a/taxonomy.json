@@ -1,0 +1,13 @@
+{
+  "version": "demo-taxonomy.v1",
+  "note": "The permitted classification identifiers for the demonstration. This is scope as data (V001 Appendix G rule 7): the classifier may only propose identifiers listed here, so widening what the system will classify is a pack change, not a code change. The list is deliberately small and generic — it is NOT derived from any authority's own category scheme, and no correspondence to one is claimed.",
+  "label_language": "en-IN",
+  "label_note": "These labels are English only and are not translated. A Marathi reader sees an English label, and an interface showing them must say so rather than implying the whole page is translated. Translating them needs the native review V019 is waiting on.",
+  "categories": [
+    { "id": "water_supply", "label": "Water supply" },
+    { "id": "sanitation", "label": "Sanitation and drainage" },
+    { "id": "structural", "label": "Buildings and structures" },
+    { "id": "electrical", "label": "Electrical" }
+  ],
+  "defect_ids": ["leak", "blockage", "crack", "outage"]
+}

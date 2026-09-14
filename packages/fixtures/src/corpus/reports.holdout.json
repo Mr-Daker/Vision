@@ -1,0 +1,293 @@
+{
+  "split": "holdout",
+  "sealed": true,
+  "provenance": "team_created_synthetic",
+  "notice": "SEALED EVALUATION HOLDOUT. These rows must never appear in a prompt, a few-shot example, a tuning set, a seeded demo database, or a demo rehearsal. They exist only to be scored once by V046. Loading them requires VISION_EVAL_RUN=1 (see src/index.ts).",
+  "leakage_rule": "Holdout reports reference only holdout assets (demo-asset-003, demo-asset-006). No asset appears in both splits, so a model cannot have learned this asset's phrasing, coordinates or routing from the development set.",
+  "reports": [
+    {
+      "report_id": "hold-0001",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-003",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.61,
+        "lat": 16.89,
+        "accuracy_m": 10,
+        "observed_at": "2026-09-10T04:00:00Z"
+      },
+      "text": "Part of the roof over the store room has collapsed and rubble is on the floor.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c1"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.roof",
+        "defect_id": "collapsed_section",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-10T06:00:00Z",
+        "notes": "Severity routes to human inspection; it is not a safety determination."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "hold-0002",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-003",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.61004,
+        "lat": 16.89003,
+        "accuracy_m": 22,
+        "observed_at": "2026-09-10T05:00:00Z"
+      },
+      "text": "स्टोअर रूमवरील छताचा काही भाग कोसळला आहे.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c2"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.roof",
+        "defect_id": "collapsed_section",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Cross-language duplicate of hold-0001: the pair tests whether matching works across mr-IN and en-IN for the same defect."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "hold-0003",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-003",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.61008,
+        "lat": 16.8901,
+        "accuracy_m": 13,
+        "observed_at": "2026-09-11T04:30:00Z"
+      },
+      "text": "त्याच शाळेतील खिडकीची काच तुटली आहे.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c3"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.window",
+        "defect_id": "broken_pane",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Nearby distinct defect on the same holdout asset: must stay separate from hold-0001/0002."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "hold-0004",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-006",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.6405,
+        "lat": 16.9005,
+        "accuracy_m": 17,
+        "observed_at": "2026-09-11T05:00:00Z"
+      },
+      "text": "No water in the school toilets for the past week.",
+      "media": [
+        {
+          "media_type": "voice",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c4",
+          "transcript_expected": "No water in the school toilets for the past week."
+        }
+      ],
+      "expected": {
+        "category_id": "sanitation.toilet",
+        "defect_id": "no_water_supply",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-2",
+        "reviewed_at": "2026-09-11T07:00:00Z",
+        "notes": "English voice-path holdout example."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "hold-0005",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-006",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.64048,
+        "lat": 16.90052,
+        "accuracy_m": 19,
+        "observed_at": "2026-09-11T06:00:00Z"
+      },
+      "text": "भिंतीचे प्लास्टर पडत आहे आणि खाली मुले बसतात.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c5"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.wall",
+        "defect_id": "plaster_falling",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Mentions children present. Redaction and quarantine rules apply to any real media for this scenario (V005 §7); this fixture carries no media bytes."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "hold-0006",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-006",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.64055,
+        "lat": 16.90045,
+        "accuracy_m": 200,
+        "observed_at": "2026-09-11T08:00:00Z"
+      },
+      "text": "Something is wrong at the school, please check.",
+      "media": [
+        { "media_type": "text", "synthetic_placeholder": false, "object_bytes_present": false }
+      ],
+      "expected": {
+        "category_id": null,
+        "defect_id": null,
+        "severity_band": "routine",
+        "needs_review_expected": true
+      },
+      "reviewer": {
+        "decision": "needs_review",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-11T09:00:00Z",
+        "notes": "Deliberately uninformative with 200 m accuracy. Correct behaviour is an abstention into review, NOT a confident category guess."
+      },
+      "unresolved_labels": ["category_id", "defect_id"]
+    },
+    {
+      "report_id": "hold-0007",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-006",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.64051,
+        "lat": 16.90049,
+        "accuracy_m": 12,
+        "observed_at": "2026-09-12T04:00:00Z"
+      },
+      "text": "Corridor lights are out across the whole building.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c6"
+        }
+      ],
+      "expected": {
+        "category_id": "electrical.lighting",
+        "defect_id": "exposed_wiring",
+        "severity_band": "elevated",
+        "routing_review_expected": true
+      },
+      "reviewer": {
+        "decision": "accepted_with_unresolved",
+        "reviewed_by": "team-reviewer-2",
+        "reviewed_at": "2026-09-12T06:00:00Z",
+        "notes": "Routing gap in DDA-B2 for electrical.lighting; must enter routing_review. Defect label is uncertain because no wiring is described."
+      },
+      "unresolved_labels": ["defect_id", "department_id"]
+    },
+    {
+      "report_id": "hold-0008",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-003",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.61002,
+        "lat": 16.89001,
+        "accuracy_m": 15,
+        "observed_at": "2026-09-12T05:00:00Z"
+      },
+      "text": "शौचालयाचे गटार तुंबले आहे.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "e2000000000000000000000000000000000000000000000000000000000000c7"
+        }
+      ],
+      "expected": {
+        "category_id": "sanitation.toilet",
+        "defect_id": "blocked_drain",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Cross-category routing on a holdout asset."
+      },
+      "unresolved_labels": []
+    }
+  ]
+}

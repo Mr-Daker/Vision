@@ -1,0 +1,13 @@
+{
+  "name": "@vision/domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure domain policy and state transitions. Imports contracts only.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vision/contracts": "0.0.0"
+  }
+}

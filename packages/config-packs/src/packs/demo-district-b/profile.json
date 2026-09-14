@@ -1,0 +1,67 @@
+{
+  "jurisdiction_profile_id": "demo-district-b",
+  "provenance": "team_created_synthetic",
+  "label": "Demo District B (synthetic, urban-style hierarchy)",
+  "level_scheme": "demo.urban.v1",
+  "directory_version": "demo-jurisdiction.v1",
+  "notice": "SYNTHETIC boundaries invented for portability tests. They correspond to no real administrative area and no external boundary dataset was ingested.",
+  "nodes": [
+    {
+      "internal_code": "DDB",
+      "level_code": "district",
+      "parent_internal_code": null,
+      "label": "Demo District B (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [75.0, 17.0],
+            [75.2, 17.0],
+            [75.2, 17.2],
+            [75.0, 17.2],
+            [75.0, 17.0]
+          ]
+        ]
+      ]
+    },
+    {
+      "internal_code": "DDB-ULB1",
+      "level_code": "urban_local_body",
+      "parent_internal_code": "DDB",
+      "label": "Demo Municipal Body 1 (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [75.02, 17.02],
+            [75.18, 17.02],
+            [75.18, 17.18],
+            [75.02, 17.18],
+            [75.02, 17.02]
+          ]
+        ]
+      ]
+    },
+    {
+      "internal_code": "DDB-ULB1-W7",
+      "level_code": "ward",
+      "parent_internal_code": "DDB-ULB1",
+      "label": "Demo Ward 7 (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [75.04, 17.04],
+            [75.1, 17.04],
+            [75.1, 17.1],
+            [75.04, 17.1],
+            [75.04, 17.04]
+          ]
+        ]
+      ]
+    }
+  ]
+}

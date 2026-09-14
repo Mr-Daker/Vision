@@ -1,0 +1,86 @@
+{
+  "directory_version": "demo-routing.v1",
+  "provenance": "team_created_synthetic",
+  "notice": "SYNTHETIC responsibility directory. Department identifiers are invented placeholders and assert nothing about which authority is legally responsible for any real asset. Routing shown in the demonstration is internal and simulated (V002 rows 15-16).",
+  "departments": [
+    {
+      "department_id": "demo-dept-education-works",
+      "label": "Demo Education Works Department (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "department_id": "demo-dept-water-sanitation",
+      "label": "Demo Water and Sanitation Department (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "department_id": "demo-dept-electrical",
+      "label": "Demo Electrical Maintenance Department (simulated)",
+      "provider_mode": "simulated"
+    }
+  ],
+  "rules": [
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "structure.roof",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "structure.wall",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "structure.window",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "sanitation.toilet",
+      "department_id": "demo-dept-water-sanitation"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "water.drinking",
+      "department_id": "demo-dept-water-sanitation"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category_id": "electrical.lighting",
+      "department_id": "demo-dept-electrical"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "structure.roof",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "structure.wall",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "structure.window",
+      "department_id": "demo-dept-education-works"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "sanitation.toilet",
+      "department_id": "demo-dept-water-sanitation"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "water.drinking",
+      "department_id": "demo-dept-water-sanitation"
+    }
+  ],
+  "deliberate_gaps": [
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category_id": "electrical.lighting",
+      "reason": "Deliberately unmapped so routing must enter routing_review rather than inventing a custodian (V003 canonical_issue routing_review state)."
+    }
+  ]
+}

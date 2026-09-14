@@ -1,0 +1,23 @@
+Fonts served from this directory
+===============================
+
+Inter
+  inter-latin.woff2, inter-latin-ext.woff2
+  SIL Open Font License 1.1. https://rsms.me/inter/
+  Variable files as served by Google Fonts; only the Latin subsets are kept,
+  because the interface renders Latin and Devanagari, and Devanagari comes
+  from the system stack (Noto Sans Devanagari) rather than from Inter.
+
+BubbledotICG-FinePos
+  BubbledotICG-FinePos.woff2
+  Obtained from OnlineWebFonts and licensed CC BY 4.0, which REQUIRES
+  attribution wherever it is used:
+
+      Font made from Web Fonts (http://www.onlinewebfonts.com/fonts)
+      is licensed by CC BY 4.0
+
+  That credit is rendered in the page footer of index.html and signin.html.
+  Do not remove it while this font is in use.
+
+GeistPixel-Circle.woff2
+  Not present. Fallback display face only — see README.txt.

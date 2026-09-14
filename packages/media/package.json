@@ -1,0 +1,10 @@
+{
+  "name": "@vision/media",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Media decoding, normalisation and fingerprinting (V021). Leaf package: imports no other workspace package and no runtime dependency.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

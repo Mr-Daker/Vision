@@ -1,0 +1,102 @@
+{
+  "provenance": "team_created_synthetic",
+  "notice": "Reviewer-assigned relationships between reports. These are the labels V027/V028 matching is scored against. Relations never cross the development/holdout boundary.",
+  "duplicate_pairs": [
+    {
+      "relation_id": "dup-dev-001",
+      "split": "development",
+      "report_a": "dev-0001",
+      "report_b": "dev-0002",
+      "relation": "same_real_world_defect",
+      "basis": "Same asset, same subsystem and defect, observations 5 hours apart, coordinates within accuracy radius. Reported in different languages by different participants.",
+      "expected_match_state": "match_confirmed",
+      "expected_counted_participants": 2,
+      "reviewer": {
+        "decision": "confirmed",
+        "reviewed_by": "team-reviewer-1",
+        "notes": "Two distinct participants corroborate one issue; participation count must be 2, evidence count 2."
+      }
+    },
+    {
+      "relation_id": "dup-hold-001",
+      "split": "holdout",
+      "report_a": "hold-0001",
+      "report_b": "hold-0002",
+      "relation": "same_real_world_defect",
+      "basis": "Cross-language duplicate on a holdout asset: en-IN and mr-IN describing the same collapsed roof section.",
+      "expected_match_state": "match_confirmed",
+      "expected_counted_participants": 2,
+      "reviewer": {
+        "decision": "confirmed",
+        "reviewed_by": "team-reviewer-1",
+        "notes": "Primary cross-language matching test for V046."
+      }
+    }
+  ],
+  "nearby_distinct": [
+    {
+      "relation_id": "dist-dev-001",
+      "split": "development",
+      "report_a": "dev-0001",
+      "report_b": "dev-0003",
+      "relation": "different_defect_same_asset",
+      "approx_distance_m": 0,
+      "basis": "A leaking roof and a broken window pane at the same school are separate defects with separate repairs. Proximity alone must not merge them.",
+      "expected_match_state": "no_match",
+      "reviewer": {
+        "decision": "confirmed",
+        "reviewed_by": "team-reviewer-1",
+        "notes": "Hard negative: identical location, different subsystem."
+      }
+    },
+    {
+      "relation_id": "dist-dev-002",
+      "split": "development",
+      "report_a": "dev-0007",
+      "report_b": "dev-0009",
+      "relation": "different_defect_same_asset",
+      "approx_distance_m": 5,
+      "basis": "A broken drinking-water tap and exposed wiring at the same school route to different departments.",
+      "expected_match_state": "no_match",
+      "reviewer": {
+        "decision": "confirmed",
+        "reviewed_by": "team-reviewer-2",
+        "notes": "Also a routing divergence case: same asset, two custodians."
+      }
+    },
+    {
+      "relation_id": "dist-hold-001",
+      "split": "holdout",
+      "report_a": "hold-0001",
+      "report_b": "hold-0003",
+      "relation": "different_defect_same_asset",
+      "approx_distance_m": 12,
+      "basis": "Collapsed roof section versus a broken window pane on the same holdout asset.",
+      "expected_match_state": "no_match",
+      "reviewer": {
+        "decision": "confirmed",
+        "reviewed_by": "team-reviewer-1",
+        "notes": "Hard negative for V046; a false merge here is the expensive error."
+      }
+    }
+  ],
+  "recurrence": [
+    {
+      "relation_id": "rec-dev-001",
+      "split": "development",
+      "earlier_report": "dev-0007",
+      "later_report": "dev-0008",
+      "asset_id": "demo-asset-005",
+      "relation": "recurrence_after_confirmed_resolution",
+      "elapsed_days_approx": 89,
+      "basis": "The same tap failed again three months after a confirmed repair.",
+      "expected_treatment": "reviewer_decides",
+      "permitted_treatments": ["reopening_of_prior_issue", "new_issue_on_same_asset"],
+      "reviewer": {
+        "decision": "undecided_by_design",
+        "reviewed_by": "team-reviewer-2",
+        "notes": "V003 §8 requires that recurrence is not silently classified. Both treatments are defensible; the corpus records that a human must choose, and scoring must not penalise either choice."
+      }
+    }
+  ]
+}

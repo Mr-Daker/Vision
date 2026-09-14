@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sign in — Vision</title>
+    <meta
+      name="description"
+      content="Choose a demonstration account. This does not verify a real person or a DigiLocker credential."
+    />
+
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="landing.css" />
+    <link rel="stylesheet" href="signin.css" />
+  </head>
+  <body>
+    <div class="bg">
+      <video class="bg-video" autoplay muted loop playsinline>
+        <source src="assets/hero.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="page">
+      <header class="header">
+        <a class="logo" href="index.html" aria-label="Vision — home">
+          <img src="assets/logo.png" alt="" width="480" height="271" />
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="index.html">Home</a>
+          <a class="nav-link" href="app.html">Report</a>
+          <a class="nav-link" href="app.html#discovery-panel">Nearby</a>
+          <a class="nav-link" href="app.html#tracking-panel">Track</a>
+        </nav>
+
+        <a class="sign-in is-current" href="signin.html" aria-current="page">Sign in</a>
+
+        <button
+          class="burger"
+          id="burger"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </header>
+
+      <main class="hero auth">
+        <a class="auth-close" href="index.html" aria-label="Close and return to the home page">
+          <svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true">
+            <path
+              d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
+            />
+          </svg>
+          <span>Close</span>
+        </a>
+
+        <h1 class="auth-title anim" style="--d: 0.08s">
+          <span class="headline-line" style="--d: 0.12s">Choose An Account</span>
+        </h1>
+
+        <p class="auth-sub anim" style="--d: 0.2s">Identity is simulated for this demonstration.</p>
+
+        <div class="auth-card anim" style="--d: 0.3s">
+          <p class="auth-notice" role="note">
+            This does not verify a real person or a DigiLocker credential. Nothing here checks an
+            identity document, and no government system is contacted.
+          </p>
+
+          <div class="principal-list" id="principal-list" aria-busy="true">
+            <p class="principal-loading">Loading demonstration accounts…</p>
+          </div>
+
+          <p class="field-error" id="form-error" role="alert" hidden></p>
+        </div>
+
+        <p class="auth-note anim" style="--d: 0.42s">
+          Signing in creates a session for a simulated participant so you can send a report and
+          follow it. <a class="auth-link" href="app.html">Continue without signing in</a>
+        </p>
+      </main>
+
+      <footer class="stats auth-stats">
+        <div class="stat anim" style="--d: 0.5s">
+          <span class="stat-icon" aria-hidden="true">#</span>
+          <span class="stat-value" data-target="2" data-suffix="" data-decimals="0">2</span>
+          <span class="stat-label">Interface Languages</span>
+        </div>
+        <div class="stat anim" style="--d: 0.58s">
+          <span class="stat-icon" aria-hidden="true">%</span>
+          <span class="stat-value" data-target="100" data-suffix="%" data-decimals="0">100%</span>
+          <span class="stat-label">Simulated Identity</span>
+        </div>
+      </footer>
+      <p class="font-credit">
+        Font made from
+        <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
+        is licensed by CC BY 4.0
+      </p>
+    </div>
+
+    <div class="menu-overlay" id="menu-overlay" hidden></div>
+    <div class="menu-sheet" id="mobile-menu" hidden>
+      <nav class="menu-nav" aria-label="Mobile">
+        <a class="menu-link" href="index.html">Home</a>
+        <a class="menu-link" href="app.html">Report</a>
+        <a class="menu-link" href="app.html#discovery-panel">Nearby</a>
+        <a class="menu-link" href="app.html#tracking-panel">Track</a>
+        <a class="menu-sign-in" href="signin.html">Sign in</a>
+      </nav>
+    </div>
+
+    <script src="landing.js"></script>
+    <script src="signin.js"></script>
+  </body>
+</html>

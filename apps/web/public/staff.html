@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — department inbox</title>
+    <meta
+      name="description"
+      content="Department triage, internal acceptance and assignment workspace for the Vision demonstration."
+    />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/reviewer.css" />
+    <link rel="stylesheet" href="/staff.css" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/staff-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#staff-main">Skip to department inbox</a>
+    <header class="reviewer-header">
+      <a class="reviewer-brand" href="/">
+        <img src="/assets/logo.png" alt="" width="480" height="271" />
+        <span>Vision operations</span>
+      </a>
+      <nav aria-label="Workspace navigation">
+        <a href="/reviewer.html">Review queue</a>
+        <a href="/app.html">Citizen app</a>
+        <button type="button" id="staff-signout" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="staff-main">
+      <div class="page-intro">
+        <p class="eyebrow">Private department workspace</p>
+        <h1>Department inbox</h1>
+        <p>
+          Accept and assign routed issues inside your server-authorized responsibility. Delivery,
+          internal acceptance and recipient acknowledgment remain three separate records.
+        </p>
+      </div>
+
+      <p id="staff-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+      <p id="staff-live" class="visually-hidden" aria-live="polite"></p>
+
+      <section id="staff-login" class="login-panel" aria-labelledby="staff-login-heading">
+        <p class="eyebrow">Access required</p>
+        <h2 id="staff-login-heading" tabindex="-1">Choose a department staff account</h2>
+        <p id="staff-identity-disclosure" class="disclosure">
+          Simulated demonstration identity — not a real identity check
+        </p>
+        <p>
+          This demonstration does not contact DigiLocker or a government staff directory. The staff
+          role, jurisdictions and departments are stored and enforced by the server.
+        </p>
+        <div id="staff-login-choices" class="login-choices" aria-live="polite"></div>
+      </section>
+
+      <section id="staff-workspace" aria-labelledby="staff-workspace-heading" hidden>
+        <div class="workspace-heading-row">
+          <div>
+            <p id="staff-role" class="eyebrow"></p>
+            <h2 id="staff-workspace-heading" tabindex="-1">Routed work</h2>
+          </div>
+          <button type="button" id="refresh-inbox" class="secondary-button">Refresh</button>
+        </div>
+
+        <div class="queue-controls">
+          <label>
+            Authorized responsibility
+            <select id="workspace-select"></select>
+          </label>
+          <label>
+            Show
+            <select id="staff-filter">
+              <option value="all">All routed issues</option>
+              <option value="unaccepted">Not accepted internally</option>
+              <option value="unassigned">Unassigned</option>
+              <option value="awaiting_recipient">No recipient acknowledgment</option>
+            </select>
+          </label>
+        </div>
+
+        <dl class="queue-summary" aria-label="Department inbox summary">
+          <div>
+            <dt>Routed here</dt>
+            <dd id="staff-count">0</dd>
+          </div>
+          <div>
+            <dt>Not accepted internally</dt>
+            <dd id="unaccepted-count">0</dd>
+          </div>
+          <div>
+            <dt>Unassigned</dt>
+            <dd id="unassigned-count">0</dd>
+          </div>
+        </dl>
+        <aside class="triage-disclosure" aria-labelledby="triage-heading">
+          <strong id="triage-heading">Queue ordering, not an urgency score</strong>
+          <p id="ordering-note"></p>
+        </aside>
+        <p id="queue-bound" class="queue-note"></p>
+        <div id="staff-list" class="review-list staff-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      Every department and recipient shown here is simulated. No action in this workspace is an
+      official government acknowledgment.
+    </footer>
+  </body>
+</html>

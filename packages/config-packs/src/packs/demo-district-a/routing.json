@@ -1,0 +1,62 @@
+{
+  "directory_version": "demo-routing.v1",
+  "note": "Synthetic responsibility directory for the demonstration. Every department here is SIMULATED: none of these is a real authority, and no relationship with any department is implied or claimed (V004 §5, V010).",
+  "entries": [
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category": "water_supply",
+      "department_id": "demo-water-supply",
+      "department_label": "Water Supply (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category": "sanitation",
+      "department_id": "demo-sanitation",
+      "department_label": "Sanitation (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category": "structural",
+      "department_id": "demo-buildings",
+      "department_label": "Buildings and Structures (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B1",
+      "category": "electrical",
+      "department_id": "demo-electrical",
+      "department_label": "Electrical (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category": "water_supply",
+      "department_id": "demo-water-supply",
+      "department_label": "Water Supply (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category": "sanitation",
+      "department_id": "demo-sanitation",
+      "department_label": "Sanitation (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category": "structural",
+      "department_id": "demo-buildings",
+      "department_label": "Buildings and Structures (simulated)",
+      "provider_mode": "simulated"
+    },
+    {
+      "jurisdiction_internal_code": "DDA-B2",
+      "category": "electrical",
+      "department_id": "demo-electrical",
+      "department_label": "Electrical (simulated)",
+      "provider_mode": "simulated"
+    }
+  ]
+}

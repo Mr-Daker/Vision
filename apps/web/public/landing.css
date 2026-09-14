@@ -1,0 +1,1190 @@
+/* ============================================================
+   Vision — single-viewport landing over the background video.
+   Plain CSS, no framework and no build step.
+
+   Type, shape, shadow and the pill colours come from theme.css,
+   which the citizen app loads too — that shared file is what makes
+   the three pages read as one product.
+   ============================================================ */
+
+/* Only what is specific to the dark marketing surface. Type, shape, shadow
+   and the pill colours come from theme.css, which all three pages load — one
+   definition each, rather than two that drift. */
+:root {
+  --bg: #000000;
+  --text: #ffffff;
+  --muted: #8e8e8e;
+  --trust-bg: #28282a;
+  --trust-border: rgba(255, 255, 255, 0.4);
+  --trust-text: #c4c2c3;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* A reader who has asked for less motion should not be thrown down the page
+   by an animated jump. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Background video ─────────────────────────────────────── */
+
+/* Scoped to the first screen. The sections below read as text, and text over
+   a moving wave is harder to read for no gain — so the video ends where the
+   reading begins. */
+.bg {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  overflow: hidden;
+}
+
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Page shell: three stacked regions in one viewport ────── */
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* `clip` rather than `hidden`: it contains a wide child without creating a
+     scroll container, and without clipping vertically — the sign-in close
+     button sits slightly above this box on a phone and `hidden` would cut it
+     off. */
+  overflow-x: clip;
+}
+
+/* The first screen: still exactly one viewport, still the composition the
+   header, hero and stats were designed for. */
+.screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Its own padding rather than the page's, so `.bg` — absolutely positioned
+     to this box — still reaches the viewport edges. */
+  padding: clamp(16px, 2.4vh, 28px) clamp(14px, 3vw, 32px);
+  /* Keeps the covered video inside this screen: `object-fit: cover` crops by
+     overflowing its box, and without this the overflow widened the document
+     and the whole page scrolled sideways. */
+  overflow: hidden;
+}
+
+.header,
+.hero,
+.stats,
+.menu-overlay,
+.menu-sheet {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 1) Header ────────────────────────────────────────────── */
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 2.8vw, 28px);
+  width: 100%;
+  max-width: 720px;
+  animation: slideDown 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The mark is a wide eye, 480x271 — roughly 1.77:1. It used to sit in a
+   circular plate, which is why it read as a smudge: `object-fit: contain` in a
+   46px circle left it 33px wide and 19px tall, and at that size the map, the
+   pin and the tricolour are all below the threshold where they resolve into
+   anything. Cropping it to a square instead would cut the eye's corners off,
+   which is worse.
+
+   So the plate is a pill cut to the mark's own proportions, and its height now
+   matches the nav and sign-in pills — the header reads as three aligned pills
+   rather than a circle beside two pills. No `overflow: hidden`: nothing is
+   being clipped any more, which is the point. */
+.logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: clamp(44px, 5.2vw, 48px);
+  padding: 0 clamp(9px, 1.1vw, 12px);
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: var(--nav-shadow);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.logo:hover {
+  transform: scale(1.04);
+}
+
+/* Height-driven with an automatic width, so the aspect ratio comes from the
+   file and a future mark of different proportions still fits uncropped.
+
+   The height is absolute rather than a percentage of the plate, and that is
+   load-bearing: a replaced element sized `width: auto; height: 72%` inside a
+   shrink-to-fit parent is a circular dependency — the parent's width waits on
+   the child, so the child falls back to its intrinsic 480px and drags the
+   plate out to full width. An absolute height breaks the cycle. */
+.logo img {
+  width: auto;
+  height: clamp(30px, 3.6vw, 34px);
+  object-fit: contain;
+  display: block;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  max-width: 430px;
+  height: clamp(44px, 5.2vw, 48px);
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: var(--nav-shadow);
+}
+
+.nav-link {
+  position: relative;
+  padding: 6px 10px 10px;
+  color: var(--nav-text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(13px, 1.4vw, 15px);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.75;
+}
+
+.nav-link.is-active {
+  opacity: 1;
+}
+
+/* Three 3×3 dots under the active label: one element plus two shadows. */
+.nav-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+  background: #000000;
+  box-shadow:
+    -5px 0 0 0 #000000,
+    5px 0 0 0 #000000;
+}
+
+.sign-in {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: clamp(44px, 5.2vw, 48px);
+  padding: 0 clamp(16px, 2vw, 22px);
+  border-radius: 999px;
+  background: var(--pill-dark);
+  color: var(--sign-in-text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(13px, 1.4vw, 15px);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: var(--nav-shadow);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sign-in:hover {
+  background: #323234;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Burger is desktop-hidden; the mobile block below reveals it. */
+.burger {
+  display: none;
+}
+
+/* ── 2) Hero ──────────────────────────────────────────────── */
+
+/* The video is pale digits on near-white down to about a third of the frame,
+   then falls away into a dark wave that holds until roughly three quarters.
+   White display type is unreadable on the first band and excellent on the
+   second, so the composition is placed to land on the second — the headline is
+   positioned onto the dark wave rather than the wave being dimmed to suit the
+   headline. Dimming it was tried and reverted: it cost the brightness that
+   makes the background worth having at all.
+
+   This is only safe because the band does not move. Sampling the frame at
+   eight points across the ten-second loop gives the same vertical luminance
+   profile every time — contrast at the headline varied by under 0.01 — so only
+   the grain animates, not the wave. A moving band would make any fixed
+   placement a gamble, and this one is not.
+
+   Measured against the video: line one sits at 5.0:1 at 1440x900, 5.5:1 at
+   1920x1080 and 10.7:1 on a phone, all comfortably past the 3:1 that WCAG asks
+   of large text. Short viewports are the exception and are handled separately
+   below. Centred content plus `padding-top` shifts the block by half the
+   padding, which is why this reads as twice what it looks like it should. */
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  padding-top: 14vh;
+  text-align: center;
+}
+
+/* Trust row */
+
+/* The pill carries its own dark background, so unlike the headline it reads
+   perfectly well up on the pale band — it can stay high while the gap below
+   it pushes the headline down onto the wave. */
+.trust {
+  --trust-size: clamp(36px, 4.5vw, 42px);
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: clamp(28px, 5vh, 52px);
+}
+
+.trust-avatar {
+  display: grid;
+  place-items: center;
+  width: var(--trust-size);
+  height: var(--trust-size);
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--trust-bg);
+  border: 1px solid var(--trust-border);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The white disc sits inside the dark padded ring, so the ring itself
+   stays visible rather than the avatar reading as a solid white circle. */
+.trust-avatar-inner {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.trust-avatar svg {
+  /* `fill="currentColor"` on the SVG, so this colour is what makes the glyph
+     visible. Without it the icon inherits white from the body and is drawn
+     white-on-white: in the DOM, invisible on screen. */
+  color: #111111;
+  width: calc(var(--trust-size) * 0.34);
+  height: calc(var(--trust-size) * 0.34);
+  display: block;
+}
+
+.trust-avatar.a1 {
+  z-index: 1;
+}
+
+.trust-avatar.a2 {
+  margin-left: calc(var(--trust-size) * -0.42);
+  z-index: 2;
+}
+
+.trust-avatar.a3 {
+  margin-left: calc(var(--trust-size) * -0.42);
+  z-index: 4;
+}
+
+.trust:hover .trust-avatar.a1 {
+  transform: translateY(-2px);
+}
+
+.trust:hover .trust-avatar.a2 {
+  transform: translateY(-4px);
+}
+
+.trust:hover .trust-avatar.a3 {
+  transform: translateY(-2px);
+}
+
+.trust-pill {
+  display: grid;
+  place-items: center;
+  height: var(--trust-size);
+  margin-left: calc(var(--trust-size) * -0.42);
+  padding-right: clamp(14px, 1.6vw, 18px);
+  padding-left: calc(var(--trust-size) * 0.58);
+  border-radius: 999px;
+  background: var(--trust-bg);
+  border: 1px solid var(--trust-border);
+  color: var(--trust-text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(12px, 1.4vw, 13.5px);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Headline */
+
+.headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: #ffffff;
+  font-size: clamp(28px, 6.2vw, 80px);
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.headline-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: headlineFade 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--d, 0s);
+}
+
+/* Subhead */
+
+.subhead {
+  max-width: min(500px, 92%);
+  margin: clamp(14px, 2.2vh, 22px) 0 0;
+  color: #d0d0d0;
+  opacity: 0.8;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(calc(13.5px + 2pt), calc(1.55vw + 2pt), calc(16.5px + 2pt));
+  line-height: 1.55;
+}
+
+/* CTA */
+
+.cta {
+  margin-top: clamp(18px, 2.8vh, 30px);
+  padding: clamp(11px, 1.6vh, 13px) clamp(22px, 3vw, 28px);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(13.5px, 1.5vw, 14.5px);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    0 0 22px rgba(255, 255, 255, 0.32),
+    0 0 44px rgba(255, 255, 255, 0.12);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+}
+
+.cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 0 30px rgba(255, 255, 255, 0.45),
+    0 0 60px rgba(255, 255, 255, 0.2);
+}
+
+/* ── 3) Stats footer ──────────────────────────────────────── */
+
+.stats {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 2vw, 28px);
+  width: 100%;
+  max-width: 920px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.stat-icon {
+  font-family: var(--font-display);
+  color: #ffffff;
+  font-size: clamp(22px, 3vw, 33px);
+  line-height: 1.1;
+}
+
+.stat-value {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: #ffffff;
+  font-size: clamp(18px, 2.2vw, 26px);
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(11px, 1.2vw, 12.5px);
+  letter-spacing: -0.01em;
+}
+
+/* ── Shared entrance animation ────────────────────────────── */
+
+.anim {
+  opacity: 0;
+  transform: translateY(22px) scale(0.98);
+  filter: blur(6px);
+  animation: reveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--d, 0s);
+}
+
+/* The headline reveals per line, so the parent must not animate itself
+   — it would fight the two child animations. */
+.headline.anim {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.cta.anim {
+  animation-name: revealPulse;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes revealPulse {
+  60% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.03);
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes headlineFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Mobile menu (shared shell, shown ≤720px) ─────────────── */
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 40;
+  animation: overlayIn 0.28s ease both;
+}
+
+.menu-sheet {
+  position: fixed;
+  top: clamp(78px, 12vh, 96px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 28px));
+  padding: 22px 18px 20px;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  z-index: 50;
+  animation: menuIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.menu-link {
+  position: relative;
+  padding: 14px 10px 18px;
+  color: var(--nav-text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: none;
+  opacity: 0.55;
+  animation: linkIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.menu-link.is-active {
+  opacity: 1;
+}
+
+.menu-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+  background: #000000;
+  box-shadow:
+    -5px 0 0 0 #000000,
+    5px 0 0 0 #000000;
+}
+
+.menu-link:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.menu-link:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.menu-link:nth-child(3) {
+  animation-delay: 0.18s;
+}
+.menu-link:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.menu-sign-in {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 52px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: var(--pill-dark);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  /* `linkInActive`, not `linkIn`: the nav links settle at 0.55 opacity on
+     purpose, and reusing that here left the dark pill rendering grey. */
+  animation: linkInActive 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes linkIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+}
+
+.menu-link.is-active {
+  animation-name: linkInActive;
+}
+
+@keyframes linkInActive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Breakpoints ──────────────────────────────────────────── */
+
+/* Below roughly 720px of viewport height the composition cannot both fit and
+   sit on the wave: the hero box is about 64vh and its content needs ~300px, so
+   there is no slack left to shift into — at 1440x680 the gap between the call
+   to action and the stats is already zero. The headline is forced back up onto
+   the bright band, where it measured 2.6:1 at 1440x680 and 1.4:1 at 390x640,
+   which is somewhere between hard to read and invisible.
+
+   So this is the one case that does need the video graded, and it is scoped to
+   exactly that case. Everything taller keeps the video at full brightness and
+   solves the problem by placement instead. The threshold is height alone:
+   1280x800 is a common laptop and measures 4.7:1 unaided, so it stays bright.
+
+   The tail carries a little more weight than the headline band needs, and the
+   stat labels are lightened to match; both are for the stats row, which lands
+   on the lit crest of the wave at this height. See the note beside them. */
+@media (max-height: 720px) {
+  .hero {
+    padding-top: 7vh;
+  }
+
+  .bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.46) 18%,
+      rgba(0, 0, 0, 0.52) 32%,
+      rgba(0, 0, 0, 0.4) 46%,
+      rgba(0, 0, 0, 0.2) 62%,
+      rgba(0, 0, 0, 0.14) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* At this height the stats land on the lit crest of the wave rather than the
+     black below it, and these are small grey labels, so they answer to 4.5:1
+     rather than the 3:1 large type gets. The leftmost measured 3.2:1. Chasing
+     it with the grade alone did not work — going from 0.06 to 0.24 on the tail
+     only moved it to 3.9:1, because the crest is lit unevenly across the row
+     and the label sits on the bright end of it. Lightening the label clears the
+     bar at 4.6:1 without muddying the lower half of the frame to get there. */
+  .stat-label {
+    color: #a8a8a8;
+  }
+}
+
+@media (max-width: 720px) {
+  .header {
+    justify-content: space-between;
+    gap: 0;
+    max-width: 100%;
+  }
+
+  .nav,
+  .sign-in {
+    display: none;
+  }
+
+  .logo {
+    height: 48px;
+    padding: 0 11px;
+  }
+
+  /* The vw term bottoms out below 720px, so the mark is set here instead —
+     otherwise it sits at the 30px floor inside a 48px plate. */
+  .logo img {
+    height: 34px;
+  }
+
+  .burger {
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--pill-dark);
+    box-shadow: var(--nav-shadow);
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+
+  .burger-bar {
+    width: 18px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: #ffffff;
+    transition:
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease,
+      background 0.25s ease;
+  }
+
+  /* Above the overlay while open. At the header's z-index the X was hidden
+     behind the very scrim it dismisses — clicks still closed the menu, by
+     landing on the overlay, but the affordance was invisible. */
+  .burger[aria-expanded="true"] {
+    position: relative;
+    z-index: 60;
+    background: #ffffff;
+  }
+
+  .burger[aria-expanded="true"] .burger-bar {
+    background: #000000;
+  }
+
+  .burger[aria-expanded="true"] .burger-bar:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+
+  .burger[aria-expanded="true"] .burger-bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .burger[aria-expanded="true"] .burger-bar:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+
+  .headline {
+    letter-spacing: -0.08em;
+    line-height: 1.05;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(14px, 3vw, 22px) clamp(12px, 4vw, 24px);
+  }
+}
+
+@media (max-width: 700px) and (max-height: 760px) {
+  .trust {
+    margin-bottom: 14px;
+  }
+
+  .subhead {
+    margin-top: 12px;
+  }
+
+  .cta {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* The pill is `white-space: nowrap` by design at full size, which made the
+     row 377px wide inside a 320px viewport — and `.page` is `overflow: hidden`,
+     so it did not scroll, it was simply cut off at both edges. The text being
+     clipped was the disclosure that these departments are simulated, which is
+     the last sentence on the page that should ever go missing.
+
+     Below 480px it wraps instead: the pill grows downward and the row stays
+     inside the viewport. */
+  .trust {
+    max-width: 100%;
+  }
+
+  .trust-pill {
+    height: auto;
+    min-height: var(--trust-size);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 12px;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 420px) {
+  .trust {
+    --trust-size: 34px;
+  }
+
+  .trust-pill {
+    font-size: 12px;
+  }
+
+  .headline {
+    letter-spacing: -0.09em;
+    line-height: 1.04;
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .anim,
+  .headline-line {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .menu-link {
+    opacity: 0.55;
+  }
+
+  .menu-link.is-active {
+    opacity: 1;
+  }
+
+  .headline {
+    color: #ffffff;
+  }
+}
+
+/* ── Font licence credit ──────────────────────────────────────
+   BubbledotICG-FinePos is CC BY 4.0, which requires attribution
+   wherever it is used. Small and low-contrast, but present and
+   selectable — a credit that is display:none is not a credit. */
+
+.font-credit {
+  margin: 0 0 10px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.42);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.font-credit a {
+  color: inherit;
+}
+
+@media (max-width: 420px) {
+  .font-credit {
+    font-size: 9px;
+  }
+}
+
+/* ============================================================
+   Scrolling sections
+   ============================================================ */
+
+/* The header belongs to the first screen, so it must not stretch. */
+.screen > .header {
+  flex-shrink: 0;
+}
+
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* 44px minimum target, like every other control. */
+  min-height: var(--target-min);
+  margin: clamp(10px, 1.6vh, 18px) auto 0;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.78);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.scroll-cue:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(2px);
+}
+
+.scroll-cue svg {
+  animation: nudge 2.2s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+.section {
+  width: 100%;
+  padding: clamp(56px, 11vh, 120px) clamp(14px, 3vw, 32px);
+}
+
+.section-inner {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin: 0 0 clamp(22px, 4vh, 40px);
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--text);
+  font-size: clamp(24px, 4.2vw, 44px);
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.section-lead {
+  max-width: 640px;
+  margin: 0 0 clamp(24px, 4vh, 42px);
+  color: #d0d0d0;
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.6;
+}
+
+/* ── Feature cards ────────────────────────────────────────── */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(14px, 2vw, 20px);
+}
+
+.card {
+  padding: clamp(20px, 2.6vw, 28px);
+  border-radius: 22px;
+  background: #101012;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card:hover {
+  background: #141416;
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-3px);
+}
+
+.card-glyph {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1;
+}
+
+.card-title {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--text);
+  font-size: clamp(15px, 1.7vw, 17px);
+  letter-spacing: -0.02em;
+}
+
+.card-body {
+  margin: 0;
+  color: #c0c0c0;
+  font-family: var(--font-sans);
+  font-size: clamp(13.5px, 1.4vw, 14.5px);
+  line-height: 1.6;
+}
+
+/* ── About facts ──────────────────────────────────────────── */
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(20px, 3vw, 34px);
+  padding-top: clamp(4px, 1vh, 10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fact {
+  padding-top: clamp(16px, 2.4vh, 24px);
+}
+
+.fact-title {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--text);
+  font-size: clamp(14.5px, 1.6vw, 16px);
+  letter-spacing: -0.02em;
+}
+
+.fact-body {
+  margin: 0;
+  color: #b8b8b8;
+  font-family: var(--font-sans);
+  font-size: clamp(13px, 1.4vw, 14px);
+  line-height: 1.6;
+}
+
+.section-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 22px;
+  margin-top: clamp(28px, 5vh, 48px);
+}
+
+.section-cta .cta {
+  margin-top: 0;
+}
+
+.section-link {
+  color: #c8c8c8;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.section-link:hover {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+/* ── Scroll reveal ────────────────────────────────────────────
+   Applied by main.js only when an IntersectionObserver exists, so
+   a browser without one shows the content rather than a blank
+   page — the content is visible by default and the script opts it
+   into animating. */
+
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.js-reveal .reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--rd, 0s);
+}
+
+@media (max-width: 720px) {
+  .cards,
+  .facts {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    /* Vertical padding tightens on a phone; the horizontal padding must stay,
+       or the text runs into the edge of the screen. An earlier version set
+       `0` here and the section content sat flush against the left edge. */
+    padding: clamp(44px, 8vh, 72px) clamp(14px, 3vw, 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .scroll-cue svg {
+    animation: none;
+  }
+}

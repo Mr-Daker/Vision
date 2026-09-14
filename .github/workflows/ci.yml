@@ -1,0 +1,77 @@
+name: ci
+
+# Roadmap V007: a clean checkout must run the documented workflow and checks
+# without production credentials. No job below has access to a secret, a
+# database, or a provider API key — and none needs one.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # check-secrets scans git-tracked files; a shallow clone is enough.
+          fetch-depth: 1
+
+      - name: Use the pinned Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies from the lockfile
+        run: npm ci
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Import direction (V006 §9)
+        run: npm run check:imports
+
+      - name: Hard-coded scope (V001 Appendix G rule 7)
+        run: npm run check:scope
+
+      - name: Secrets and private evidence (V005 §7)
+        run: npm run check:secrets
+
+      - name: Evaluation holdout seal (V011)
+        run: npm run check:holdout
+
+      - name: Browser-safe shared packages (V019)
+        run: npm run check:browser-safe
+
+      - name: Migration naming and ordering
+        run: npm run check:migrations
+
+      - name: Tests
+        run: npm test
+
+      # The interface is emitted by tsc and its specifiers are rewritten
+      # afterwards; a build that produces an unresolvable bare specifier fails
+      # silently in a browser, so it is built here rather than trusted.
+      - name: Build the citizen interface (V019)
+        run: npm run build:web
+
+      - name: Confirm no production credential was required
+        run: |
+          # A failure here means a check silently depended on configuration
+          # that a clean checkout does not have.
+          test ! -f .env || (echo "::error::.env must never be committed" && exit 1)
+          echo "all checks completed without a database, provider key, or .env file"

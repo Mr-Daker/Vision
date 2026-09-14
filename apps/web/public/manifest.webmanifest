@@ -1,0 +1,17 @@
+{
+  "name": "Vision \u2014 report a public infrastructure problem",
+  "short_name": "Vision",
+  "description": "Citizen reporting for public infrastructure problems. Demonstration build.",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b5c3f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

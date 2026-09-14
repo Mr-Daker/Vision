@@ -1,0 +1,893 @@
+contract:
+  name: vision-domain-contract
+  version: "3.0.0"
+  status: ready-for-owner-approval
+  roadmap_task: V003
+  supersedes: "2.0.0"
+  notes:
+    - This is a domain contract, not a database schema.
+    - V012 must translate every declared invariant into a database constraint, transaction guard, or tested domain rule.
+
+entities:
+  Submission:
+    identifier: submission_id
+    purpose: Authenticated citizen report before interpretation or matching.
+    fields:
+      submission_id: { type: uuid, mutability: immutable }
+      participant_id: { type: uuid, mutability: immutable, nullable: false }
+      observed_location:
+        {
+          type: geopoint_with_accuracy_and_source,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          provenance: client_asserted,
+        }
+      observed_at:
+        { type: timestamp, mutability: immutable, time_kind: event, provenance: client_asserted }
+      server_received_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      interface_locale: { type: bcp47, mutability: immutable }
+      language_hint: { type: bcp47_or_und, mutability: immutable, nullable: true }
+      locale_pack_version: { type: string, mutability: immutable, set_by: server }
+      idempotency_key: { type: string, mutability: immutable }
+      taxonomy_version: { type: string, mutability: immutable, set_by: server }
+      processing_status:
+        {
+          type: enum,
+          values: [received, processing, needs_review, accepted, rejected, quarantined],
+          mutability: correctable_with_event,
+        }
+      privacy_state: { type: enum, values: [active, erased], mutability: privacy_process_only }
+      erased_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: ingestion }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [authenticated_citizen_api]
+    modified_by: [submission_worker, authorized_reviewer, data_subject_deletion_process]
+    constraints:
+      - { type: unique, fields: [participant_id, idempotency_key] }
+      - { type: conditional_required, when: "privacy_state == active", fields: [observed_location] }
+      - { type: conditional_null, when: "privacy_state == erased", fields: [observed_location] }
+      - Device-only drafts are not Submission records.
+
+  EvidenceItem:
+    identifier: evidence_id
+    purpose: Citizen-supplied photo, voice, or text item belonging to a submission; immutable in ordinary use and erasable under privacy policy.
+    fields:
+      evidence_id: { type: uuid, mutability: immutable }
+      submission_id: { type: uuid, mutability: immutable, nullable: false }
+      media_type: { type: enum, values: [photo, voice, text], mutability: immutable }
+      object_reference:
+        {
+          type: string,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          visibility: private,
+        }
+      content_text:
+        {
+          type: string,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          visibility: restricted,
+        }
+      fingerprint_hash:
+        { type: string, mutability: immutable_except_privacy_erasure, nullable: true }
+      perceptual_hash:
+        { type: string, mutability: immutable_except_privacy_erasure, nullable: true }
+      capture_metadata:
+        {
+          type: json,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          provenance: client_asserted,
+        }
+      source_language: { type: bcp47_or_und, mutability: correctable_with_event, nullable: true }
+      transcript_text:
+        {
+          type: string,
+          mutability: correctable_with_event_or_privacy_erasure,
+          nullable: true,
+          visibility: restricted,
+        }
+      transcript_provenance:
+        { type: json, mutability: correctable_with_event_or_privacy_erasure, nullable: true }
+      processing_status:
+        {
+          type: enum,
+          values: [pending, usable, needs_review, quarantined, rejected],
+          mutability: correctable_with_event,
+        }
+      redaction_status:
+        {
+          type: enum,
+          values: [pending, approved, not_required, needs_review],
+          mutability: correctable_with_event,
+        }
+      derivative_reference:
+        {
+          type: string,
+          mutability: correctable_with_event_or_privacy_erasure,
+          nullable: true,
+          visibility: public_only_after_approval,
+        }
+      privacy_state: { type: enum, values: [active, erased], mutability: privacy_process_only }
+      erased_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: ingestion }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [submission_ingestion]
+    modified_by: [evidence_worker, transcription_processor, authorized_reviewer]
+    constraints:
+      - {
+          type: conditional_required,
+          when: "privacy_state == active and media_type in [photo, voice]",
+          fields: [object_reference, fingerprint_hash],
+        }
+      - {
+          type: conditional_required,
+          when: "privacy_state == active and media_type == text",
+          fields: [content_text],
+        }
+      - {
+          type: conditional_null,
+          when: "privacy_state == active and media_type == text",
+          fields: [object_reference],
+        }
+      - {
+          type: conditional_null,
+          when: "privacy_state == erased",
+          fields:
+            [
+              object_reference,
+              content_text,
+              fingerprint_hash,
+              perceptual_hash,
+              capture_metadata,
+              transcript_text,
+              transcript_provenance,
+              derivative_reference,
+            ],
+        }
+      - No issue identifier is stored on this entity; use IssueEvidenceLink.
+
+  IssueEvidenceLink:
+    identifier: issue_evidence_link_id
+    purpose: Effective-dated and correctable association of evidence with an original canonical issue.
+    fields:
+      issue_evidence_link_id: { type: uuid, mutability: immutable }
+      evidence_id: { type: uuid, mutability: immutable }
+      canonical_issue_id: { type: uuid, mutability: immutable }
+      match_id: { type: uuid, mutability: immutable, nullable: true }
+      decision_basis: { type: json, mutability: immutable }
+      effective_from: { type: timestamp, mutability: immutable, time_kind: event }
+      effective_to:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      supersedes_link_id: { type: uuid, mutability: immutable, nullable: true }
+      superseded_by_link_id: { type: uuid, mutability: immutable_once_set, nullable: true }
+      corrected_by_actor_id: { type: uuid, mutability: immutable, nullable: true }
+      correction_reason: { type: string, mutability: immutable, nullable: true }
+    created_by: [issue_match_finalization, authorized_reviewer_correction]
+    modified_by: [authorized_reviewer_correction]
+    constraints:
+      - {
+          type: unique_where,
+          fields: [evidence_id],
+          where: "effective_to is null",
+          reason: exactly_one_active_issue_link_per_evidence,
+        }
+      - Closing an active link and creating its successor occur atomically.
+
+  IssueMatch:
+    identifier: match_id
+    purpose: Versioned duplicate/new-issue decision for one submission.
+    fields:
+      match_id: { type: uuid, mutability: immutable }
+      submission_id: { type: uuid, mutability: immutable }
+      attempt_number: { type: integer, mutability: immutable }
+      state:
+        {
+          type: enum,
+          values:
+            [pending, candidates_retrieved, ambiguous, no_match, match_confirmed, failed_retryable],
+          mutability: correctable_with_event,
+        }
+      candidate_issue_ids: { type: array_uuid, mutability: immutable_once_set, nullable: true }
+      resulting_issue_id: { type: uuid, mutability: immutable_once_set, nullable: true }
+      decision_basis: { type: json, mutability: immutable_once_set, nullable: true }
+      decided_by_actor_type:
+        {
+          type: enum,
+          values: [system, citizen, reviewer],
+          mutability: immutable_once_set,
+          nullable: true,
+        }
+      decided_by_actor_id: { type: uuid, mutability: immutable_once_set, nullable: true }
+      decided_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      supersedes_match_id: { type: uuid, mutability: immutable, nullable: true }
+      superseded_at: { type: timestamp, mutability: immutable_once_set, nullable: true }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [matching_worker]
+    modified_by:
+      [matching_worker, authorized_reviewer, citizen_confirmation, match_supersession_transaction]
+    constraints:
+      - { type: unique, fields: [submission_id, attempt_number] }
+      - {
+          type: unique_where,
+          fields: [submission_id],
+          where: "superseded_at is null",
+          reason: one_active_attempt_per_submission,
+        }
+      - {
+          type: conditional_required,
+          when: "state in [no_match, match_confirmed]",
+          fields: [resulting_issue_id, decision_basis, decided_by_actor_type, decided_at],
+        }
+      - {
+          type: conditional_null,
+          when: "state not in [no_match, match_confirmed]",
+          fields: [resulting_issue_id],
+        }
+      - Superseding an active attempt and creating its successor occur atomically.
+
+  CanonicalIssue:
+    identifier: issue_id
+    purpose: Original real-world problem record with operational workflow state only.
+    fields:
+      issue_id: { type: uuid, mutability: immutable }
+      public_reference: { type: string, mutability: immutable }
+      asset_id: { type: string, mutability: correctable_with_event, nullable: true }
+      jurisdiction_id: { type: uuid, mutability: correctable_with_event, nullable: true }
+      category: { type: string, mutability: correctable_with_event }
+      current_status:
+        {
+          type: enum,
+          values:
+            [
+              created,
+              routing_review,
+              routed_internal,
+              agency_ack_received,
+              work_planned,
+              resolution_claimed,
+              resolution_confirmed,
+              resolution_disputed,
+              reopened,
+            ],
+          mutability: correctable_with_event,
+        }
+      opened_at: { type: timestamp, mutability: immutable, time_kind: event }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [issue_match_no_match_finalization]
+    modified_by: [authorized_lifecycle_actor]
+    constraints:
+      - An issue with an active outgoing IssueAlias rejects direct operational writes.
+      - Matching states and evidence-attached events never appear in current_status.
+
+  IssueParticipation:
+    identifier: participation_id
+    purpose: Versioned current participation decision for one participant on one original issue.
+    fields:
+      participation_id: { type: uuid, mutability: immutable }
+      participant_id: { type: uuid, mutability: immutable }
+      canonical_issue_id: { type: uuid, mutability: immutable }
+      counted: { type: boolean, mutability: correctable_with_event }
+      non_counted_reason: { type: string, mutability: correctable_with_event, nullable: true }
+      eligibility_provenance: { type: json, mutability: correctable_with_event }
+      first_evidence_at: { type: timestamp, mutability: correctable_with_event, time_kind: event }
+      last_evidence_at: { type: timestamp, mutability: correctable_with_event, time_kind: event }
+      created_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [issue_match_finalization]
+    modified_by: [additional_evidence_transaction, authorized_participation_correction]
+    constraints:
+      - { type: unique, fields: [participant_id, canonical_issue_id] }
+      - { type: conditional_required, when: "counted == false", fields: [non_counted_reason] }
+      - { type: compare, expression: "first_evidence_at <= last_evidence_at" }
+      - Effective canonical counts use distinct participant_id values across original issues resolving to the active root.
+
+  Participant:
+    identifier: participant_id
+    purpose: Stable pseudonymous application identity with no provider subject or credential.
+    fields:
+      participant_id: { type: uuid, mutability: immutable }
+      created_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      tombstoned_at: { type: timestamp, mutability: immutable_once_set, nullable: true }
+    created_by: [identity_resolution_transaction]
+    modified_by: [data_subject_deletion_process]
+    constraints:
+      - Logout, expiry, and session revocation never mutate this entity.
+
+  IdentityMapping:
+    identifier: identity_mapping_id
+    purpose: Highly restricted provider-subject mapping to a pseudonymous participant.
+    fields:
+      identity_mapping_id: { type: uuid, mutability: immutable }
+      participant_id: { type: uuid, mutability: immutable }
+      provider: { type: string, mutability: immutable }
+      provider_subject_reference:
+        {
+          type: encrypted_or_keyed_hash,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          visibility: identity_service_only,
+        }
+      provider_mode: { type: enum, values: [simulated, real], mutability: immutable }
+      created_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      disabled_at: { type: timestamp, mutability: immutable_once_set, nullable: true }
+      erased_at: { type: timestamp, mutability: immutable_once_set, nullable: true }
+    created_by: [identity_resolution_transaction]
+    modified_by: [identity_service, data_subject_deletion_process]
+    constraints:
+      - {
+          type: unique_where,
+          fields: [provider, provider_subject_reference],
+          where: "provider_subject_reference is not null",
+        }
+      - {
+          type: conditional_null,
+          when: "erased_at is not null",
+          fields: [provider_subject_reference],
+        }
+      - Provider references never appear in application logs, events, public records, or AI context.
+
+  Session:
+    identifier: session_id
+    purpose: Revocable per-login application session.
+    fields:
+      session_id: { type: uuid, mutability: immutable }
+      participant_id: { type: uuid, mutability: immutable }
+      token_hash: { type: secure_hash, mutability: immutable, visibility: session_service_only }
+      issued_at: { type: timestamp, mutability: immutable, time_kind: event }
+      expires_at: { type: timestamp, mutability: immutable, time_kind: event }
+      revoked_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      revocation_reason:
+        {
+          type: enum,
+          values: [logout, admin_revocation, security_incident],
+          mutability: immutable_once_set,
+          nullable: true,
+        }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [session_service]
+    modified_by: [session_service]
+    constraints:
+      - Session expiry is derived from expires_at; it does not mutate Participant.
+
+  ConsentRecord:
+    identifier: consent_id
+    purpose: Versioned proof of notice and explicitly granted demonstration-processing purposes.
+    fields:
+      consent_id: { type: uuid, mutability: immutable }
+      participant_id: { type: uuid, mutability: immutable }
+      notice_version: { type: string, mutability: immutable }
+      notice_locale: { type: bcp47, mutability: immutable }
+      granted_purposes:
+        {
+          type: array_enum,
+          values:
+            [demo_processing, public_derivative, gemini_classification, gemini_voice_transcription],
+          mutability: immutable,
+        }
+      granted_at: { type: timestamp, mutability: immutable, time_kind: event }
+      withdrawn_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      withdrawal_reason: { type: string, mutability: immutable_once_set, nullable: true }
+    created_by: [consent_api]
+    modified_by: [consent_withdrawal_process]
+    constraints:
+      - { type: minimum_items, field: granted_purposes, value: 1 }
+      - public_derivative and gemini_voice_transcription are optional purposes and are never inferred from demo_processing.
+      - Withdrawal queues V005 content deletion/public-derivative withdrawal work without rewriting the original grant facts.
+
+  InfrastructureAsset:
+    identifier: asset_id
+    purpose: Versioned public-infrastructure asset reference.
+    fields:
+      asset_id: { type: string, mutability: immutable }
+      asset_type: { type: string, mutability: immutable }
+      source_record_id: { type: uuid, mutability: immutable, nullable: true }
+      name: { type: string, mutability: correctable_with_event }
+      location: { type: geopoint, mutability: correctable_with_event }
+      jurisdiction_id: { type: uuid, mutability: correctable_with_event }
+      effective_from: { type: timestamp, mutability: immutable, time_kind: event }
+      effective_to:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [source_import, synthetic_fixture_import]
+    modified_by: [authorized_data_reviewer]
+    constraints:
+      - Source provenance or explicit synthetic provenance is required.
+
+  Jurisdiction:
+    identifier: jurisdiction_id
+    purpose: Effective-dated node in a configurable jurisdiction hierarchy.
+    fields:
+      jurisdiction_id: { type: uuid, mutability: immutable }
+      jurisdiction_profile_id: { type: string, mutability: immutable }
+      parent_jurisdiction_id: { type: uuid, mutability: immutable, nullable: true }
+      internal_code: { type: string, mutability: immutable }
+      external_source_code: { type: string, mutability: immutable, nullable: true }
+      directory_version: { type: string, mutability: immutable }
+      level_scheme: { type: string, mutability: immutable }
+      level_code: { type: string, mutability: immutable }
+      effective_from: { type: timestamp, mutability: immutable, time_kind: event }
+      effective_to:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      source_record_id: { type: uuid, mutability: immutable, nullable: true }
+    created_by: [jurisdiction_import]
+    modified_by: [jurisdiction_versioning_transaction]
+    constraints:
+      - Source provenance or explicit synthetic provenance is required.
+      - If external_source_code is present, source_record_id must reference a permitted source.
+      - Parent and child use the same jurisdiction_profile_id; self-reference and hierarchy cycles are rejected.
+
+  Assignment:
+    identifier: assignment_id
+    purpose: Effective-dated issue ownership record.
+    fields:
+      assignment_id: { type: uuid, mutability: immutable }
+      issue_id: { type: uuid, mutability: immutable }
+      department_id: { type: string, mutability: immutable }
+      assigned_staff_id: { type: uuid, mutability: immutable, nullable: true }
+      reason: { type: string, mutability: immutable }
+      valid_from: { type: timestamp, mutability: immutable, time_kind: event }
+      valid_to:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      supersedes_assignment_id: { type: uuid, mutability: immutable, nullable: true }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [routing_transaction, authorized_reassignment]
+    modified_by: [assignment_supersession_transaction]
+    constraints:
+      - {
+          type: unique_where,
+          fields: [issue_id],
+          where: "valid_to is null",
+          reason: one_active_assignment_per_issue,
+        }
+      - Closing the prior assignment and creating the successor occur atomically.
+
+  ProjectLink:
+    identifier: project_link_id
+    purpose: Reviewable source-labelled link between one issue or asset and a project record.
+    fields:
+      project_link_id: { type: uuid, mutability: immutable }
+      issue_id: { type: uuid, mutability: immutable, nullable: true }
+      asset_id: { type: string, mutability: immutable, nullable: true }
+      source_project_id: { type: uuid, mutability: immutable }
+      match_basis: { type: json, mutability: immutable }
+      match_status:
+        {
+          type: enum,
+          values: [proposed, confirmed, rejected, ambiguous],
+          mutability: correctable_with_event,
+        }
+      reviewer_id: { type: uuid, mutability: correctable_with_event, nullable: true }
+      proposed_at: { type: timestamp, mutability: immutable, time_kind: event }
+      decided_at:
+        { type: timestamp, mutability: correctable_with_event, nullable: true, time_kind: event }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [project_matching_worker]
+    modified_by: [authorized_reviewer]
+    constraints:
+      - { type: exactly_one_of, fields: [issue_id, asset_id] }
+
+  StatusEvent:
+    identifier: event_id
+    purpose: Append-only domain history with a restricted actor pseudonym and non-sensitive payload.
+    fields:
+      event_id: { type: uuid, mutability: immutable }
+      aggregate_type: { type: string, mutability: immutable }
+      aggregate_id: { type: uuid_or_string, mutability: immutable }
+      aggregate_version: { type: integer, mutability: immutable }
+      event_type: { type: string, mutability: immutable }
+      actor_type:
+        {
+          type: enum,
+          values: [citizen, staff, reviewer, supervisor, administrator, system_worker],
+          mutability: immutable,
+        }
+      actor_pseudonym:
+        { type: uuid, mutability: immutable, nullable: true, visibility: restricted_internal }
+      correlation_id: { type: uuid, mutability: immutable }
+      occurred_at: { type: timestamp, mutability: immutable, time_kind: event }
+      recorded_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      payload_schema_version: { type: string, mutability: immutable }
+      payload: { type: json_non_sensitive, mutability: immutable }
+    created_by: [domain_transaction]
+    modified_by: []
+    constraints:
+      - { type: unique, fields: [aggregate_type, aggregate_id, aggregate_version] }
+      - Payload forbids raw evidence, descriptions, transcripts, exact coordinates, provider identity references, tokens, and secrets.
+
+  IssueMerge:
+    identifier: merge_id
+    purpose: Reviewable and reversible decision merging one issue into another.
+    fields:
+      merge_id: { type: uuid, mutability: immutable }
+      surviving_issue_id: { type: uuid, mutability: immutable }
+      merged_issue_id: { type: uuid, mutability: immutable }
+      merged_at: { type: timestamp, mutability: immutable, time_kind: event }
+      reason: { type: string, mutability: immutable }
+      decision_event_id: { type: uuid, mutability: immutable }
+      reversed_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      reversal_reason: { type: string, mutability: immutable_once_set, nullable: true }
+      reversal_event_id: { type: uuid, mutability: immutable_once_set, nullable: true }
+    created_by: [authorized_merge_transaction]
+    modified_by: [authorized_merge_reversal_transaction]
+    constraints:
+      - { type: not_equal, fields: [surviving_issue_id, merged_issue_id] }
+      - Merge never moves evidence, participation, or status events.
+
+  IssueAlias:
+    identifier: alias_id
+    purpose: Effective-dated active-canonical edge created by an issue merge.
+    fields:
+      alias_id: { type: uuid, mutability: immutable }
+      source_issue_id: { type: uuid, mutability: immutable }
+      target_issue_id: { type: uuid, mutability: immutable }
+      merge_id: { type: uuid, mutability: immutable }
+      valid_from: { type: timestamp, mutability: immutable, time_kind: event }
+      valid_to:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: event }
+      closed_by_event_id: { type: uuid, mutability: immutable_once_set, nullable: true }
+    created_by: [authorized_merge_transaction]
+    modified_by: [authorized_merge_reversal_transaction]
+    constraints:
+      - {
+          type: unique_where,
+          fields: [source_issue_id],
+          where: "valid_to is null",
+          reason: one_active_outgoing_alias_per_issue,
+        }
+      - { type: not_equal, fields: [source_issue_id, target_issue_id] }
+      - New edges are rejected if recursive resolution would cycle or exceed 16 hops.
+
+  ResolutionEvidenceItem:
+    identifier: resolution_evidence_id
+    purpose: Private staff-supplied photo or document supporting a resolution claim.
+    fields:
+      resolution_evidence_id: { type: uuid, mutability: immutable }
+      claim_id: { type: uuid, mutability: immutable }
+      media_type: { type: enum, values: [photo, document], mutability: immutable }
+      object_reference:
+        {
+          type: string,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          visibility: private,
+        }
+      fingerprint_hash:
+        { type: string, mutability: immutable_except_privacy_erasure, nullable: true }
+      capture_metadata:
+        {
+          type: json,
+          mutability: immutable_except_privacy_erasure,
+          nullable: true,
+          provenance: staff_asserted,
+        }
+      redaction_status:
+        {
+          type: enum,
+          values: [pending, approved, not_required, needs_review],
+          mutability: correctable_with_event,
+        }
+      derivative_reference:
+        {
+          type: string,
+          mutability: correctable_with_event_or_privacy_erasure,
+          nullable: true,
+          visibility: public_only_after_approval,
+        }
+      privacy_state: { type: enum, values: [active, erased], mutability: privacy_process_only }
+      erased_at:
+        { type: timestamp, mutability: immutable_once_set, nullable: true, time_kind: ingestion }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [resolution_claim_transaction]
+    modified_by: [redaction_worker, authorized_reviewer, retention_or_deletion_process]
+    constraints:
+      - {
+          type: conditional_required,
+          when: "privacy_state == active",
+          fields: [object_reference, fingerprint_hash],
+        }
+      - {
+          type: conditional_null,
+          when: "privacy_state == erased",
+          fields: [object_reference, fingerprint_hash, capture_metadata, derivative_reference],
+        }
+
+  ResolutionClaim:
+    identifier: claim_id
+    purpose: Staff assertion of completed work; not a confirmed repair.
+    fields:
+      claim_id: { type: uuid, mutability: immutable }
+      issue_id: { type: uuid, mutability: immutable }
+      staff_id: { type: uuid, mutability: immutable }
+      idempotency_key: { type: string, mutability: immutable }
+      claimed_at: { type: timestamp, mutability: immutable, time_kind: event }
+      resolution_evidence_ids:
+        {
+          type: array_uuid,
+          mutability: immutable,
+          references: ResolutionEvidenceItem.resolution_evidence_id,
+        }
+      description: { type: string, mutability: immutable }
+    created_by: [authorized_department_staff]
+    modified_by: []
+    constraints:
+      - { type: unique, fields: [staff_id, idempotency_key] }
+      - { type: minimum_items, field: resolution_evidence_ids, value: 1 }
+      - At most one unresolved claim exists per active issue.
+
+  ResolutionConfirmation:
+    identifier: confirmation_id
+    purpose: Participant or reviewer response to a resolution claim.
+    fields:
+      confirmation_id: { type: uuid, mutability: immutable }
+      claim_id: { type: uuid, mutability: immutable }
+      responding_participant_id: { type: uuid, mutability: immutable, nullable: true }
+      reviewer_id: { type: uuid, mutability: immutable, nullable: true }
+      decision: { type: enum, values: [confirmed, disputed], mutability: immutable }
+      decided_at: { type: timestamp, mutability: immutable, time_kind: event }
+      comment: { type: string, mutability: immutable, nullable: true }
+    created_by: [eligible_participant, authorized_reviewer]
+    modified_by: []
+    constraints:
+      - { type: unique, fields: [claim_id] }
+      - { type: exactly_one_of, fields: [responding_participant_id, reviewer_id] }
+      - Participant actor must have counted IssueParticipation on the resolved active issue closure.
+
+  Reopening:
+    identifier: reopening_id
+    purpose: Explicit reopening of a previously confirmed issue.
+    fields:
+      reopening_id: { type: uuid, mutability: immutable }
+      issue_id: { type: uuid, mutability: immutable }
+      prior_confirmation_id: { type: uuid, mutability: immutable }
+      reopened_at: { type: timestamp, mutability: immutable, time_kind: event }
+      reason: { type: string, mutability: immutable }
+      actor_type:
+        { type: enum, values: [citizen, staff, reviewer, supervisor], mutability: immutable }
+      actor_id: { type: uuid, mutability: immutable }
+    created_by: [eligible_participant, authorized_staff_or_reviewer]
+    modified_by: []
+
+  SourceRecord:
+    identifier: source_record_id
+    purpose: Versioned source snapshot and reuse provenance.
+    fields:
+      source_record_id: { type: uuid, mutability: immutable }
+      source_name: { type: string, mutability: immutable }
+      source_url_or_location: { type: string, mutability: immutable }
+      retrieved_at: { type: timestamp, mutability: immutable, time_kind: ingestion }
+      source_effective_at:
+        { type: timestamp, mutability: immutable, nullable: true, time_kind: event }
+      licence_or_permission_status:
+        {
+          type: enum,
+          values:
+            [permitted, synthetic, consented, reference_only, unavailable, verification_pending],
+          mutability: correctable_with_event,
+        }
+      demo_status:
+        {
+          type: enum,
+          values:
+            [
+              permitted_source_data,
+              team_created_synthetic,
+              consented_evaluation_data,
+              unavailable_not_approved,
+            ],
+          mutability: correctable_with_event,
+        }
+      raw_snapshot: { type: json, mutability: immutable, nullable: true }
+      current_version: { type: integer, mutability: correctable }
+    created_by: [source_import]
+    modified_by: [authorized_data_privacy_owner]
+    constraints:
+      - reference_only and unavailable always map to unavailable_not_approved for demo use.
+      - {
+          type: conditional_null,
+          when: "licence_or_permission_status in [reference_only, unavailable, verification_pending]",
+          fields: [raw_snapshot],
+        }
+
+lifecycle:
+  submission:
+    states: [received, processing, needs_review, accepted, rejected, quarantined]
+    transitions:
+      - { from: null, to: received, actor: api, guard: submission_and_outbox_committed }
+      - { from: received, to: processing, actor: worker, guard: durable_lease_acquired }
+      - { from: processing, to: needs_review, actor: worker, guard: human_decision_required }
+      - { from: processing, to: accepted, actor: worker, guard: required_evidence_usable }
+      - { from: needs_review, to: accepted, actor: reviewer, guard: flags_resolved }
+      - { from: processing, to: rejected, actor: worker, guard: invalid_or_prohibited }
+      - {
+          from: needs_review,
+          to: rejected,
+          actor: reviewer,
+          guard: invalid_or_prohibited_confirmed,
+        }
+      - { from: processing, to: quarantined, actor: worker, guard: isolation_required }
+      - { from: needs_review, to: quarantined, actor: reviewer, guard: isolation_required }
+      - { from: quarantined, to: needs_review, actor: reviewer, guard: safe_review_path_available }
+
+  issue_match:
+    states: [pending, candidates_retrieved, ambiguous, no_match, match_confirmed, failed_retryable]
+    transitions:
+      - {
+          from: null,
+          to: pending,
+          actor: matching_worker,
+          guard: accepted_submission_and_unique_active_attempt,
+        }
+      - {
+          from: pending,
+          to: candidates_retrieved,
+          actor: matching_worker,
+          guard: bounded_query_completed,
+        }
+      - { from: pending, to: failed_retryable, actor: matching_worker, guard: dependency_failure }
+      - { from: failed_retryable, to: pending, actor: matching_worker, guard: retry_lease_acquired }
+      - {
+          from: candidates_retrieved,
+          to: ambiguous,
+          actor: matching_worker,
+          guard: human_or_citizen_decision_required,
+        }
+      - {
+          from: candidates_retrieved,
+          to: no_match,
+          actor: matching_finalization,
+          guard: no_valid_candidate_after_recheck,
+        }
+      - {
+          from: candidates_retrieved,
+          to: match_confirmed,
+          actor: matching_finalization,
+          guard: selected_candidate_resolves_to_active_root,
+        }
+      - {
+          from: ambiguous,
+          to: no_match,
+          actor: reviewer_or_citizen,
+          guard: determined_distinct_and_rechecked,
+        }
+      - {
+          from: ambiguous,
+          to: match_confirmed,
+          actor: reviewer_or_citizen,
+          guard: determined_same_and_rechecked,
+        }
+
+  canonical_issue:
+    states:
+      [
+        created,
+        routing_review,
+        routed_internal,
+        agency_ack_received,
+        work_planned,
+        resolution_claimed,
+        resolution_confirmed,
+        resolution_disputed,
+        reopened,
+      ]
+    transitions:
+      - { from: null, to: created, actor: issue_match_no_match_finalization }
+      - {
+          from: created,
+          to: routing_review,
+          actor: routing_worker,
+          guard: custodian_ambiguous_or_unavailable,
+        }
+      - {
+          from: created,
+          to: routed_internal,
+          actor: routing_worker,
+          guard: versioned_directory_decision,
+        }
+      - {
+          from: routing_review,
+          to: routed_internal,
+          actor: reviewer,
+          guard: versioned_directory_decision,
+        }
+      - {
+          from: routed_internal,
+          to: agency_ack_received,
+          actor: recipient_adapter,
+          guard: provenance_and_simulation_label_recorded,
+        }
+      - {
+          from: agency_ack_received,
+          to: work_planned,
+          actor: department_staff,
+          guard: active_assignment,
+        }
+      - {
+          from: work_planned,
+          to: resolution_claimed,
+          actor: department_staff,
+          guard: resolution_claim_with_evidence,
+        }
+      - {
+          from: resolution_claimed,
+          to: resolution_confirmed,
+          actor: eligible_participant_or_reviewer,
+          guard: confirmation_record,
+        }
+      - {
+          from: resolution_claimed,
+          to: resolution_disputed,
+          actor: eligible_participant_or_reviewer,
+          guard: dispute_record,
+        }
+      - {
+          from: resolution_disputed,
+          to: work_planned,
+          actor: staff_or_reviewer,
+          guard: further_work_assigned,
+        }
+      - {
+          from: resolution_confirmed,
+          to: reopened,
+          actor: eligible_participant_or_reviewer,
+          guard: reopening_record,
+        }
+      - { from: reopened, to: work_planned, actor: staff_or_reviewer, guard: new_work_cycle }
+
+transactions:
+  finalize_issue_match:
+    isolation: serializable_or_equivalent_guarded_transaction
+    steps:
+      - Re-resolve candidate through active aliases or confirm no valid candidate.
+      - Create CanonicalIssue for no_match, otherwise choose active root.
+      - Finalize IssueMatch and resulting_issue_id.
+      - Create IssueEvidenceLink for every accepted EvidenceItem in the Submission.
+      - Create or update IssueParticipation for Submission.participant_id and resulting original issue.
+      - If this attempt changes a prior result, supersede affected evidence links and recompute affected participation materializations in this transaction.
+      - Append StatusEvents and durable outbox work.
+    idempotency: Return the existing committed result for the same submission and active attempt.
+
+  correct_evidence_link:
+    steps:
+      - Close the existing IssueEvidenceLink.
+      - Create the successor IssueEvidenceLink with correction reason and actor.
+      - Recompute affected IssueParticipation materializations with versioned correction events.
+      - Append outbox work for affected read models.
+
+  merge_issues:
+    steps:
+      - Resolve both issues to active roots while holding required locks.
+      - Reject self-merge, cycle, or alias depth greater than 16.
+      - Create IssueMerge and active IssueAlias source-to-target edge.
+      - Leave all evidence, participation, and events on their original issues.
+      - Refresh aggregate projections using distinct participants over alias closure.
+
+  reverse_merge:
+    steps:
+      - Record reversal details on IssueMerge.
+      - Close the associated active IssueAlias in the same transaction.
+      - Reactivate the original issue without creating a replacement issue.
+      - Refresh aggregate projections; correct post-merge evidence links explicitly where required.
+
+  create_resolution_claim:
+    steps:
+      - Resolve the requested issue to its active root and lock its current version.
+      - Create ResolutionClaim and at least one ResolutionEvidenceItem using deferred relationship validation.
+      - Transition CanonicalIssue to resolution_claimed and append the non-content StatusEvent.
+      - Commit pending redaction and notification outbox work atomically.
+    idempotency: Return the existing claim for the same active issue and idempotency key; never create two open claims.
+
+policies:
+  canonical_resolution:
+    algorithm: Follow active IssueAlias edges until no edge remains.
+    maximum_hops: 16
+    cycle_behavior: reject_write_and_require_review
+  identity_session_separation: Session state never mutates Participant or IssueParticipation.
+  consent_enforcement: Gemini voice transcription and public derivative release each require their own active ConsentRecord purpose.
+  event_payload_privacy: Events contain identifiers and reason codes only; sensitive content remains in access-controlled records.
+  deletion: Null restricted values on Submission, EvidenceItem, ResolutionEvidenceItem, and IdentityMapping; retain non-content tombstones and referential links; make affected participation non-counting; tombstone Participant; withdraw/recompute public derivatives; and reapply the deletion ledger after backup restore.

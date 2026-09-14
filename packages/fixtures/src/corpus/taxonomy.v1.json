@@ -1,0 +1,84 @@
+{
+  "taxonomy_version": "demo-taxonomy.v1",
+  "provenance": "team_created_synthetic",
+  "category_pack": "public-infrastructure-demo",
+  "label_definitions": {
+    "category_id": "The asset subsystem the report concerns. Language-neutral identifier.",
+    "defect_id": "The observed fault within that subsystem. Language-neutral identifier.",
+    "severity_band": "Reviewer triage band. NOT an engineering assessment and never a safety certification (V002 row 18).",
+    "unresolved_labels": "Fields a reviewer could not decide from the evidence alone. Present means genuinely undecided, not merely absent."
+  },
+  "severity_bands": [
+    { "id": "routine", "definition": "No immediate hazard observed; normal maintenance queue." },
+    {
+      "id": "elevated",
+      "definition": "Disrupts use of the facility; should be triaged ahead of routine."
+    },
+    {
+      "id": "needs_inspection",
+      "definition": "Evidence suggests a possible hazard. Always routed to a human inspector. This is a triage flag, never a determination that the structure is unsafe."
+    }
+  ],
+  "categories": [
+    {
+      "category_id": "structure.roof",
+      "labels": { "en-IN": "Roof", "mr-IN": "छत" },
+      "defects": [
+        { "defect_id": "leaking", "labels": { "en-IN": "Leaking", "mr-IN": "गळती" } },
+        {
+          "defect_id": "collapsed_section",
+          "labels": { "en-IN": "Collapsed section", "mr-IN": "कोसळलेला भाग" }
+        }
+      ]
+    },
+    {
+      "category_id": "structure.wall",
+      "labels": { "en-IN": "Wall", "mr-IN": "भिंत" },
+      "defects": [
+        { "defect_id": "cracked", "labels": { "en-IN": "Cracked", "mr-IN": "तडे" } },
+        {
+          "defect_id": "plaster_falling",
+          "labels": { "en-IN": "Plaster falling", "mr-IN": "प्लास्टर पडत आहे" }
+        }
+      ]
+    },
+    {
+      "category_id": "structure.window",
+      "labels": { "en-IN": "Window", "mr-IN": "खिडकी" },
+      "defects": [
+        { "defect_id": "broken_pane", "labels": { "en-IN": "Broken pane", "mr-IN": "तुटलेली काच" } }
+      ]
+    },
+    {
+      "category_id": "sanitation.toilet",
+      "labels": { "en-IN": "Toilet block", "mr-IN": "शौचालय" },
+      "defects": [
+        {
+          "defect_id": "no_water_supply",
+          "labels": { "en-IN": "No water supply", "mr-IN": "पाणी पुरवठा नाही" }
+        },
+        {
+          "defect_id": "blocked_drain",
+          "labels": { "en-IN": "Blocked drain", "mr-IN": "गटार तुंबले" }
+        }
+      ]
+    },
+    {
+      "category_id": "water.drinking",
+      "labels": { "en-IN": "Drinking water point", "mr-IN": "पिण्याच्या पाण्याची सुविधा" },
+      "defects": [
+        { "defect_id": "tap_broken", "labels": { "en-IN": "Tap broken", "mr-IN": "नळ तुटला" } }
+      ]
+    },
+    {
+      "category_id": "electrical.lighting",
+      "labels": { "en-IN": "Lighting", "mr-IN": "प्रकाश व्यवस्था" },
+      "defects": [
+        {
+          "defect_id": "exposed_wiring",
+          "labels": { "en-IN": "Exposed wiring", "mr-IN": "उघडी वायर" }
+        }
+      ]
+    }
+  ]
+}

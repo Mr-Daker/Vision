@@ -1,0 +1,728 @@
+[
+  {
+    "id": "V001",
+    "title": "Freeze the first decision workflow and release boundaries",
+    "phase": "Foundation",
+    "owner": "Product",
+    "deps": [],
+    "build": "Choose one district, one infrastructure category, supported demonstration languages, target citizen and staff roles, and the complete report-to-priority-to-resolution demonstration. Start with photos, text, and recorded voice; place richer video in the later media task. Separate hackathon, authorized pilot, and national expansion scope.",
+    "done": "The team approves a one-page scope, explicit exclusions, demo acceptance criteria, and measurable pilot learning goals. No later-phase integration is required to demonstrate the first workflow."
+  },
+  {
+    "id": "V002",
+    "title": "Publish the capability and evidence-claim matrix",
+    "phase": "Foundation",
+    "owner": "Product + AI",
+    "deps": ["V001"],
+    "build": "Mark each planned capability as real, simulated, proposed, or unsupported. Distinguish verified identity, location evidence, independent contributors, media consistency, estimated population served, and engineering confirmation.",
+    "done": "The matrix prohibits perfect AI-image detection, uncalibrated confidence probabilities, GPS-as-proof claims, and claims of official receipt or repair certification based solely on internal state."
+  },
+  {
+    "id": "V003",
+    "title": "Define versioned domain and lifecycle contracts",
+    "phase": "Foundation",
+    "owner": "Product + Backend",
+    "deps": ["V001", "V002"],
+    "build": "Define submission, evidence item, canonical issue, infrastructure asset, participant, jurisdiction, assignment, project link, status event, merge, and reopening. Specify actors, allowed transitions, immutable facts, and correction semantics.",
+    "done": "A versioned domain dictionary and transition matrix distinguish submission acceptance, agency acknowledgment, resolution claim, resolution confirmation, and reopening; recurrence and mistaken merges have explicit treatment."
+  },
+  {
+    "id": "V004",
+    "title": "Create the source and reuse register",
+    "phase": "Foundation",
+    "owner": "Data",
+    "deps": ["V001", "V003"],
+    "build": "Inventory candidate complaint, asset, boundary, population, project, and investment datasets. Record publisher, exact source, access method, dates, license or permission, update cadence, useful identifiers, and known gaps. Identify an eligible identity partner and prospective department recipient; prepare and, through the authorized project owner, initiate needed onboarding or data-access requests early.",
+    "done": "Each proposed demo input is either permitted source data or explicitly labeled synthetic data. Public visibility is not treated as blanket permission to copy personal information. The external-access register names owners and outstanding requests, but neither approval nor live credentials are prerequisites for completing this task or the demonstration."
+  },
+  {
+    "id": "V005",
+    "title": "Draft data classes, trust boundaries, and retention rules",
+    "phase": "Foundation",
+    "owner": "Security + Product",
+    "deps": ["V002", "V003", "V004"],
+    "build": "Classify identity mappings, precise coordinates, private originals, redacted public evidence, model inputs, logs, and aggregates. Draft access, retention, deletion, and disclosure rules for a demonstration using consenting participants.",
+    "done": "The design keeps identity mappings separate from public records, excludes identity documents from AI context, and identifies the policy and consent decisions requiring approval before a real pilot."
+  },
+  {
+    "id": "V006",
+    "title": "Record the initial architecture and deployment decisions",
+    "phase": "Foundation",
+    "owner": "Platform + Backend",
+    "deps": ["V003", "V005"],
+    "build": "Document TypeScript PWA, API, private HTTP worker, PostgreSQL/PostGIS/pgvector, object storage, and durable task delivery. Define authoritative records, service identities, connection budgets, deployment region choices, and deferred components.",
+    "done": "Architecture decisions explain why BigQuery, Redis, native mobile attestation, and additional services are deferred until a measured requirement or pilot decision justifies them."
+  },
+  {
+    "id": "V007",
+    "title": "Prepare the development workspace and automated checks",
+    "phase": "Foundation",
+    "owner": "Platform",
+    "deps": ["V006"],
+    "build": "Establish application packages, versioned migrations, environment templates, secret handling, formatting, type checks, test commands, and CI. Pin supported runtime and database-extension versions after compatibility checks.",
+    "done": "A clean checkout can run the documented local workflow and checks without production credentials; secrets and private media are excluded from version control and build artifacts."
+  },
+  {
+    "id": "V008",
+    "title": "Specify APIs, events, and replaceable provider adapters",
+    "phase": "Foundation",
+    "owner": "Backend",
+    "deps": ["V003", "V006", "V007"],
+    "build": "Define versioned request, response, error, event, and adapter contracts for identity, government routing, object storage, task delivery, AI inference, and source imports. Include idempotency, correlation IDs, timestamps, and provider capabilities.",
+    "done": "Contract fixtures cover success, unavailable, pending, rejected, duplicate, and ambiguous outcomes. Interfaces distinguish simulated provider responses from authenticated external responses."
+  },
+  {
+    "id": "V009",
+    "title": "Implement application sessions and clearly simulated demo identity",
+    "phase": "Foundation",
+    "owner": "Backend + Frontend",
+    "deps": ["V005", "V008"],
+    "build": "Implement the identity adapter using fixed demo principals and internal pseudonymous participant IDs. Build real application session issuance, expiry, rotation, logout, protected cookies, CSRF defenses where applicable, and a documented demo recovery path. Model credential state, issuer, revocation, and uniqueness without claiming real DigiLocker verification.",
+    "done": "The UI and API capability metadata identify demo identity as simulated. Repeated login for the same fixture yields the same internal participant; expired or revoked sessions fail, logout clears protected local state under the agreed policy, and no live identity-provider approval is needed."
+  },
+  {
+    "id": "V010",
+    "title": "Implement a simulated department recipient and source adapters",
+    "phase": "Foundation",
+    "owner": "Backend + Data",
+    "deps": ["V004", "V008"],
+    "build": "Create controlled department-inbox, acknowledgment, project-data, and demographic-data adapters using reviewed fixtures. Include delayed acknowledgment, rejected routing, stale records, and missing project matches.",
+    "done": "Every simulated agency event and synthetic source row is labeled. Adapter contract tests make later real providers replaceable without changing the citizen or staff workflow."
+  },
+  {
+    "id": "V011",
+    "title": "Build reviewed fixtures and a sealed evaluation holdout",
+    "phase": "Foundation",
+    "owner": "AI + Data",
+    "deps": ["V002", "V003", "V004", "V008"],
+    "build": "Prepare permitted multilingual reports, media, routing labels, duplicate pairs, nearby distinct defects, recurrence examples, and adversarial inputs. Include a small versioned demo taxonomy, asset registry, jurisdiction mapping, permitted or synthetic boundaries, and responsibility directory for seeding before matching and routing are built. Separate development and holdout sets by real issue or asset to reduce leakage.",
+    "done": "The corpus has provenance, reviewer decisions, label definitions, language and category coverage, and unresolved-label flags. Holdout examples are excluded from prompts, tuning, and demo rehearsal."
+  },
+  {
+    "id": "V012",
+    "title": "Create database schemas and enforce core invariants",
+    "phase": "Foundation",
+    "owner": "Backend",
+    "deps": ["V003", "V005", "V008"],
+    "build": "Create migrations for domain records, participant mappings, evidence metadata, current state, immutable events, processing stages, outbox rows, source lineage, and issue aliases. Define foreign keys, unique keys, timestamps, and version columns.",
+    "done": "Database constraints prevent repeated request acceptance, duplicate stage identities, and repeated participation on the same canonical issue. Event and source records preserve event time separately from ingestion time."
+  },
+  {
+    "id": "V013",
+    "title": "Run the local persistence stack and test migrations",
+    "phase": "Foundation",
+    "owner": "Platform + Backend",
+    "deps": ["V007", "V011", "V012"],
+    "build": "Run the selected PostgreSQL and extensions, apply migrations, and seed the isolated taxonomy, asset, jurisdiction, responsibility, and evidence fixtures from V011. Configure bounded connection pools and statement timeouts. Document development resets that cannot target shared or production data.",
+    "done": "Fresh installation and forward migration checks pass on the selected database version; spatial and vector capabilities are verified rather than assumed from upstream documentation."
+  },
+  {
+    "id": "V014",
+    "title": "Implement and test domain transitions and persistence invariants",
+    "phase": "Foundation",
+    "owner": "Backend + QA",
+    "deps": ["V003", "V011", "V012", "V013"],
+    "build": "Implement pure domain functions for transition validation, participant eligibility, recurrence, alias rules, and correction semantics. Add unit tests and real-database tests for constraints, request replay, optimistic version conflicts, and event ordering. Use constructed histories here; complete matching, merging, and reopening workflows are implemented and exercised in their later tasks.",
+    "done": "Executable domain policies and persistence tests demonstrate business invariants independently of UI code or later workflow implementations. A resolution claim cannot become externally confirmed merely because a status field is supplied by a client."
+  },
+  {
+    "id": "V015",
+    "title": "Enforce authorization and private-data boundaries",
+    "phase": "Foundation",
+    "owner": "Backend + Security",
+    "deps": ["V005", "V009", "V012", "V014"],
+    "build": "Implement citizen, reviewer, department staff, supervisor, and administrator permissions with jurisdiction scoping. Derive identities and roles from the application sessions built in V009, and filter public versus authorized private representations. Add server-enforced request limits and per-principal upload/submission quotas with actionable retry errors.",
+    "done": "Authorization and limit tests reject forged principal IDs, cross-jurisdiction writes, public access to originals or identity mappings, unauthorized status transitions, and requests beyond configured quotas. Simulated identity still exercises real application authorization."
+  },
+  {
+    "id": "V016",
+    "title": "Implement private object-storage upload contracts",
+    "phase": "Foundation",
+    "owner": "Backend + Platform",
+    "deps": ["V005", "V008", "V013", "V015"],
+    "build": "Implement narrowly scoped upload authorization, unique object paths, upload completion validation, quarantine states, size and type limits, and temporary-object cleanup. Keep original evidence private and separate derived previews.",
+    "done": "An authorized client uploads only to its assigned object; forged completion, oversized content, mismatched metadata, and unauthorized reads fail without creating accepted evidence."
+  },
+  {
+    "id": "V017",
+    "title": "Implement outbox delivery and durable stage execution",
+    "phase": "Foundation",
+    "owner": "Backend + Platform",
+    "deps": ["V008", "V012", "V013", "V014"],
+    "build": "Implement transactional outbox publication, bounded dispatch, unique processing-stage keys, renewable leases with fencing tokens, retry policy, terminal failure state, and reconciliation of expired or undelivered work.",
+    "done": "A transaction can atomically save domain changes and pending work. Duplicate queue delivery does not duplicate committed effects, and an expired worker cannot overwrite results from a newer lease."
+  },
+  {
+    "id": "V018",
+    "title": "Accept a submission and return a durable receipt",
+    "phase": "Hackathon",
+    "owner": "Backend",
+    "deps": ["V014", "V015", "V016", "V017"],
+    "build": "Implement submission creation using validated location, description, completed-upload references, and an idempotency key. Save the submission and first outbox event atomically before returning a processing receipt.",
+    "done": "Network retries return the original receipt. A saved submission remains discoverable during worker outages; a failed database commit cannot be presented as a successful report."
+  },
+  {
+    "id": "V019",
+    "title": "Build the citizen capture and submission interface",
+    "phase": "Hackathon",
+    "owner": "Frontend",
+    "deps": ["V009", "V016", "V018"],
+    "build": "Build location capture with accuracy disclosure, photo upload, short text or voice description, permission handling, upload progress, and a durable receipt screen. Localize the selected demonstration languages and implement labels, keyboard navigation, visible focus, screen-reader announcements, sufficient contrast, usable touch targets, zoom support, and text alternatives to voice controls. Keep category, department, and severity selection out of the required form.",
+    "done": "A citizen completes the core flow on a mobile browser, including denied-permission and interrupted-upload paths. Keyboard and screen-reader checks pass for that flow. The interface clearly distinguishes a manually claimed pin from captured location evidence."
+  },
+  {
+    "id": "V020",
+    "title": "Make drafts and submission retries resilient",
+    "phase": "Hackathon",
+    "owner": "Frontend + Backend",
+    "deps": ["V005", "V018", "V019"],
+    "build": "Add consent-aware local draft persistence, safe upload resumption where supported, explicit retry, duplicate-tap prevention, and stale-location prompts. Define expiry and cleanup for device drafts and unfinished uploads.",
+    "done": "Loss of connectivity does not falsely show server acceptance or inflate submissions. Reconnecting preserves the original idempotency key, and locally retained sensitive content follows the disclosed cleanup rule."
+  },
+  {
+    "id": "V021",
+    "title": "Process media into usable, traceable evidence",
+    "phase": "Hackathon",
+    "owner": "Backend + AI",
+    "deps": ["V016", "V017", "V018"],
+    "build": "Validate actual media formats, normalize safe derivatives, generate thumbnails, compute cryptographic and perceptual fingerprints, and extract relevant capture metadata. Implement the approved face, number-plate, and contact-detail redaction policy for AI inputs and public derivatives; unresolved redaction cases remain quarantined. Preserve private originals under the retention policy and record derivative provenance and approval state.",
+    "done": "Malformed media and unresolved redaction cases cannot enter public views or the normal AI path. Approved fixtures exercise redaction and derivative generation before the later review interface exists. Reused bytes are recognized without treating reuse as independent corroboration or deleting another contributor's evidence record."
+  },
+  {
+    "id": "V022",
+    "title": "Verify ingestion recovery and duplicate-delivery behavior",
+    "phase": "Hackathon",
+    "owner": "Backend + QA",
+    "deps": ["V017", "V018", "V020", "V021"],
+    "build": "Exercise worker crashes, duplicate deliveries, missing uploads, expired leases, and a crash after stage commit but before task acknowledgment. Verify reconciliation and controlled replay of recoverable failures.",
+    "done": "Each scenario ends in one authoritative stage result or a visible recoverable failure. Tests distinguish idempotent database outcomes from possible repeated external processing costs."
+  },
+  {
+    "id": "V023",
+    "title": "Connect real Gemini inference behind the AI adapter",
+    "phase": "Hackathon",
+    "owner": "AI + Backend",
+    "deps": ["V008", "V011", "V015", "V017", "V021"],
+    "build": "Use a supported Google AI endpoint server-side for multimodal classification with a compact versioned output schema. Generate and cache semantic embeddings through a separately configured supported endpoint before V026 uses vectors; record embedding model/version, dimensions, normalization, and input hash. Use media fingerprints for initial image similarity unless an image-embedding provider is explicitly selected. Validate identifiers and values, record prompt versions, enforce timeouts and budgets, and isolate untrusted input from application authority.",
+    "done": "Real inference and compatible stored semantic vectors are produced from representative approved evidence; invalid or unavailable output produces an explicit review or retry state. Dimension/version mismatches fail validation. API keys remain server-side, and the model cannot execute administrative actions or access identity records."
+  },
+  {
+    "id": "V024",
+    "title": "Support and verify multilingual voice and text understanding",
+    "phase": "Hackathon",
+    "owner": "AI + Frontend",
+    "deps": ["V011", "V019", "V023"],
+    "build": "Process the selected demonstration languages and voice inputs while preserving original wording and derived transcripts. Map equivalent descriptions to versioned categories and issue types, retaining uncertainty and a correction path.",
+    "done": "Reviewed examples in the chosen languages reach equivalent structured outcomes when appropriate. Unsupported language, noisy audio, and uncertain transcription are visible rather than silently mistranslated."
+  },
+  {
+    "id": "V025",
+    "title": "Explain independent trust signals without overstating verification",
+    "phase": "Hackathon",
+    "owner": "AI + Product",
+    "deps": ["V002", "V021", "V023", "V024"],
+    "build": "Combine capture consistency, known-media reuse, image-description consistency, and timestamp availability into individual evidence checks and review flags. Define a corroboration-signal adapter using clearly marked fixtures until V029 supplies live eligible participation. Separate observations from any experimentally calibrated model scores.",
+    "done": "Users can inspect the reason for each flag and whether its corroboration input is a fixture. Missing metadata is not proof of fraud; identity, physical presence, image authenticity, and factual severity remain distinct claims."
+  },
+  {
+    "id": "V026",
+    "title": "Retrieve nearby and asset-related issue candidates",
+    "phase": "Hackathon",
+    "owner": "Backend + Data",
+    "deps": ["V011", "V013", "V021", "V023"],
+    "build": "Add indexed spatial candidate queries with correct distance units, asset identifiers, time windows, and configurable accuracy-aware radii. Use exact vector reranking over bounded candidates initially and retain candidate-query diagnostics.",
+    "done": "Tests include boundary-adjacent locations, inaccurate GPS, repeated assets, and nearby different defects. Empty approximate-search results are never used as proof that no candidate exists."
+  },
+  {
+    "id": "V027",
+    "title": "Propose duplicate matches with reviewable reasons",
+    "phase": "Hackathon",
+    "owner": "AI + Backend",
+    "deps": ["V011", "V024", "V025", "V026"],
+    "build": "Evaluate candidates using location, asset identity, semantics, media similarity, history, and recurrence context. Produce existing-issue, new-issue, or ambiguous proposals with evidence references and versioned decision metadata.",
+    "done": "Hard negatives remain separate, recurrence is handled according to the domain contract, and an ambiguous proposal cannot silently cause an irreversible issue merge."
+  },
+  {
+    "id": "V028",
+    "title": "Finalize canonical issue assignment safely under concurrency",
+    "phase": "Hackathon",
+    "owner": "Backend",
+    "deps": ["V014", "V017", "V022", "V026", "V027"],
+    "build": "Implement a short transactional candidate recheck before attachment or creation, using the selected serializable or explicit-guard strategy. Implement the reviewed merge and separation commands and reversible membership records that later review screens will invoke. Retry conflicts, rerun stale decisions, and keep external inference outside database transactions.",
+    "done": "Concurrent first reports do not bypass the final matching decision because both previously saw no issue. Alias resolution and issue-version changes are checked at commit, with reversible merge records retained."
+  },
+  {
+    "id": "V029",
+    "title": "Enforce unique contribution counts across merges",
+    "phase": "Hackathon",
+    "owner": "Backend + QA",
+    "deps": ["V009", "V014", "V025", "V028"],
+    "build": "Implement one counted participant per canonical issue, allow fresh evidence from existing participants, and union contributor identities when issues merge. Supply live eligible-participation signals to the V025 corroboration adapter and recompute them after merges or corrections. Separate submitted media, unique contributors, onsite evidence, and population estimates.",
+    "done": "Repeated accounts in the same demo identity mapping, retries, new evidence, and merges cannot inflate unique-participant counts. Reversal and reopening preserve an auditable contribution history."
+  },
+  {
+    "id": "V030",
+    "title": "Build citizen tracking, issue discovery, and infrastructure history views",
+    "phase": "Hackathon",
+    "owner": "Frontend + Backend",
+    "deps": ["V015", "V021", "V025", "V028", "V029"],
+    "build": "Implement a private My Reports list and receipt lookup, bounded nearby issue discovery with list/map filters and cursor pagination, and canonical issue details. Display evidence, contributor counts, trust checks, history, and recurrence. Render assignment and resolution fields from contracts or labeled fixtures until V034 and V035 provide their live workflow events. Provide authorized access to originals and public access to approved derivatives only.",
+    "done": "Citizens can return to a saved report and discover nearby public issues without retaining a special link. A reader can trace a summary back to its evidence and dates, see what is uncertain or simulated, and distinguish infrastructure history from repeated complaint entries."
+  },
+  {
+    "id": "V031",
+    "title": "Complete citizen duplicate confirmation and correction",
+    "phase": "Hackathon",
+    "owner": "Frontend + Backend",
+    "deps": ["V019", "V027", "V028", "V029", "V030"],
+    "build": "Show a possible existing problem with location, preview, and issue history; let the citizen confirm or reject the match. Route disagreement and mistaken attachments through a reviewed correction path.",
+    "done": "Confirmation adds evidence once to the current canonical issue. A match that changes during interaction is revalidated, and rejection does not require the citizen to understand government categories."
+  },
+  {
+    "id": "V032",
+    "title": "Build the evidence and matching review queue",
+    "phase": "Hackathon",
+    "owner": "Frontend + Backend",
+    "deps": ["V015", "V025", "V028", "V030", "V031"],
+    "build": "Provide authorized reviewers with flagged evidence, uncertain classifications, ambiguous matches, redaction decisions, and correction requests. Require reasoned decisions and preserve prior states and reviewer identity in the audit trail.",
+    "done": "Review can accept, reject, correct, attach, separate, or request more evidence within defined permissions; public displays update without erasing the original decision history."
+  },
+  {
+    "id": "V033",
+    "title": "Resolve department routing through a versioned directory",
+    "phase": "Hackathon",
+    "owner": "Backend + Data",
+    "deps": ["V003", "V010", "V023", "V028", "V032"],
+    "build": "Map proposed issue category and location to a reviewed jurisdiction and responsibility directory. Keep deterministic authority checks, unknown-owner review, and provider submission capability separate from AI classification.",
+    "done": "Each route has an explainable directory version and recipient. The demo makes clear when routing is internal or simulated and never invents an official government acknowledgment."
+  },
+  {
+    "id": "V034",
+    "title": "Build staff triage and acknowledgment",
+    "phase": "Hackathon",
+    "owner": "Frontend + Backend",
+    "deps": ["V010", "V015", "V030", "V033"],
+    "build": "Create the department inbox with ownership, age, urgency, evidence, and assignment controls. Record internal acceptance and simulated external acknowledgment as separate events with actor, timestamp, and reference.",
+    "done": "An authorized staff member can acknowledge and assign a routed issue. Delivery, internal acceptance, and actual recipient acknowledgment have distinct statuses and cannot be conflated by the interface."
+  },
+  {
+    "id": "V035",
+    "title": "Implement resolution claims, confirmation, dispute, and reopening",
+    "phase": "Hackathon",
+    "owner": "Backend + Frontend",
+    "deps": ["V003", "V014", "V015", "V030", "V032", "V034"],
+    "build": "Allow staff to provide completion evidence, citizens to corroborate or dispute, and authorized reviewers to resolve disagreements. Apply the category-specific confirmation policy and retain the full transition history.",
+    "done": "A repair claim does not automatically count as verified resolution. Reopening reverses current-state closure metrics, and photographs are not presented as professional structural-safety certification."
+  },
+  {
+    "id": "V036",
+    "title": "Add supervisor queues and deterministic ageing alerts",
+    "phase": "Hackathon",
+    "owner": "Backend + Frontend",
+    "deps": ["V017", "V033", "V034", "V035"],
+    "build": "Provide supervisor views of unacknowledged, overdue, critical, disputed, and reopened issues. Implement configured ageing and escalation rules with explicit pause conditions, deduplicated alert events, and reviewed severity overrides.",
+    "done": "Clock-driven tests show alerts occur once per intended rule window; age survives reassignment, and internal demo alerts are not represented as notifications delivered to real officials."
+  },
+  {
+    "id": "V037",
+    "title": "Specify analytics populations, denominators, and time semantics",
+    "phase": "Hackathon",
+    "owner": "Data + Product",
+    "deps": ["V003", "V029", "V035"],
+    "build": "Define current backlog, accepted issue cohorts, fixed-window resolution, time to resolution, disputed closures, reopening, unique contributors, and estimated population served. Keep cohort status as of a date separate from fixed-window comparisons; include only sufficiently observed cohorts in the latter and specify whether reopening within the observation window invalidates resolution. Specify boundary versions, unknown values, and late corrections.",
+    "done": "Every metric has a reproducible formula and denominator. Resolved-only speed does not hide unresolved cases; local distinct counts and population estimates cannot be summed without valid aggregation rules."
+  },
+  {
+    "id": "V038",
+    "title": "Build replayable regional and category summaries",
+    "phase": "Hackathon",
+    "owner": "Data + Backend",
+    "deps": ["V017", "V028", "V029", "V035", "V037"],
+    "build": "Project authoritative records and events into summary tables for the chosen district and categories. Deduplicate events and handle merges, separations, late updates, reassignment, reopening, and corrected jurisdiction attribution.",
+    "done": "A clean rebuild matches incremental summaries on test histories. Summary freshness and reconciliation failures are observable, and retries cannot increase counts."
+  },
+  {
+    "id": "V039",
+    "title": "Build the district dashboard with evidence drill-down",
+    "phase": "Hackathon",
+    "owner": "Frontend + Data",
+    "deps": ["V030", "V036", "V037", "V038"],
+    "build": "Display category, jurisdiction, backlog age, closure cohorts, and reopening using prepared summaries. Show data coverage, metric definitions, update timestamps, and links through canonical issues to original authorized evidence.",
+    "done": "Dashboard totals reconcile to the defined source population; users can distinguish zero from missing coverage and navigate from a regional indicator to its supporting records."
+  },
+  {
+    "id": "V040",
+    "title": "Import scoped contextual data with lineage",
+    "phase": "Hackathon",
+    "owner": "Data",
+    "deps": ["V004", "V010", "V011", "V012", "V013"],
+    "build": "Load permitted or clearly synthetic asset, enrolment or population, access, and investment records for the selected district. Preserve source snapshots, licenses, units, identifiers, extraction dates, and missing-data indicators.",
+    "done": "Every displayed context value links to a source record or is visibly synthetic. Invalid units, stale records, and unmatched assets are reported rather than converted into plausible values."
+  },
+  {
+    "id": "V041",
+    "title": "Link issues to sanctioned projects with reviewable evidence",
+    "phase": "Hackathon",
+    "owner": "Data + Backend",
+    "deps": ["V028", "V032", "V040"],
+    "build": "Propose project links using asset identifiers, geography, scope, dates, and source evidence. Store confirmed, rejected, ambiguous, and unmatched links separately, with matching method and reviewer provenance.",
+    "done": "The demo shows one defensible link and one ambiguous or absent match. No match is never translated into a claim that government has not funded the asset."
+  },
+  {
+    "id": "V042",
+    "title": "Implement transparent prioritization and sensitivity checks",
+    "phase": "Hackathon",
+    "owner": "Data + Product",
+    "deps": ["V002", "V025", "V037", "V040", "V041"],
+    "build": "Implement a versioned deterministic recommendation policy using available severity, persistence, service population, alternatives, accessibility, equity, and existing-project context. Disclose weights, missing data, budget assumptions, and evidence limits.",
+    "done": "A lower-reporting high-need case can rank appropriately for explainable reasons. Changing plausible weights exposes rank sensitivity, and neither an arbitrary score nor model prose is presented as optimal public spending."
+  },
+  {
+    "id": "V043",
+    "title": "Build the policy decision and investment comparison view",
+    "phase": "Hackathon",
+    "owner": "Frontend + Data",
+    "deps": ["V030", "V039", "V041", "V042"],
+    "build": "Show candidate interventions, component scores, source-backed need, linked sanctioned projects, alternatives, and recorded outcomes. Permit drill-down and scenario comparison while preserving the recommendation policy version.",
+    "done": "A reviewer can explain why one intervention ranks above another, identify unsupported assumptions, and distinguish recorded outcomes during a project from proof that spending caused those outcomes."
+  },
+  {
+    "id": "V044",
+    "title": "Complete demo notices and private-data handling",
+    "phase": "Hackathon",
+    "owner": "Security + Frontend",
+    "deps": ["V002", "V005", "V015", "V019", "V021", "V030", "V032"],
+    "build": "Apply the approved demonstration data rules to capture notices, public redaction, model inputs, draft cleanup, logs, exports, and deletion requests. Explain simulated identity and departmental integration at the relevant screens.",
+    "done": "A documented sample-data audit finds no undisclosed identity records or unnecessary personal information in public views, model traces, logs, or repository fixtures."
+  },
+  {
+    "id": "V045",
+    "title": "Run the comparative citizen usability experiment",
+    "phase": "Hackathon",
+    "owner": "Product + QA",
+    "deps": ["V019", "V020", "V024", "V031", "V044"],
+    "build": "Test the same representative reporting task with a small consenting participant group using the prototype and a suitable existing flow without filing real complaints. Counterbalance order and record completion time, assistance, errors, and understanding. Explicitly test keyboard-only operation, a screen reader, text zoom, selected UI languages, and a constrained mobile/network profile; include reporting, duplicate confirmation, and report tracking.",
+    "done": "Results include sample size, test conditions, accessibility observations, and limitations. Blocking accessibility and reporting failures are corrected and retested before release or comparative effort claims; foundational accessibility is not deferred to V065."
+  },
+  {
+    "id": "V046",
+    "title": "Run held-out AI, routing, and deduplication evaluation",
+    "phase": "Hackathon",
+    "owner": "AI + QA",
+    "deps": ["V011", "V023", "V024", "V025", "V027", "V028", "V033", "V041", "V042"],
+    "build": "Run the frozen holdout with recorded model, prompt, taxonomy, and data versions. Compare classification and routing to reviewed labels, measure candidate recall and incorrect merges separately, and assess unsupported recommendation statements.",
+    "done": "A reproducible report gives per-language and per-category results, abstention coverage, error examples, latency, and cost. No failures are hidden by replacing the holdout with rehearsal examples."
+  },
+  {
+    "id": "V047",
+    "title": "Exercise security and abuse boundaries end to end",
+    "phase": "Hackathon",
+    "owner": "Security + QA",
+    "deps": ["V015", "V016", "V023", "V029", "V032", "V035", "V044"],
+    "build": "Test authorization bypass, cross-jurisdiction access, media abuse, forged identity fields, repeated contribution requests, secret exposure, and instructions embedded in text or images. Verify output validation and bounded server resource use.",
+    "done": "Critical findings are fixed and regression checked. Untrusted evidence cannot invoke administrative operations, change credentials, fetch arbitrary internal URLs, or silently publish private content."
+  },
+  {
+    "id": "V048",
+    "title": "Test concurrency, recovery, and analytics corrections",
+    "phase": "Hackathon",
+    "owner": "Backend + QA",
+    "deps": ["V022", "V028", "V029", "V035", "V036", "V038", "V041"],
+    "build": "Exercise simultaneous first reports, stale confirmations, overlapping merges, repeated acknowledgments, task reordering, crash boundaries, reopened closures, and late project corrections. Compare derived state with an authoritative rebuild.",
+    "done": "All targeted histories preserve canonical issue membership, uniqueness, permitted state transitions, and metric denominators. Unrecoverable states are visible with an operator repair procedure."
+  },
+  {
+    "id": "V049",
+    "title": "Measure performance and establish operating budgets",
+    "phase": "Hackathon",
+    "owner": "Platform + QA",
+    "deps": ["V006", "V013", "V023", "V026", "V039", "V043", "V048"],
+    "build": "Measure receipt latency, processing delay, candidate-query latency, dashboard latency, upload behavior, database connections, storage growth, and AI cost under an explicitly sized synthetic workload. Tune indexes, pools, and queue limits from results.",
+    "done": "The team records workload, hardware or service settings, percentile results, cost assumptions, and failure limits. No national-scale capacity claim is extrapolated solely from a small demonstration."
+  },
+  {
+    "id": "V050",
+    "title": "Install monitoring and prepare the demo operations runbook",
+    "phase": "Hackathon",
+    "owner": "Platform",
+    "deps": ["V017", "V022", "V047", "V048", "V049"],
+    "build": "Instrument correlated requests, outbox lag, queue age, stage failures, model cost, database saturation, and summary freshness without logging private payloads. Document incident response, safe replay, migration rollback, and demo data recovery.",
+    "done": "A deliberate processing failure produces a useful alert and can be diagnosed using IDs and state. Runbooks name owners and distinguish demo recovery from the stronger pilot restore-drill gate."
+  },
+  {
+    "id": "V051",
+    "title": "Deploy the demonstration environment reproducibly",
+    "phase": "Hackathon",
+    "owner": "Platform + Backend",
+    "deps": ["V006", "V016", "V017", "V043", "V044", "V047", "V049", "V050"],
+    "build": "Deploy the selected API, private worker, PWA, database, task queue, and private storage with explicit service identities, secrets, origins, and resource caps. Load permitted demo fixtures and enable real Gemini through the adapter.",
+    "done": "The deployed environment passes smoke checks, uses genuine Google AI, and labels mock identity and government providers. Deployment does not wait for DigiLocker onboarding or a government partnership."
+  },
+  {
+    "id": "V052",
+    "title": "Pass the full hackathon demonstration acceptance test",
+    "phase": "Hackathon",
+    "owner": "Product + QA",
+    "deps": [
+      "V031",
+      "V035",
+      "V036",
+      "V043",
+      "V045",
+      "V046",
+      "V047",
+      "V048",
+      "V049",
+      "V050",
+      "V051"
+    ],
+    "build": "Demonstrate multilingual capture, same-issue confirmation, a nearby distinct defect, unique counts, staff action, a sourced project match, need-based prioritization, closure dispute, and reopening in the deployed environment.",
+    "done": "The rehearsed path uses real inference and clearly labeled simulated history where needed. The team records unresolved limitations, measured results, and a recoverable fallback for a live provider outage."
+  },
+  {
+    "id": "V053",
+    "title": "Prepare the hackathon submission package",
+    "phase": "Hackathon",
+    "owner": "Product + Team",
+    "deps": ["V004", "V006", "V046", "V049", "V052"],
+    "build": "Prepare the evaluator-accessible repository, deployed prototype, demo video, pitch deck, concise solution description, architecture, setup instructions, source attribution, and AI evaluation evidence to the current organizer requirements.",
+    "done": "All links and credentials intended for evaluators work; media and slide lengths meet the current rules; contributions, reused components, synthetic data, and simulated integrations are disclosed consistently."
+  },
+  {
+    "id": "V054",
+    "title": "Approve the hackathon release gate",
+    "phase": "Hackathon",
+    "owner": "Product + Team",
+    "deps": [
+      "V001",
+      "V002",
+      "V003",
+      "V004",
+      "V005",
+      "V006",
+      "V007",
+      "V008",
+      "V009",
+      "V010",
+      "V011",
+      "V012",
+      "V013",
+      "V014",
+      "V015",
+      "V016",
+      "V017",
+      "V018",
+      "V019",
+      "V020",
+      "V021",
+      "V022",
+      "V023",
+      "V024",
+      "V025",
+      "V026",
+      "V027",
+      "V028",
+      "V029",
+      "V030",
+      "V031",
+      "V032",
+      "V033",
+      "V034",
+      "V035",
+      "V036",
+      "V037",
+      "V038",
+      "V039",
+      "V040",
+      "V041",
+      "V042",
+      "V043",
+      "V044",
+      "V045",
+      "V046",
+      "V047",
+      "V048",
+      "V049",
+      "V050",
+      "V051",
+      "V052",
+      "V053"
+    ],
+    "build": "Review the complete Foundation and Hackathon checklist, submission rules, demo claims, unresolved defects, and evidence for each acceptance criterion. Freeze the demonstrated scope and preserve the evaluated version.",
+    "done": "All required release acceptance criteria pass, declared demonstration limitations match the capability matrix, and the evaluated submission version is preserved. No Pilot or Scale task is a dependency, and the package accurately represents delivered capability."
+  },
+  {
+    "id": "V055",
+    "title": "Agree an authorized pilot with named operational owners",
+    "phase": "Pilot",
+    "owner": "Product + Partnerships",
+    "deps": ["V054"],
+    "build": "Select a participating authority, geography, category, reviewer team, and actual receiving department. Agree permitted data exchanges, staff capacity, escalation responsibilities, success measures, stop conditions, and pilot duration.",
+    "done": "Named partners accept the operating workflow and acknowledge their responsibilities. A public routing directory alone does not count as a government integration or pilot commitment."
+  },
+  {
+    "id": "V056",
+    "title": "Approve pilot consent, privacy, identity, and retention policy",
+    "phase": "Pilot",
+    "owner": "Security + Product + Partnerships",
+    "deps": ["V005", "V044", "V055"],
+    "build": "Review the actual pilot data flows with appropriate privacy and legal advisers. Finalize notices, consent records, identity purpose, location requirements, access roles, public redaction, retention, deletion, incident handling, and applicable participant restrictions.",
+    "done": "Accountable owners approve the policy and operational procedures before collecting real pilot identity or location evidence. Storage, AI processing, backups, and downstream exports follow the same approved policy."
+  },
+  {
+    "id": "V057",
+    "title": "Integrate real citizen identity and production staff authentication",
+    "phase": "Pilot",
+    "owner": "Backend + Partnerships",
+    "deps": ["V008", "V009", "V015", "V055", "V056"],
+    "build": "Complete the required DigiLocker or other approved provider onboarding and implement only documented supported flows. Verify the identifier available to this integration, consent exchange, token validation, account linking, recovery, revocation, and secure pseudonymous mapping. Connect production citizen sign-in to the application sessions from V009. Implement approved staff sign-in with MFA, controlled invitations and role/jurisdiction grants, account suspension, recovery, and session revocation; citizen verification cannot confer staff privileges.",
+    "done": "Provider-approved test cases demonstrate the intended uniqueness behavior and failure paths. Real identity verification is enabled only after credentials, permissions, and identifier semantics are confirmed; simulated accounts remain distinguishable and cannot authenticate in production. Staff onboarding, least-privilege access, recovery, and deprovisioning are tested."
+  },
+  {
+    "id": "V058",
+    "title": "Integrate an authorized government recipient with acknowledgment",
+    "phase": "Pilot",
+    "owner": "Backend + Partnerships",
+    "deps": ["V008", "V010", "V033", "V034", "V036", "V055", "V056"],
+    "build": "Replace the simulated recipient with an approved API, partner dashboard, or explicitly agreed operational channel. Implement reference mapping, authenticated receipt or acknowledgment, rejection, retries, reconciliation, and recipient ownership.",
+    "done": "A controlled test produces a verifiable acknowledgment from the actual receiving authority. Transport delivery and Vision's own staff action are not substituted for evidence of official receipt."
+  },
+  {
+    "id": "V059",
+    "title": "Validate the pilot's identity and onsite-evidence gate",
+    "phase": "Pilot",
+    "owner": "Security + Mobile or Frontend + QA",
+    "deps": ["V002", "V020", "V025", "V056", "V057"],
+    "build": "Implement the approved onsite policy using fresh location, accuracy, capture timing, replay resistance, and available platform signals. Test poor GPS, denied permissions, stale drafts, shared devices, account recovery, and attempted spoofing.",
+    "done": "Measured platform limitations and false rejections are documented, review paths are staffed, and presence labels reflect supported evidence strength. Identity verification is not used as a substitute for physical-presence evidence."
+  },
+  {
+    "id": "V060",
+    "title": "Validate pilot boundaries, assets, and responsibility mappings",
+    "phase": "Pilot",
+    "owner": "Data + Partnerships",
+    "deps": ["V004", "V026", "V033", "V040", "V055", "V056"],
+    "build": "Replace demonstration directories with reviewed pilot assets, jurisdiction boundaries, and department responsibility rules. Preserve effective dates, stable source identifiers, overlaps, ownership disputes, and rural or urban hierarchy differences.",
+    "done": "Partner-reviewed samples route to the correct authority, boundary changes preserve history, and missing or contested ownership enters an operational review queue."
+  },
+  {
+    "id": "V061",
+    "title": "Operationalize contextual and project data feeds",
+    "phase": "Pilot",
+    "owner": "Data + Partnerships",
+    "deps": ["V004", "V040", "V041", "V042", "V055", "V056", "V060"],
+    "build": "Implement approved pilot source refreshes with licensing, authentication, schema checks, lineage, freshness monitoring, and reconciliation. Review project matching and priority assumptions with staff who understand local delivery constraints.",
+    "done": "Real source updates reproduce a source-backed recommendation; stale or absent feeds are visible, and operational reviewers approve how uncertainty affects project links and priority."
+  },
+  {
+    "id": "V062",
+    "title": "Pass the pilot security, retention, and restore drill",
+    "phase": "Pilot",
+    "owner": "Platform + Security + QA",
+    "deps": ["V047", "V048", "V049", "V050", "V056", "V057", "V058", "V059", "V060", "V061"],
+    "build": "Exercise backups and restoration in an isolated environment, including database state, evidence access, outbox replay, secrets, audit history, and deletion propagation. Recheck real adapters, pilot load, alerts, support ownership, and access boundaries.",
+    "done": "Measured recovery point and recovery time satisfy agreed pilot objectives. Restored systems do not resurrect deleted public data or replay external actions incorrectly; critical findings and retention failures are resolved."
+  },
+  {
+    "id": "V063",
+    "title": "Run partner acceptance across a controlled real workflow",
+    "phase": "Pilot",
+    "owner": "Product + Partnerships + QA",
+    "deps": [
+      "V035",
+      "V036",
+      "V043",
+      "V055",
+      "V056",
+      "V057",
+      "V058",
+      "V059",
+      "V060",
+      "V061",
+      "V062"
+    ],
+    "build": "Using agreed test records and consenting participants, exercise real identity, onsite evidence, actual recipient acknowledgment, staff ownership, contextual prioritization, completion evidence, dispute, and reopening with the pilot team.",
+    "done": "Both Vision and the receiving authority sign off the controlled results, observed limitations, support process, and response expectations. Any unavailable required integration remains a pilot blocker rather than a simulated success."
+  },
+  {
+    "id": "V064",
+    "title": "Approve limited pilot launch and review its outcomes",
+    "phase": "Pilot",
+    "owner": "Product + Partnerships + Security",
+    "deps": ["V055", "V056", "V057", "V058", "V059", "V060", "V061", "V062", "V063"],
+    "build": "Authorize the agreed cohort, geography, and duration only after consent, identity and presence limits, actual acknowledgment, privacy and retention, security, restore, and staff-capacity gates pass. Review outcomes at the pre-agreed checkpoints.",
+    "done": "The pilot has explicit launch approval, monitored operating limits, stop conditions, and a recorded continuation decision based on adoption, response, correction, and resolution evidence rather than report volume alone."
+  },
+  {
+    "id": "V065",
+    "title": "Extend accessibility and low-connectivity participation",
+    "phase": "Scale",
+    "owner": "Product + Frontend + Partnerships",
+    "deps": ["V020", "V045", "V056", "V059", "V064"],
+    "build": "Review screen-reader access, language coverage, constrained devices, assisted reporting, intermittent connectivity, and mobility-related barriers using pilot findings. Define any alternative participation modes with explicit identity and presence semantics.",
+    "done": "Representative users validate the added modes and policy owners approve them. Remote support or assisted input cannot silently count as independently verified onsite evidence."
+  },
+  {
+    "id": "V066",
+    "title": "Add richer media and longer infrastructure histories",
+    "phase": "Scale",
+    "owner": "Backend + AI + Platform",
+    "deps": ["V021", "V025", "V030", "V049", "V056", "V062", "V064"],
+    "build": "Add bounded video and richer audio processing, long-running job orchestration where justified, lifecycle storage classes, efficient previews, and longitudinal comparison. Preserve originals, derivation lineage, and meaningful recurrence evidence.",
+    "done": "If adopted, new media paths meet measured cost and latency budgets, support recovery and deletion, and expose comparison uncertainty without claiming automated engineering certification or perfect manipulation detection. If pilot evidence does not justify richer media, record a reviewed deferral and retain the validated photo/text/voice path; video is not a prerequisite for geographic expansion."
+  },
+  {
+    "id": "V067",
+    "title": "Onboard additional jurisdictions, categories, and languages",
+    "phase": "Scale",
+    "owner": "Data + AI + Partnerships",
+    "deps": ["V046", "V056", "V058", "V060", "V061", "V064", "V065"],
+    "build": "Review each new authority's responsibility mapping, assets, boundaries, taxonomy, language data, partner workflow, and consent requirements. Run targeted evaluation and capacity checks before enabling public reporting in that jurisdiction.",
+    "done": "Each expansion has named recipients, reviewed mappings, source coverage, documented model performance, and operational support; national geography is not enabled merely because a map can display it."
+  },
+  {
+    "id": "V068",
+    "title": "Introduce BigQuery when historical analytics warrants it",
+    "phase": "Scale",
+    "owner": "Data + Platform",
+    "deps": ["V037", "V038", "V049", "V056", "V062", "V064", "V067"],
+    "build": "Implement a measured migration to partitioned historical tables, deduplicated ingestion, current-state snapshots, and regional summaries. Validate event time, corrections, canonical aliases, jurisdiction history, deletion propagation, and distinct-person aggregation.",
+    "done": "If adopted, warehouse results reconcile with authoritative records and replayed histories under late events, merges, and reopening; partition filters, costs, freshness, and integrity checks are enforced independently of unenforced key declarations. If measurements do not justify a warehouse, record a reviewed deferral with capacity evidence and continue using reconciled PostgreSQL summaries."
+  },
+  {
+    "id": "V069",
+    "title": "Scale transactional storage and delivery from measured bottlenecks",
+    "phase": "Scale",
+    "owner": "Platform + Backend",
+    "deps": ["V026", "V028", "V048", "V049", "V062", "V064", "V067"],
+    "build": "Benchmark growth and selectively add archival or partitioning, read replicas, caching, improved vector retrieval, or queue segmentation. Preserve global uniqueness, matching recall, migration safety, connection budgets, and outbox correctness.",
+    "done": "Each change resolves a measured constraint and passes invariant and recovery tests. Approximate matching recall and replica staleness cannot silently change canonical issue or staff-action decisions."
+  },
+  {
+    "id": "V070",
+    "title": "Add authorized notification and submission channels",
+    "phase": "Scale",
+    "owner": "Backend + Product + Partnerships",
+    "deps": ["V008", "V017", "V036", "V056", "V058", "V064", "V065", "V067"],
+    "build": "Review and integrate needed messaging, email, SMS, or partner channels through provider adapters with consent and preferences, signed callbacks, rate limits, deduplicated delivery, and clear identity-linking rules.",
+    "done": "Each adopted channel passes provider and privacy review, duplicate and opt-out tests, and failure reconciliation. Message delivery does not count as agency acknowledgment, onsite presence, or a new unique participant. A reviewed decision to retain the web receipt and tracking flow is valid when no additional channel is justified for the expansion."
+  },
+  {
+    "id": "V071",
+    "title": "Extend investment, contractor, and historical outcome analysis",
+    "phase": "Scale",
+    "owner": "Data + Product + Partnerships",
+    "deps": ["V037", "V041", "V042", "V056", "V061", "V064", "V067", "V068"],
+    "build": "Add reviewed funding, procurement, contractor, execution, recurring-defect, and contextual tenure histories when reliable sources exist. Preserve project identity, agency responsibility, inherited backlog, boundary versions, coverage, and source corrections.",
+    "done": "Adopted comparisons use documented comparable cohorts and denominators, provide source drill-down and correction routes, and distinguish outcomes recorded during a tenure from claims of individual causation or an authoritative political score. Where sources are insufficient or the feature is not justified, record a reviewed deferral; tenure and contractor comparisons are not prerequisites for geographic expansion."
+  },
+  {
+    "id": "V072",
+    "title": "Approve staged national expansion using operational evidence",
+    "phase": "Scale",
+    "owner": "Product + Platform + Partnerships + Security",
+    "deps": ["V064", "V065", "V066", "V067", "V068", "V069", "V070", "V071"],
+    "build": "Review adoption, actual acknowledgment, resolution and reopening cohorts, model errors, low-reporting coverage, accessibility, equity sensitivity, capacity, cost, privacy, source freshness, and disaster recovery for each expansion wave. Review both implemented results and explicit evidence-backed deferrals for optional media, warehouse, messaging, and historical-analysis tasks.",
+    "done": "Expansion proceeds only where recipients and operational capacity exist and agreed measures remain acceptable; it does not require adopting an optional technology or feature that measurements do not justify. Unsupported geography or data gaps remain visible; rollback, retraining review, and corrective action have named owners."
+  }
+]

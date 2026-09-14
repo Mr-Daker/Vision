@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Vision — Report A Problem, Follow What Happens</title>
+    <meta
+      name="description"
+      content="Citizens report problems with public infrastructure. Vision groups duplicate reports, routes each one to the department responsible and shows what happened. A demonstration build: departments are simulated."
+    />
+
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="landing.css" />
+  </head>
+  <body>
+    <div class="page">
+      <section class="screen" id="top">
+        <div class="bg">
+          <video class="bg-video" autoplay muted loop playsinline>
+            <source src="assets/hero.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <header class="header">
+          <a class="logo" href="index.html" aria-label="Vision — home">
+            <img src="assets/logo.png" alt="" width="480" height="271" />
+          </a>
+
+          <nav class="nav" aria-label="Primary">
+            <a class="nav-link is-active" href="index.html" aria-current="page">Home</a>
+            <a class="nav-link" href="app.html">Report</a>
+            <a class="nav-link" href="#features">Features</a>
+            <a class="nav-link" href="intelligence.html">Intelligence</a>
+            <a class="nav-link" href="#about">About</a>
+          </nav>
+
+          <a class="sign-in" href="signin.html">Sign in</a>
+
+          <button
+            class="burger"
+            id="burger"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+          </button>
+        </header>
+
+        <main class="hero">
+          <!-- The template this replaces carried "Trusted by 2000+ Enterprises"
+             over Microsoft, Amazon and Google marks. No such relationship
+             exists, so the same component now carries what is true: this is a
+             demonstration, and every department in it is simulated. -->
+          <div class="trust anim" style="--d: 0.05s">
+            <span class="trust-avatar a1" aria-hidden="true">
+              <span class="trust-avatar-inner"
+                ><svg
+                  viewBox="0 0 640 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M0 128C0 92.7 28.7 64 64 64H256h48 16H576c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H320 304 256 64c-35.3 0-64-28.7-64-64V128zm320 0V384H576V128H320zM178.3 175.9c-3.2-7.2-10.4-11.9-18.3-11.9s-15.1 4.7-18.3 11.9l-64 144c-4.5 10.1 .1 21.9 10.2 26.4s21.9-.1 26.4-10.2l8.9-20.1h73.6l8.9 20.1c4.5 10.1 16.3 14.6 26.4 10.2s14.6-16.3 10.2-26.4l-64-144zM160 233.2L179 276H141l19-42.8zM448 164c11 0 20 9 20 20v4h44 16c11 0 20 9 20 20s-9 20-20 20h-2l-1.6 4.5c-8.9 24.4-22.4 46.6-39.6 65.4c.9 .6 1.8 1.1 2.7 1.6l18.9 11.3c9.5 5.7 12.5 18 6.9 27.4s-18 12.5-27.4 6.9l-18.9-11.3c-4.5-2.7-8.8-5.5-13.1-8.5c-10.6 7.5-22 13.6-34 18.2l-4.7 1.8c-10.3 4-21.9-1.2-25.9-11.5s1.2-21.9 11.5-25.9l4.7-1.8c6.1-2.3 11.9-5.2 17.5-8.5l-17.6-17.6c-7.8-7.8-7.8-20.5 0-28.3s20.5-7.8 28.3 0l21.4 21.4 .2 .2c12.4-13.2 22.1-28.9 28.3-46.1H392c-11 0-20-9-20-20s9-20 20-20h36v-4c0-11 9-20 20-20z"
+                  /></svg
+              ></span>
+            </span>
+            <span class="trust-avatar a2" aria-hidden="true">
+              <span class="trust-avatar-inner"
+                ><svg
+                  viewBox="0 0 384 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"
+                  /></svg
+              ></span>
+            </span>
+            <span class="trust-avatar a3" aria-hidden="true">
+              <span class="trust-avatar-inner"
+                ><svg
+                  viewBox="0 0 448 512"
+                  width="1em"
+                  height="1em"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M288 0H160 128C110.3 0 96 14.3 96 32s14.3 32 32 32V196.8c0 11.8-3.3 23.5-9.5 33.5L10.3 406.2C3.6 417.2 0 429.7 0 442.6C0 481 31 512 69.4 512H378.6c38.3 0 69.4-31 69.4-69.4c0-12.8-3.6-25.4-10.3-36.4L329.5 230.4c-6.2-10.1-9.5-21.7-9.5-33.5V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H288zM192 196.8V64h64V196.8c0 23.7 6.6 46.9 19 67.1L309.5 320h-171L173 263.9c12.4-20.2 19-43.4 19-67.1z"
+                  /></svg
+              ></span>
+            </span>
+            <span class="trust-pill">Demonstration build — departments are simulated</span>
+          </div>
+
+          <h1 class="headline anim">
+            <span class="headline-line" style="--d: 0.12s">Report A Problem</span>
+            <span class="headline-line" style="--d: 0.3s">Follow What Happens</span>
+          </h1>
+
+          <p class="subhead anim" style="--d: 0.28s">
+            Photo, voice or a sentence. Vision groups reports of the same problem, routes each one
+            to the department responsible, and shows you what happened next.
+          </p>
+
+          <a class="cta anim" style="--d: 0.4s" href="app.html">Report a problem</a>
+        </main>
+
+        <!-- Every figure below is measured, not asserted; `data-basis` records
+           where each one comes from. The test count is the one that goes stale
+           fastest — refresh it from `npm run check` and `npm run test:db`
+           whenever it is quoted, because a number that was true last week is
+           still a false claim today. -->
+        <footer class="stats" id="stats">
+          <div class="stat anim" style="--d: 0.5s">
+            <span class="stat-icon" aria-hidden="true">#</span>
+            <span
+              class="stat-value"
+              data-target="2"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="English (en-IN) and Marathi (mr-IN) locale packs"
+              >2</span
+            >
+            <span class="stat-label">Interface Languages</span>
+          </div>
+          <div class="stat anim" style="--d: 0.58s">
+            <span class="stat-icon" aria-hidden="true">*</span>
+            <span
+              class="stat-value"
+              data-target="957"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="532 unit plus 425 database tests, all passing"
+              >957</span
+            >
+            <span class="stat-label">Automated Checks</span>
+          </div>
+          <div class="stat anim" style="--d: 0.66s">
+            <span class="stat-icon" aria-hidden="true">%</span>
+            <span
+              class="stat-value"
+              data-target="100"
+              data-suffix="%"
+              data-decimals="0"
+              data-basis="routing writes provider_mode simulated and refuses a real recipient"
+              >100%</span
+            >
+            <span class="stat-label">Simulated Departments</span>
+          </div>
+          <div class="stat anim" style="--d: 0.74s">
+            <span class="stat-icon" aria-hidden="true">&lt;</span>
+            <span
+              class="stat-value"
+              data-target="4"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="water_supply, sanitation, structural, electrical in demo-taxonomy.v1"
+              >4</span
+            >
+            <span class="stat-label">Report Categories</span>
+          </div>
+        </footer>
+
+        <a class="scroll-cue" href="#features" aria-label="Read what the project does">
+          <span>What it does</span>
+          <svg viewBox="0 0 384 512" width="11" height="11" fill="currentColor" aria-hidden="true">
+            <path
+              d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+            />
+          </svg>
+        </a>
+      </section>
+
+      <!-- ── What it does ──────────────────────────────────────
+           Every claim here describes behaviour that exists and is
+           tested. Where something is simulated or unbuilt, the card
+           says so rather than leaving the reader to assume. -->
+      <section class="section" id="features">
+        <div class="section-inner">
+          <p class="section-eyebrow reveal">What it does</p>
+          <h2 class="section-title reveal">Four things, end to end</h2>
+
+          <div class="cards">
+            <article class="card reveal">
+              <span class="card-glyph" aria-hidden="true">#</span>
+              <h3 class="card-title">Report in your own words</h3>
+              <p class="card-body">
+                A photo, a voice note or a sentence. You are never asked to pick a department, a
+                category or a severity — that is decided after review, not by you.
+              </p>
+            </article>
+
+            <article class="card reveal">
+              <span class="card-glyph" aria-hidden="true">*</span>
+              <h3 class="card-title">Duplicates are grouped</h3>
+              <p class="card-body">
+                Reports of the same problem are joined into one issue, so ten neighbours reporting
+                one blocked drain is one problem with ten voices, not ten tickets.
+              </p>
+            </article>
+
+            <article class="card reveal">
+              <span class="card-glyph" aria-hidden="true">&lt;</span>
+              <h3 class="card-title">Routed to an owner</h3>
+              <p class="card-body">
+                Each issue is matched to the department responsible for that category, and the
+                decision is recorded so it can be re-derived later. Every department here is
+                simulated.
+              </p>
+            </article>
+
+            <article class="card reveal">
+              <span class="card-glyph" aria-hidden="true">%</span>
+              <h3 class="card-title">Followed to an answer</h3>
+              <p class="card-body">
+                You can see what happened to your report. A repair claim is not a verified
+                resolution: it has to be confirmed by people who reported the problem.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── About ────────────────────────────────────────────── -->
+      <section class="section" id="about">
+        <div class="section-inner">
+          <p class="section-eyebrow reveal">About the project</p>
+          <h2 class="section-title reveal">Built to be checkable</h2>
+
+          <p class="section-lead reveal">
+            Vision is a citizen reporting platform for public infrastructure, built for the
+            Code&nbsp;for&nbsp;Communities challenge. The hard part of this problem is not
+            collecting reports — it is being honest about what the system does and does not know.
+          </p>
+
+          <div class="facts">
+            <div class="fact reveal">
+              <h3 class="fact-title">Nothing claims to be official</h3>
+              <p class="fact-body">
+                Identity is simulated. Departments are simulated. No government system is contacted,
+                and a receipt says plainly that it is not an official acknowledgement.
+              </p>
+            </div>
+
+            <div class="fact reveal">
+              <h3 class="fact-title">Absence is not evidence</h3>
+              <p class="fact-body">
+                A photo with its metadata stripped is the ordinary case, not a suspicious one. A
+                consistency check that cannot conclude says so, and never counts against the person
+                who reported.
+              </p>
+            </div>
+
+            <div class="fact reveal">
+              <h3 class="fact-title">No invented numbers</h3>
+              <p class="fact-body">
+                There is no confidence score and no severity rating, because nothing here has been
+                calibrated to produce one. An AI category is a proposal for a person to confirm.
+              </p>
+            </div>
+
+            <div class="fact reveal">
+              <h3 class="fact-title">Two languages, one bar</h3>
+              <p class="fact-body">
+                English and Marathi. The Marathi pack is machine-drafted and the interface says so
+                on screen, because an unreviewed translation presented as finished is its own kind
+                of false claim.
+              </p>
+            </div>
+          </div>
+
+          <div class="section-cta reveal">
+            <a class="cta" href="app.html">Report a problem</a>
+            <a class="section-link" href="signin.html">Choose a demonstration account</a>
+          </div>
+        </div>
+      </section>
+
+      <p class="font-credit">
+        Font made from
+        <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
+        is licensed by CC BY 4.0
+      </p>
+    </div>
+
+    <div class="menu-overlay" id="menu-overlay" hidden></div>
+    <div class="menu-sheet" id="mobile-menu" hidden>
+      <nav class="menu-nav" aria-label="Mobile">
+        <a class="menu-link is-active" href="index.html" aria-current="page">Home</a>
+        <a class="menu-link" href="app.html">Report</a>
+        <a class="menu-link" href="#features">Features</a>
+        <a class="menu-link" href="intelligence.html">Intelligence</a>
+        <a class="menu-link" href="#about">About</a>
+        <a class="menu-sign-in" href="signin.html">Sign in</a>
+      </nav>
+    </div>
+
+    <script src="landing.js"></script>
+  </body>
+</html>

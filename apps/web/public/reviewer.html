@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — reviewer workspace</title>
+    <meta
+      name="description"
+      content="Private evidence and matching review workspace for the Vision demonstration."
+    />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/reviewer.css" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/reviewer-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#reviewer-main">Skip to reviewer workspace</a>
+    <header class="reviewer-header">
+      <a class="reviewer-brand" href="/">
+        <img src="/assets/logo.png" alt="" width="480" height="271" />
+        <span>Vision review</span>
+      </a>
+      <nav aria-label="Workspace navigation">
+        <a href="/staff.html">Department inbox</a>
+        <a href="/app.html">Citizen app</a>
+        <button type="button" id="reviewer-signout" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="reviewer-main">
+      <div class="page-intro">
+        <p class="eyebrow">Private operations workspace</p>
+        <h1>Evidence and matching review</h1>
+        <p>
+          Work only within your server-authorized jurisdiction. Every decision requires a reason and
+          preserves the state it replaced.
+        </p>
+      </div>
+
+      <p id="reviewer-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+      <p id="reviewer-live" class="visually-hidden" aria-live="polite"></p>
+
+      <section id="reviewer-login" class="login-panel" aria-labelledby="reviewer-login-heading">
+        <p class="eyebrow">Access required</p>
+        <h2 id="reviewer-login-heading" tabindex="-1">Choose a reviewer account</h2>
+        <p id="identity-disclosure" class="disclosure">
+          Simulated demonstration identity — not a real identity check
+        </p>
+        <p>
+          This demonstration does not contact DigiLocker or a government staff directory. The role
+          and jurisdiction grant are still stored and enforced by the server.
+        </p>
+        <div id="reviewer-login-choices" class="login-choices" aria-live="polite"></div>
+      </section>
+
+      <section id="reviewer-workspace" aria-labelledby="workspace-heading" hidden>
+        <div class="workspace-heading-row">
+          <div>
+            <p id="reviewer-role" class="eyebrow"></p>
+            <h2 id="workspace-heading" tabindex="-1">Current review queue</h2>
+          </div>
+          <button type="button" id="refresh-queue" class="secondary-button">Refresh</button>
+        </div>
+
+        <div class="queue-controls">
+          <label>
+            Authorized jurisdiction
+            <select id="jurisdiction-select"></select>
+          </label>
+          <label>
+            Review type
+            <select id="kind-filter">
+              <option value="all">All review types</option>
+              <option value="redaction_decision">Redaction decisions</option>
+              <option value="flagged_evidence">Evidence consistency</option>
+              <option value="ambiguous_match">Ambiguous matches</option>
+              <option value="correction_request">Citizen corrections</option>
+              <option value="uncertain_classification">Classifications</option>
+            </select>
+          </label>
+        </div>
+
+        <dl class="queue-summary" aria-label="Queue summary">
+          <div>
+            <dt>Waiting in scope</dt>
+            <dd id="queue-count">0</dd>
+          </div>
+          <div>
+            <dt>Visible after filter</dt>
+            <dd id="visible-count">0</dd>
+          </div>
+          <div>
+            <dt>Awaiting jurisdiction</dt>
+            <dd id="orphan-count">0</dd>
+          </div>
+        </dl>
+        <p id="queue-bound" class="queue-note"></p>
+        <p id="orphan-note" class="disclosure" hidden></p>
+        <div id="review-list" class="review-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      Simulated identity and synthetic jurisdictions are labelled throughout. No screen here is an
+      official government acknowledgment.
+    </footer>
+  </body>
+</html>

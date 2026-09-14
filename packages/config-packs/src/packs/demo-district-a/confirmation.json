@@ -1,0 +1,28 @@
+{
+  "version": "demo-confirmation.v1",
+  "note": "How many confirmations close a claim, by category, and whether a reviewer may resolve a dispute in favour of the claim. Migration 0016 made a multi-confirmation category reachable: the rule is one answer per person per claim, so two confirmations mean two different people. A safety category withholds the reviewer override deliberately — that is where overruling residents would be least defensible.",
+  "rules": {
+    "water_supply": {
+      "required_confirmations": 1,
+      "citizen_may_confirm": true,
+      "reviewer_may_override": true
+    },
+    "sanitation": {
+      "required_confirmations": 1,
+      "citizen_may_confirm": true,
+      "reviewer_may_override": true
+    },
+    "electrical": {
+      "required_confirmations": 2,
+      "citizen_may_confirm": true,
+      "reviewer_may_override": false,
+      "requires_qualified_inspection": true
+    },
+    "structural": {
+      "required_confirmations": 2,
+      "citizen_may_confirm": true,
+      "reviewer_may_override": false,
+      "requires_qualified_inspection": true
+    }
+  }
+}

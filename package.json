@@ -1,0 +1,52 @@
+{
+  "name": "vision",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vision \u2014 citizen public-infrastructure reporting. Foundation workspace (roadmap V007).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": "26.4.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "check": "npm run format:check && npm run typecheck && npm run check:imports && npm run check:scope && npm run check:secrets && npm run check:holdout && npm run check:browser-safe && npm run check:migrations && npm run test",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p apps/web/tsconfig.json",
+    "test": "node --test \"packages/*/src/**/*.test.ts\" \"apps/*/src/**/*.test.ts\"",
+    "test:watch": "node --test --watch \"packages/*/src/**/*.test.ts\" \"apps/*/src/**/*.test.ts\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:imports": "node tools/check-import-direction.mjs",
+    "check:scope": "node tools/check-scope-literals.mjs",
+    "check:secrets": "node tools/check-secrets.mjs",
+    "check:migrations": "node tools/migrate.mjs validate",
+    "migrate:status": "node tools/migrate.mjs status",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "node tools/db.mjs reset",
+    "db:migrate": "node tools/db.mjs migrate",
+    "db:verify": "node tools/db.mjs verify",
+    "db:seed": "node tools/db.mjs seed",
+    "test:db": "node --test --test-concurrency=1 \"packages/*/src/**/*.dbtest.ts\" \"apps/*/src/**/*.dbtest.ts\"",
+    "check:holdout": "node tools/check-holdout-seal.mjs",
+    "build:web": "tsc -p apps/web/tsconfig.vendor.json && tsc -p apps/web/tsconfig.app.json && node tools/rewrite-web-imports.mjs",
+    "check:browser-safe": "node tools/check-browser-safe.mjs",
+    "dev": "node --env-file-if-exists=.env apps/api/src/dev-server.ts",
+    "test:live": "node --env-file-if-exists=.env --test --test-concurrency=1 \"packages/*/src/**/*.livetest.ts\"",
+    "worker": "node --env-file-if-exists=.env apps/worker/src/dev-worker.ts",
+    "db:seed:v035": "node --env-file-if-exists=.env tools/db.mjs seed:v035"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/pg": "8.15.6",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "pg": "8.16.3"
+  }
+}

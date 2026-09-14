@@ -1,0 +1,1360 @@
+/*
+ * Citizen capture interface styles (roadmap V019).
+ *
+ * Accessibility decisions that are load-bearing, not cosmetic:
+ *
+ *  - Every interactive target is at least 44x44 CSS px (min-height/min-width
+ *    plus padding), so a control is usable with a thumb on a phone.
+ *  - Focus is always visible: `:focus-visible` draws a 3px outline with a 2px
+ *    offset, and `outline: none` appears nowhere in this file.
+ *  - Sizes are in `rem` and the layout is a single column with `max-width` in
+ *    `ch`/`rem`, so page zoom to 200% reflows instead of clipping.
+ *  - Colour pairs meet a contrast ratio of at least 4.5:1 for text in both
+ *    schemes, asserted against this file by `contrast.test.ts`.
+ *  - Motion is removed under `prefers-reduced-motion`.
+ *
+ * Visual approach: the form was a bordered panel containing bordered
+ * fieldsets, which read as boxes inside boxes with every element at the same
+ * weight. Hierarchy now comes from space and type instead of from borders —
+ * the only rules left are hairlines that separate steps, and the only filled
+ * surfaces are the ones that are genuinely a card (a receipt, a decision to
+ * make). Steps are numbered by a CSS counter, so the markup did not have to
+ * grow a single element to carry a number.
+ */
+
+/* The palette is the landing page's, so the three pages read as one product:
+   black and white, with the primary control a solid pill rather than a green
+   one. Both schemes are kept — dropping light mode would have been removing an
+   accessibility option to win a cosmetic argument — and every ratio below is
+   computed, not estimated. `contrast.test.ts` re-checks all of them against
+   this file. */
+:root {
+  --page: #ffffff;
+  --ink: #16191d; /* 17.6:1 on --page */
+  --ink-muted: #4a5157; /* 8.1:1 on --page, 7.3:1 on --panel */
+  --line: #b9c0c7;
+  --panel: #f4f4f5;
+  --accent: #16191d; /* 17.6:1 with --accent-ink */
+  --accent-ink: #ffffff;
+  --accent-hover: #000000;
+  --danger: #a4231b; /* 7.4:1 on --page */
+  --danger-bg: #fdf3f2;
+  --warning-ink: #6b4300; /* 8.2:1 on --warning-bg */
+  --warning-bg: #fff8e6;
+  --focus: #1f6feb; /* 4.6:1 on --page */
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Exactly the landing page's ground and accent, so moving from the front
+     door into the app is not a change of product. */
+  :root {
+    --page: #000000;
+    --ink: #ffffff; /* 21:1 on --page */
+    --ink-muted: #b4b4b4; /* 10.1:1 on --page, 8.9:1 on --panel */
+    --line: #3a3a3d;
+    --panel: #141416;
+    --accent: #ffffff; /* 21:1 with --accent-ink */
+    --accent-ink: #000000;
+    --accent-hover: #e4e4e4;
+    --danger: #ff8a80; /* 9.2:1 on --page */
+    --danger-bg: #2b1a18;
+    --warning-ink: #f2cf7a; /* 10.5:1 on --warning-bg */
+    --warning-bg: #2a2116;
+    --focus: #9ec5ff; /* 11.9:1 on --page */
+  }
+}
+
+/* Surfaces derived from the tokens, so they follow both schemes.
+
+   This block must stay AFTER the dark override above. `contrast.test.ts` reads
+   `:root` blocks by index — 0 is light, 1 is dark — so a palette block
+   inserted before that one would make the dark assertions silently measure the
+   light tokens and pass while checking nothing. */
+:root {
+  --hairline: color-mix(in srgb, var(--line) 55%, transparent);
+  --surface: color-mix(in srgb, var(--ink) 4%, transparent);
+  --surface-strong: color-mix(in srgb, var(--ink) 7%, transparent);
+  --measure: 40rem;
+
+  /* Evidence rail. Derived rather than literal so both schemes follow the
+     palette instead of needing a second set of hand-picked colours. */
+  --rail-width: 21rem;
+  --rail-gap: clamp(1.5rem, 3vw, 3rem);
+  --glass: color-mix(in srgb, var(--panel) 62%, transparent);
+  --glass-edge: color-mix(in srgb, var(--ink) 12%, transparent);
+  --ground-grid: color-mix(in srgb, var(--ink) 3%, transparent);
+  /* The landing wave's own two colours, at the intensity the spec asks for:
+     enough to give the glass something to refract, not enough to compete with
+     a form. Light scheme gets a fraction of it — a dark atmosphere under black
+     body text would cost contrast for nothing. */
+  --ground-violet: rgba(126, 106, 168, 0.07);
+  --ground-crest: rgba(178, 106, 92, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground-violet: rgba(150, 128, 198, 0.16);
+    --ground-crest: rgba(206, 122, 104, 0.13);
+  }
+}
+
+/* ── Atmospheric ground ───────────────────────────────────────
+   The landing page at roughly a quarter of its intensity: the same two wave
+   colours, a coordinate graticule instead of a video, and a grain that keeps
+   the gradients from banding on a cheap panel.
+
+   Drawn on the body's own pseudo-elements rather than an added element, and
+   entirely in CSS — it downloads nothing, works offline, and costs no request
+   on a connection this product cannot assume. `position: fixed` so it does not
+   scroll with the form, `z-index: -1` so it is behind everything, and
+   `pointer-events: none` so it can never intercept a tap.
+
+   Civic rather than neon: straight ruled lines and signal falloff, no blobs. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55rem 38rem at 14% 6%, var(--ground-violet), transparent 68%),
+    radial-gradient(48rem 34rem at 86% 88%, var(--ground-crest), transparent 70%);
+  animation: ground-drift 40s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, var(--ground-grid) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom, var(--ground-grid) 0 1px, transparent 1px 64px);
+}
+
+/* Sub-pixel, and slow enough to read as depth rather than movement. The global
+   reduced-motion block at the end of this file stops it outright. */
+@keyframes ground-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-1.5%, -1%, 0);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  /* From theme.css, shared with the landing and sign-in pages. Inter leads
+     and "Noto Sans Devanagari" is still in the stack, because Inter has no
+     Devanagari coverage and every Marathi string depends on it. */
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Accessibility primitives ─────────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.75rem 1rem;
+  border-radius: 0 0 var(--radius) 0;
+  z-index: 60;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Author `display` rules beat the browser's own `[hidden]`, and this file sets
+   `display: flex` and `display: grid` on things the interface hides by
+   attribute — a hidden button row would otherwise be visible. Dropping this
+   line during a restyle is exactly the regression `contrast.test.ts` caught. */
+[hidden] {
+  display: none !important;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem clamp(1rem, 4vw, 2rem);
+  background: color-mix(in srgb, var(--page) 86%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* The same circular mark the landing and sign-in pages carry, so the three
+   read as one product — and a way back to the front door. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: var(--target-min);
+  margin: 0;
+  color: inherit;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+/* Height-driven with an automatic width: the mark is ~1.77:1, so a square
+   plate shrank it to the point where the map inside stopped resolving. */
+.brand-mark {
+  width: auto;
+  height: 2rem;
+  border-radius: 999px;
+  background: #ffffff;
+  /* A ring as well as a shadow: the plate is white, and on the light scheme's
+     white page a shadow alone left it with no edge at all. */
+  border: 1px solid var(--hairline);
+  box-shadow: var(--nav-shadow);
+  padding: 0.22rem 0.4rem;
+  object-fit: contain;
+}
+
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.language-label {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Page frame ───────────────────────────────────────────── */
+
+.app-main {
+  width: 100%;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem;
+}
+
+h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.75rem, 4.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+/* A disclosure is the interface admitting a limit. Marked with a rule rather
+   than a box: it should read as an aside, not as an alert. */
+.disclosure {
+  margin: 0.5rem 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--hairline);
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+.signed-in {
+  margin: 0 0 2rem;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.notice {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+.warning {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning-ink);
+  font-size: 0.875rem;
+}
+
+.error-summary {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.error-summary ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.field-error {
+  margin: 0.4rem 0 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+/* ── Panels ───────────────────────────────────────────────────
+   A panel is a section of the page, not a box drawn around one.
+   Only the ones that are genuinely a card — a decision to make, a
+   receipt to keep — get a surface, and they say so by opting in. */
+
+.panel {
+  margin: 0 0 2.5rem;
+}
+
+#consent-panel,
+#login-panel,
+#receipt-panel {
+  padding: clamp(1.25rem, 4vw, 1.75rem);
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+/* ── Form steps ───────────────────────────────────────────────
+   Numbered by a counter rather than by markup, so the HTML did not
+   have to grow an element per step to carry a number. */
+
+#report-form {
+  counter-reset: step;
+}
+
+/* Separated by space, not by a rule. A fieldset lays its legend out above its
+   padding box, so `padding-top` here opened a 50px dead gap between the step
+   heading and its own first control — and a `border-top` gets notched by the
+   legend, which is the bordered-box look this redesign is getting rid of.
+   Margin does the separating; the numbered headings do the delineating. */
+.field-group {
+  position: relative;
+  margin: 0 0 2.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.field-group > legend,
+.field-group > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.field-group > legend::before,
+.field-group > h2::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  /* Latin digits in the display face, matching the landing's stat glyphs.
+     Numerals only: this font has no Devanagari, and everything else here can
+     be translated. */
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  letter-spacing: 0;
+}
+
+.field {
+  margin: 0 0 1.25rem;
+}
+
+.field > label,
+.manual-fields label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ── Controls ─────────────────────────────────────────────── */
+
+input[type="text"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--page);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+input[type="text"]:hover,
+input[type="number"]:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--ink-muted);
+}
+
+textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.language-select {
+  width: auto;
+  min-width: 7rem;
+  border-radius: var(--radius-pill);
+}
+
+/* The native file input renders an unstyleable grey button that looked
+   pasted in from another century. The input itself stays in the DOM and
+   keeps its label, its id and its keyboard behaviour — it is moved
+   off-screen, and its own label is what you see and click. */
+input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The drop area is the control, so it carries no separate caption above it —
+   the step heading already says what this is, and a label sitting over a
+   labelled box was the same words twice. */
+label[for="photo-input"] {
+  display: flex;
+  margin-top: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 6rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+label[for="photo-input"]:hover {
+  border-color: var(--ink);
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+
+/* The visible control is the label, so the hidden input's focus ring has to
+   be drawn on it or keyboard users get no indication at all. */
+input[type="file"]:focus-visible + p,
+input[type="file"]:focus-visible ~ label,
+label[for="photo-input"]:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+#photo-input:focus-visible ~ label[for="photo-input"] {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+progress {
+  width: 100%;
+  height: 0.4rem;
+  margin: 0.5rem 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  accent-color: var(--accent);
+}
+
+.manual-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1.1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+
+.button,
+.button-secondary,
+.button-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0.65rem 1.35rem;
+  /* The pill shape the landing and sign-in pages use, so a control looks
+     like the same control across the three. */
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.button,
+.button-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button:hover,
+.button-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+.button-secondary:hover {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+.button-quiet {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.button-quiet:hover {
+  background: var(--surface);
+  text-decoration-thickness: 2px;
+}
+
+.button:disabled,
+.button-primary:disabled,
+.button-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+
+.button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+/* The submit sits at the end of the sequence and should look like the end. */
+#submit-report {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+}
+
+/* ── Results and lists ────────────────────────────────────── */
+
+.result {
+  margin: 1rem 0;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.result h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.98rem;
+}
+
+.result p {
+  margin: 0 0 0.3rem;
+  font-size: 0.9rem;
+}
+
+.result-line {
+  margin: 0.6rem 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.review-list,
+.receipt-fields {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+  font-size: 0.92rem;
+}
+
+.review-list dt,
+.receipt-fields dt {
+  color: var(--ink-muted);
+}
+
+.review-list dd,
+.receipt-fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.record-list {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record-list li {
+  padding: 1rem 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.record-list li:first-child {
+  border-top: 0;
+}
+
+.record-list li > p {
+  margin: 0 0 0.25rem;
+}
+
+/* Inside a record, these lines are the record's own metadata — a status, a
+   count — not the interface disclosing a limit. They are built with the
+   `disclosure` class by the renderer, so the rule is dropped here rather than
+   in JavaScript: stacking two ruled asides per row read as noise. */
+.record-list .disclosure {
+  margin: 0 0 0.2rem;
+  padding-left: 0;
+  border-left: 0;
+}
+
+/* The first line of a record is its reference. It should read as the title of
+   the row rather than as another line of text. */
+.record-list li > p:first-child {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.record-list img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 0.6rem;
+  border-radius: 0.7rem;
+}
+
+/* ── V030 receipt lookup ─────────────────────────────────────
+   Part of the signed-in reports section, not a separate login mechanism: a
+   reference identifies what to request while the session still decides who
+   may read it. */
+
+.lookup-block {
+  margin: 1.25rem 0 2rem;
+  padding: 1.1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.lookup-block > h3 {
+  margin-top: 0;
+}
+
+.lookup-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.lookup-result {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.lookup-result > h3 {
+  margin-top: 0;
+}
+
+.record-reference {
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+}
+
+/* ── V030 nearby coordinate map ──────────────────────────────
+   This intentionally has no basemap. Grid lines convey relative position;
+   rendering streets or buildings we do not possess would turn decoration
+   into false geographic evidence. */
+
+.coordinate-map-shell {
+  margin: 1.5rem 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.coordinate-map-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.coordinate-map-heading-row h3 {
+  margin-top: 0;
+}
+
+.coordinate-map-north {
+  flex: none;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+}
+
+.coordinate-map {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 1.55 / 1;
+  min-height: 15rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background-color: var(--page);
+  background-image:
+    linear-gradient(to right, var(--ground-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ground-grid) 1px, transparent 1px),
+    radial-gradient(circle at center, var(--surface-strong), transparent 55%);
+  background-size:
+    12.5% 100%,
+    100% 12.5%,
+    100% 100%;
+}
+
+#discovery-map-markers {
+  position: absolute;
+  inset: 0;
+}
+
+.coordinate-map-centre {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--page);
+  transform: translate(-50%, -50%);
+}
+
+.coordinate-map-centre::before,
+.coordinate-map-centre::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  background: var(--ink);
+  transform: translate(-50%, -50%);
+}
+
+.coordinate-map-centre::before {
+  width: 2rem;
+  height: 1px;
+}
+
+.coordinate-map-centre::after {
+  width: 1px;
+  height: 2rem;
+}
+
+.coordinate-map-marker {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  cursor: pointer;
+  box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--ink) 22%, transparent);
+  transform: translate(-50%, -50%);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.coordinate-map-marker:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.coordinate-map-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  margin-top: 0.75rem;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
+.coordinate-map-key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.coordinate-map-key i {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+
+.coordinate-map-key-centre {
+  border: 1px solid var(--ink);
+  background: var(--page);
+}
+
+.coordinate-map-key-issue {
+  background: var(--accent);
+}
+
+@media (max-width: 34rem) {
+  .lookup-row {
+    grid-template-columns: 1fr;
+  }
+
+  .lookup-row .button-secondary {
+    width: 100%;
+  }
+
+  .coordinate-map {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* ── Evidence rail ────────────────────────────────────────────
+   A second view of state the form already holds. The governing rule is that
+   nothing lives only here: every value the rail shows is also in the flow on
+   the left, which is what lets it collapse on a phone without losing anything.
+
+   Below the two-column breakpoint the rail simply falls into normal flow after
+   the form. That lands it in the right place without any DOM reordering,
+   because every panel between the form and the rail — receipt, tracking,
+   discovery, detail, candidate — is `hidden` until it has something to say.
+
+   Hierarchy is deliberately uneven. Location and evidence are what the citizen
+   is producing, so they get glass, a figure and full-strength type. Nearby and
+   the pipeline are context, so they get a hairline, no fill and quieter text.
+   Four cards of equal weight would read as a dashboard, which this is not. */
+
+.evidence-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 3rem 0 0;
+}
+
+.rail-card {
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  /* Transitioned so a card arriving reads as the system resolving something,
+     rather than as a box appearing. */
+  transition:
+    border-color 0.4s ease,
+    background-color 0.4s ease;
+}
+
+/* Hero cards: the evidence itself. */
+.rail-card-hero {
+  background: var(--glass);
+  border-color: var(--glass-edge);
+}
+
+/* Quiet cards: context around the evidence. No fill, and the label and body
+   both step down, so the eye reaches them after the two above. */
+.rail-card-quiet {
+  padding: 0.85rem 1.1rem 1rem;
+  background: none;
+}
+
+.rail-card-quiet .rail-label {
+  opacity: 0.6;
+}
+
+.rail-label {
+  margin: 0 0 0.75rem;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.rail-card-hero .rail-label {
+  color: var(--ink);
+}
+
+.rail-empty {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  /* Anticipatory rather than absent: the composition should look intentional
+     before any data arrives, not like a card that failed to load. */
+  opacity: 0.75;
+}
+
+.rail-readout {
+  margin: 0.9rem 0 0;
+}
+
+.rail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.8rem;
+}
+
+.rail-row:first-child {
+  border-top: 0;
+}
+
+.rail-row dt {
+  color: var(--ink-muted);
+}
+
+.rail-row dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  text-align: right;
+  /* Coordinates and byte counts read as instrument output, which is the one
+     job the display face is good at. Never used for anything a citizen has to
+     read to finish the form. */
+}
+
+.rail-figure {
+  overflow: hidden;
+  border-radius: 0.6rem;
+}
+
+.rail-figure-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 13rem;
+  object-fit: cover;
+}
+
+.rail-figure-count {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.rail-note {
+  margin: 0.75rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+/* ── Card states: neutral → processing → resolved ─────────────
+   `processing` is driven by real pending work — a geolocation fix, a file
+   read, a nearby query — and never by a timer imitating computation. A card
+   whose data is already there goes straight to `resolved`. */
+
+.rail-card[data-state="resolved"] {
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.rail-card[data-state="processing"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.rail-card[data-state="processing"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ink), transparent);
+  animation: rail-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes rail-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
+}
+
+.rail-figure,
+.rail-readout,
+.rail-figure-count {
+  animation: rail-resolve 0.24s ease-out both;
+}
+
+@keyframes rail-resolve {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Location instrument ──────────────────────────────────────
+   Every mark is something the system knows: real parallels and meridians, the
+   device's stated accuracy at true scale, and nearby issues at their true
+   bearing. No streets — invented geography would be read as the real layout,
+   and inventing evidence is the one thing this product refuses. */
+
+.sp-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.sp-grid {
+  stroke: var(--ink);
+  stroke-width: 0.5;
+  opacity: 0.18;
+}
+
+.sp-grid-label {
+  fill: var(--ink);
+  font-family: var(--font-display);
+  font-size: 7px;
+  opacity: 0.45;
+}
+
+.sp-grid-label-v {
+  writing-mode: vertical-rl;
+}
+
+.sp-accuracy {
+  fill: color-mix(in srgb, var(--ink) 8%, transparent);
+  stroke: var(--ink);
+  stroke-width: 0.75;
+  opacity: 0.5;
+}
+
+.sp-pulse {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  transform-origin: center;
+  animation: sp-pulse 3.2s ease-out infinite;
+}
+
+.sp-cross {
+  stroke: var(--ink);
+  stroke-width: 0.75;
+  opacity: 0.55;
+}
+
+.sp-pin {
+  fill: var(--ink);
+}
+
+.sp-nearby {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  opacity: 0.55;
+}
+
+@keyframes sp-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* ── Pipeline ─────────────────────────────────────────────────
+   Four stages, each named for a state that exists in
+   packages/domain/src/transitions.ts. Stages not yet reached are dimmed rather
+   than hidden: seeing the whole path is the point of the card. */
+
+.rail-pipeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail-stage {
+  position: relative;
+  padding: 0.3rem 0 0.3rem 1.4rem;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+/* The connecting spine, drawn between the markers rather than through them. */
+.rail-stage::before {
+  content: "";
+  position: absolute;
+  top: 1.15rem;
+  bottom: -0.3rem;
+  left: 0.28rem;
+  width: 1px;
+  background: var(--hairline);
+}
+
+.rail-stage:last-child::before {
+  display: none;
+}
+
+.rail-stage::after {
+  content: "";
+  position: absolute;
+  top: 0.6rem;
+  left: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid var(--ink-muted);
+  border-radius: 50%;
+}
+
+.rail-stage.is-current {
+  color: var(--ink);
+  opacity: 1;
+}
+
+.rail-stage.is-current::after {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.rail-stage.is-done {
+  opacity: 0.8;
+}
+
+.rail-stage.is-done::after {
+  background: var(--ink-muted);
+}
+
+/* ── Two-column composition ───────────────────────────────────
+   The form keeps its 40rem measure; the rail takes the space to its right that
+   was previously 400px of empty ground either side. Sticky, because the rail
+   is context for whatever step you are on. */
+
+@media (min-width: 1100px) {
+  .app-main {
+    max-width: calc(var(--measure) + var(--rail-width) + var(--rail-gap) + 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure)) minmax(0, var(--rail-width));
+    gap: var(--rail-gap);
+    align-items: start;
+  }
+
+  .evidence-rail {
+    position: sticky;
+    /* Clears the sticky header rather than sliding under it. */
+    top: 5.5rem;
+    margin: 0;
+    /* A sticky element taller than the viewport pins at its top and the rest
+       becomes unreachable — with both hero cards filled the rail runs to about
+       1170px, so on a 900px screen the pipeline simply could not be seen. It
+       scrolls itself instead. `contain` stops that scroll chaining to the page
+       and dragging the form away under the pointer. */
+    max-height: calc(100dvh - 7rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .app-footer {
+    max-width: calc(var(--measure) + var(--rail-width) + var(--rail-gap) + 4rem);
+  }
+}
+
+/* Glass is only worth its cost where there is room for it. Below the
+   two-column breakpoint the target device is a phone, where `backdrop-filter`
+   is an expensive way to tint a panel, so the hero cards fall back to a flat
+   surface. */
+@media (min-width: 1100px) {
+  .rail-card-hero {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+}
+
+@media (max-width: 1099px) {
+  .rail-card-hero {
+    background: var(--surface);
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+
+.app-footer {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 2rem) 3rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Motion ───────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

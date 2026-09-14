@@ -1,0 +1,40 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Environment and secrets — only .env.example is tracked (V005 L3c)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+gcp-credentials*.json
+
+# Private evidence and demonstration media must never enter version control (V005 §7)
+private-media/
+evidence-originals/
+quarantine/
+local-object-store/
+
+# Local database and coverage artifacts
+pgdata/
+coverage/
+.nyc_output/
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json.example
+*.swp
+
+# Browser build output (npm run build:web)
+apps/web/public/js/
+
+# Local dev artefacts
+.local/

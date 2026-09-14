@@ -1,0 +1,257 @@
+/* ============================================================
+   Sign in — layered on styles.css, same tokens and type scale.
+   Only what the auth screen adds lives here.
+   ============================================================ */
+
+/* A scrim behind the auth column.
+   The video's upper half is bright — pale digits on near-white — and white
+   display type sat straight on it was close to unreadable. The landing page
+   escapes this because its headline falls in the dark band lower down; the
+   sign-in title sits higher, right in the bright region. So this page gets a
+   soft vertical wash that darkens only the column the text occupies, rather
+   than a full-screen overlay that would flatten the video everywhere.
+
+   Behind the content and non-interactive, so nothing here can swallow a click
+   on the form. */
+.hero.auth {
+  position: relative;
+  max-width: 460px;
+  gap: 0;
+}
+
+.hero.auth::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 128vw);
+  height: min(760px, 118vh);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.58) 42%,
+    rgba(0, 0, 0, 0.28) 68%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.auth-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: #ffffff;
+  /* A step below the landing headline: this is a room, not the front door. */
+  font-size: clamp(26px, 4.6vw, 52px);
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.auth-sub {
+  margin: clamp(10px, 1.6vh, 16px) 0 clamp(18px, 2.6vh, 26px);
+  color: #d0d0d0;
+  opacity: 0.8;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(13.5px, 1.4vw, 15px);
+  line-height: 1.55;
+}
+
+/* The one card on either page. The landing hero is deliberately
+   card-free; a form needs a surface to sit on. */
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding: clamp(20px, 3vh, 28px) clamp(18px, 3vw, 26px);
+  border-radius: 24px;
+  background: rgba(40, 40, 42, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--trust-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  text-align: left;
+}
+
+/* The notice sits above the choices, not below them: somebody about to pick
+   an account should read what the account is before choosing, not after. */
+.auth-notice {
+  margin: 0 0 4px;
+  color: var(--trust-text);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.principal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.principal-loading {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  /* 44px is the minimum target the interface holds itself to (V019). */
+  min-height: 52px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.principal:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.principal:focus-visible {
+  outline: 3px solid #9ec5ff;
+  outline-offset: 2px;
+}
+
+.principal.is-busy {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.principal-label {
+  font-weight: 500;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+}
+
+/* The issuer is shown, not hidden: naming it is what lets a reader check the
+   simulation claim rather than take it on trust. */
+.principal-meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: -0.01em;
+}
+
+.field-error {
+  margin: 0;
+  color: #ff8a80;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
+}
+
+.auth-link {
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  transition: border-color 0.2s ease;
+}
+
+.auth-link:hover {
+  border-bottom-color: #ffffff;
+}
+
+.auth-note {
+  max-width: 380px;
+  margin: clamp(14px, 2vh, 20px) 0 0;
+  /* Lifted off `--muted`: this sentence is the page's honesty disclosure —
+     that nothing here creates an account or verifies anybody — and it was the
+     hardest thing on the screen to read. A disclosure nobody can read is not
+     a disclosure. */
+  color: #b4b4b4;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* The sign-in link is the current page here rather than a control. */
+.sign-in.is-current {
+  background: #ffffff;
+  color: #000000;
+}
+
+.sign-in.is-current:hover {
+  background: #ffffff;
+  color: #000000;
+  transform: none;
+}
+
+/* Two metrics rather than four: the auth screen is narrower, and a
+   four-column strip under a 460px card reads as clutter. */
+.stats.auth-stats {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 460px;
+}
+
+@media (max-width: 420px) {
+  .auth-title {
+    letter-spacing: -0.06em;
+  }
+}
+
+/* ── Close ────────────────────────────────────────────────────
+   Always present, at every width. Below 720px the nav and the
+   Sign in pill are both hidden, and without this the page was a
+   card you could not dismiss: the logo and the burger were the
+   only exits, and neither of them says "leave". */
+
+.auth-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* 44px minimum target (V019). */
+  min-height: var(--target-min);
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(40, 40, 42, 0.82);
+  border: 1px solid var(--trust-border);
+  color: var(--trust-text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.auth-close:hover {
+  background: var(--pill-dark-hover);
+  color: #ffffff;
+}
+
+.auth-close:focus-visible {
+  outline: 3px solid #9ec5ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .auth-close {
+    /* Clear of the header row on a phone. */
+    top: -6px;
+  }
+}

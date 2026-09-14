@@ -1,0 +1,9 @@
+{
+  "//": "Type-checks the web app with browser globals available. The root project excludes apps/web because a single tsconfig cannot give one directory a different `lib`.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"]
+}

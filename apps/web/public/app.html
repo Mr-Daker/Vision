@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      No maximum-scale and no user-scalable=no: pinch zoom must keep working.
+      A viewport that blocks zoom is the single most common accessibility
+      failure in a mobile form, and this form has to work at 200%.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — report a public infrastructure problem</title>
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#report-form" data-i18n="app.skip_to_form"
+      >Skip to the report form</a
+    >
+
+    <header class="app-header">
+      <a class="brand" href="/" aria-label="Vision — home">
+        <img class="brand-mark" src="/assets/logo.png" alt="" width="480" height="271" />
+        <span data-i18n="app.name">Vision</span>
+      </a>
+      <div class="header-controls">
+        <label class="language-label" for="language-select" data-i18n="app.language_label">
+          Language
+        </label>
+        <select id="language-select" class="language-select"></select>
+        <button type="button" id="sign-out" class="button-quiet" hidden data-i18n="login.sign_out">
+          Sign out
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="app-column">
+        <h1 id="page-title" data-i18n="app.tagline">Report a problem with public infrastructure</h1>
+
+        <!-- Provider honesty: the text comes from the API's capability metadata,
+           never from a string in this page (V009). -->
+        <p id="capability-label" class="disclosure" role="note"></p>
+        <p id="translation-notice" class="disclosure" role="note" hidden></p>
+
+        <!-- Announcements. Both regions exist from first paint so a screen
+           reader is already observing them when the first update lands. -->
+        <p id="live-status" class="visually-hidden" role="status" aria-live="polite"></p>
+        <div id="error-summary" class="error-summary" role="alert" tabindex="-1" hidden></div>
+
+        <section
+          id="consent-panel"
+          class="panel"
+          aria-labelledby="consent-heading"
+          aria-describedby="consent-explain"
+          hidden
+        >
+          <h2 id="consent-heading" tabindex="-1" data-i18n="draft.consent_heading">
+            Keep unfinished reports on this device?
+          </h2>
+          <p id="consent-explain" data-i18n="draft.consent_explain"></p>
+          <div class="button-row">
+            <button type="button" id="consent-allow" class="button" data-i18n="draft.consent_allow">
+              Keep drafts on this device
+            </button>
+            <button
+              type="button"
+              id="consent-decline"
+              class="button-secondary"
+              data-i18n="draft.consent_decline"
+            >
+              Do not keep drafts
+            </button>
+          </div>
+        </section>
+
+        <section id="login-panel" class="panel" aria-labelledby="login-heading" hidden>
+          <h2 id="login-heading" tabindex="-1" data-i18n="login.heading">
+            Choose a demonstration account
+          </h2>
+          <p id="login-warning" class="disclosure" role="note"></p>
+          <div id="login-choices" class="button-column"></div>
+        </section>
+
+        <p id="signed-in-as" class="signed-in" hidden></p>
+        <p id="draft-restored" class="notice" role="note" hidden></p>
+
+        <form id="report-form" class="panel" novalidate hidden>
+          <fieldset class="field-group">
+            <legend id="location-heading" data-i18n="location.heading">
+              Where is the problem?
+            </legend>
+
+            <button type="button" id="use-location" class="button" data-i18n="location.use_device">
+              Use my current location
+            </button>
+
+            <div id="location-result" class="result" hidden>
+              <h3 id="location-result-heading"></h3>
+              <p id="location-result-note"></p>
+              <p id="location-accuracy"></p>
+              <p id="location-captured-at" class="muted"></p>
+              <p id="location-coordinates" class="muted"></p>
+              <p id="location-stale" class="warning" role="note" hidden></p>
+              <div class="button-row">
+                <button
+                  type="button"
+                  id="refresh-location"
+                  class="button-secondary"
+                  data-i18n="location.refresh"
+                >
+                  Capture the location again
+                </button>
+                <button
+                  type="button"
+                  id="clear-location"
+                  class="button-quiet"
+                  data-i18n="location.clear"
+                >
+                  Clear this location
+                </button>
+              </div>
+            </div>
+
+            <p id="location-error" class="field-error" role="note" hidden></p>
+
+            <button
+              type="button"
+              id="toggle-manual"
+              class="button-quiet"
+              aria-expanded="false"
+              aria-controls="manual-fields"
+              data-i18n="location.manual_toggle"
+            >
+              Enter the location myself instead
+            </button>
+
+            <div id="manual-fields" class="manual-fields" hidden>
+              <div class="field">
+                <label for="manual-lat" data-i18n="location.latitude">Latitude</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="manual-lat"
+                  autocomplete="off"
+                  aria-describedby="manual-lat-error"
+                />
+                <p id="manual-lat-error" class="field-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="manual-lon" data-i18n="location.longitude">Longitude</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="manual-lon"
+                  autocomplete="off"
+                  aria-describedby="manual-lon-error"
+                />
+                <p id="manual-lon-error" class="field-error" hidden></p>
+              </div>
+              <button
+                type="button"
+                id="apply-manual"
+                class="button-secondary"
+                data-i18n="location.manual_apply"
+              >
+                Use the location I entered
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="field-group">
+            <legend data-i18n="photo.heading">Add a photo (optional)</legend>
+            <div class="field">
+              <!-- The input is visually hidden and its label is the control you
+                 see and click. Order matters: the label follows the input so
+                 the focus ring can be drawn on it with a sibling selector,
+                 which is the only way a keyboard user gets any indication. -->
+              <input
+                type="file"
+                id="photo-input"
+                accept="image/jpeg,image/png"
+                aria-describedby="photo-hint photo-state"
+              />
+              <label for="photo-input" data-i18n="photo.choose">Choose a photo</label>
+              <p id="photo-hint" class="muted"></p>
+            </div>
+            <p id="photo-state" class="result-line" aria-live="polite"></p>
+            <!-- A native progress element carries its own role and value to
+               assistive technology; the text beside it is what gets spoken. -->
+            <progress id="photo-progress" max="100" value="0" hidden></progress>
+            <div class="button-row">
+              <button
+                type="button"
+                id="photo-retry"
+                class="button-secondary"
+                hidden
+                data-i18n="photo.retry"
+              >
+                Try the upload again
+              </button>
+              <button
+                type="button"
+                id="photo-remove"
+                class="button-quiet"
+                hidden
+                data-i18n="photo.remove"
+              >
+                Remove this photo
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="field-group">
+            <legend data-i18n="describe.heading">Describe the problem</legend>
+            <div class="field">
+              <label for="description" data-i18n="describe.text_label">What is wrong?</label>
+              <textarea
+                id="description"
+                rows="4"
+                maxlength="500"
+                aria-describedby="description-hint description-remaining"
+              ></textarea>
+              <p id="description-hint" class="muted"></p>
+              <p id="description-remaining" class="muted" aria-live="polite"></p>
+            </div>
+
+            <h3 id="voice-heading" data-i18n="describe.voice_heading">
+              Or record a short spoken description
+            </h3>
+            <!-- The text alternative is stated, not implied: everything the
+               voice control does can be done by typing above. -->
+            <p id="voice-alternative" class="muted" data-i18n="describe.voice_alternative"></p>
+            <div class="button-row">
+              <button
+                type="button"
+                id="voice-record"
+                class="button-secondary"
+                aria-describedby="voice-alternative voice-state"
+              >
+                <span data-i18n="describe.voice_record">Start recording</span>
+              </button>
+            </div>
+            <p id="voice-state" class="result-line" aria-live="polite"></p>
+            <progress id="voice-progress" max="100" value="0" hidden></progress>
+          </fieldset>
+
+          <section class="field-group" aria-labelledby="review-heading">
+            <h2 id="review-heading" data-i18n="review.heading">Check your report before sending</h2>
+            <dl id="review-list" class="review-list"></dl>
+            <p class="muted" data-i18n="review.no_categories_note"></p>
+            <p id="draft-state" class="muted" aria-live="polite"></p>
+            <p id="draft-expiry" class="muted" hidden></p>
+            <div class="button-row">
+              <button
+                type="button"
+                id="discard-draft"
+                class="button-quiet"
+                hidden
+                data-i18n="draft.discard"
+              >
+                Discard this draft
+              </button>
+            </div>
+            <button type="submit" id="submit-report" class="button button-primary">
+              <span data-i18n="review.submit">Send report</span>
+            </button>
+          </section>
+        </form>
+
+        <section id="receipt-panel" class="panel" aria-labelledby="receipt-heading" hidden>
+          <h2 id="receipt-heading" tabindex="-1" data-i18n="receipt.heading">
+            Your report was saved
+          </h2>
+          <p id="receipt-replayed" class="notice" role="note" hidden></p>
+          <dl class="review-list">
+            <dt data-i18n="receipt.reference">Reference</dt>
+            <dd id="receipt-reference"></dd>
+            <dt data-i18n="receipt.status">Status</dt>
+            <dd id="receipt-status"></dd>
+            <dt data-i18n="receipt.received_at">Received at</dt>
+            <dd id="receipt-received-at"></dd>
+          </dl>
+          <p id="receipt-saved-note"></p>
+          <!-- The caveat is part of the receipt, not a footnote: this is a
+             record of receipt, not an official acknowledgement or a promise
+             of repair (V002). -->
+          <p id="receipt-caveat" class="disclosure"></p>
+          <button
+            type="button"
+            id="report-another"
+            class="button"
+            data-i18n="receipt.report_another"
+          >
+            Report another problem
+          </button>
+        </section>
+
+        <!-- V030: tracking and discovery.
+           "Your reports" is bound to the session, not to a saved link, so a
+           citizen who closes the tab can still come back. Discovery is public
+           and deliberately bounded: the applied radius and page size are shown
+           so an empty list cannot be read as an all-clear. -->
+        <section id="tracking-panel" class="panel" aria-labelledby="tracking-heading" hidden>
+          <h2 id="tracking-heading" data-i18n="tracking.heading">Your reports</h2>
+          <form id="receipt-lookup-form" class="lookup-block" novalidate>
+            <h3 id="receipt-lookup-heading" data-i18n="lookup.heading">Find a saved receipt</h3>
+            <p id="receipt-lookup-hint" class="muted" data-i18n="lookup.hint">
+              Enter the receipt reference shown after you sent your report. Only receipts belonging
+              to this signed-in account can be opened.
+            </p>
+            <div class="field">
+              <label for="receipt-lookup-reference" data-i18n="lookup.label"
+                >Receipt reference</label
+              >
+              <div class="lookup-row">
+                <input
+                  type="text"
+                  id="receipt-lookup-reference"
+                  autocomplete="off"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  aria-describedby="receipt-lookup-hint receipt-lookup-error"
+                />
+                <button type="submit" id="receipt-lookup-submit" class="button-secondary">
+                  <span data-i18n="lookup.submit">Find receipt</span>
+                </button>
+              </div>
+              <p id="receipt-lookup-error" class="field-error" role="note" hidden></p>
+            </div>
+
+            <article
+              id="receipt-lookup-result"
+              class="lookup-result"
+              aria-labelledby="receipt-lookup-result-heading"
+              hidden
+            >
+              <h3 id="receipt-lookup-result-heading" tabindex="-1" data-i18n="lookup.found">
+                Saved receipt
+              </h3>
+              <dl class="receipt-fields">
+                <dt data-i18n="receipt.reference">Reference</dt>
+                <dd id="receipt-lookup-result-reference"></dd>
+                <dt data-i18n="receipt.status">Status</dt>
+                <dd id="receipt-lookup-result-status"></dd>
+                <dt data-i18n="receipt.received_at">Received at</dt>
+                <dd id="receipt-lookup-result-received-at"></dd>
+              </dl>
+              <p id="receipt-lookup-result-replayed" class="notice" role="note" hidden></p>
+              <p class="disclosure" data-i18n="receipt.not_a_promise"></p>
+            </article>
+          </form>
+
+          <p id="tracking-empty" class="notice" role="note" hidden data-i18n="tracking.none">
+            You have not sent a report from this device yet.
+          </p>
+          <ul id="tracking-list" class="record-list"></ul>
+          <button
+            type="button"
+            id="tracking-refresh"
+            class="button-secondary"
+            data-i18n="tracking.refresh"
+          >
+            Refresh your reports
+          </button>
+        </section>
+
+        <section id="discovery-panel" class="panel" aria-labelledby="discovery-heading">
+          <h2 id="discovery-heading" data-i18n="discovery.heading">Problems reported nearby</h2>
+          <div class="field">
+            <label for="discovery-category" data-i18n="discovery.filter_label">Category</label>
+            <select id="discovery-category">
+              <option value="" data-i18n="discovery.filter_all">All categories</option>
+            </select>
+            <p id="discovery-category-language" class="disclosure" hidden></p>
+          </div>
+          <button type="button" id="discovery-search" class="button" data-i18n="discovery.search">
+            Search near my location
+          </button>
+          <p id="discovery-bounds" class="disclosure"></p>
+          <p id="discovery-empty" class="notice" role="note" hidden></p>
+
+          <section
+            id="discovery-map-shell"
+            class="coordinate-map-shell"
+            aria-labelledby="discovery-map-heading"
+            hidden
+          >
+            <div class="coordinate-map-heading-row">
+              <h3 id="discovery-map-heading" data-i18n="discovery.map_heading">Nearby issue map</h3>
+              <span class="coordinate-map-north" aria-hidden="true">N ↑</span>
+            </div>
+            <p id="discovery-map-note" class="muted" data-i18n="discovery.map_note">
+              Approximate coordinate map. Issue markers use rounded public locations; the centre is
+              your search location. This is not a street map.
+            </p>
+            <div
+              id="discovery-map"
+              class="coordinate-map"
+              role="region"
+              aria-labelledby="discovery-map-heading"
+              aria-describedby="discovery-map-note discovery-map-summary"
+            >
+              <span class="coordinate-map-centre" aria-hidden="true"></span>
+              <div id="discovery-map-markers"></div>
+            </div>
+            <div class="coordinate-map-key" aria-hidden="true">
+              <span
+                ><i class="coordinate-map-key-centre"></i
+                ><span data-i18n="discovery.map_key_centre">Search centre</span></span
+              >
+              <span
+                ><i class="coordinate-map-key-issue"></i
+                ><span data-i18n="discovery.map_key_issue">Reported issue</span></span
+              >
+            </div>
+            <p id="discovery-map-summary" class="disclosure" role="status"></p>
+          </section>
+
+          <ul id="discovery-list" class="record-list"></ul>
+          <button
+            type="button"
+            id="discovery-more"
+            class="button-secondary"
+            hidden
+            data-i18n="discovery.load_more"
+          >
+            Show more
+          </button>
+        </section>
+
+        <section id="detail-panel" class="panel" aria-labelledby="detail-heading" hidden>
+          <h2 id="detail-heading" tabindex="-1" data-i18n="detail.heading">Issue details</h2>
+          <dl class="receipt-fields">
+            <dt data-i18n="detail.opened">First opened</dt>
+            <dd id="detail-opened"></dd>
+            <dt data-i18n="detail.last_evidence">Most recent evidence</dt>
+            <dd id="detail-last-evidence"></dd>
+          </dl>
+          <p id="detail-participants"></p>
+          <p id="detail-entries"></p>
+
+          <h3 data-i18n="detail.evidence_heading">Evidence attached to this issue</h3>
+          <ul id="detail-evidence" class="record-list"></ul>
+
+          <h3 data-i18n="detail.history_heading">Infrastructure history</h3>
+          <p id="detail-history-note" class="disclosure"></p>
+          <ul id="detail-history" class="record-list"></ul>
+
+          <p id="detail-assignment" class="notice" role="note">
+            <span data-i18n="detail.not_live">Not yet connected to a real workflow</span>
+          </p>
+
+          <!--
+            V035 — the repair claim, and the citizen's answer to it.
+
+            Inside the issue details panel rather than on a page of its own,
+            because it is the same issue at a later stage. Every element is
+            hidden until the server says there is something to show, so a
+            reader of an issue with no claim sees the panel exactly as before.
+
+            The two answer buttons are equal in weight. Hedging the
+            disagreeing one teaches the reader that saying "it is not fixed" is
+            the difficult path, which is the same mistake V031 refused to make
+            with the duplicate question.
+          -->
+          <section id="detail-resolution" aria-labelledby="resolution-heading" hidden>
+            <h3 id="resolution-heading" data-i18n="resolution.heading">Repair claim</h3>
+            <p id="resolution-state" class="result-line"></p>
+            <p id="resolution-progress" class="muted" hidden></p>
+
+            <blockquote id="resolution-claim" hidden>
+              <strong data-i18n="resolution.claim_label">What the department says was done</strong>
+              <span id="resolution-description"></span>
+            </blockquote>
+
+            <ul id="resolution-evidence" class="record-list"></ul>
+
+            <!-- Never behind a toggle: this is the sentence that stops a
+                 photograph being read as a safety certificate. -->
+            <p id="resolution-caveat" class="disclosure"></p>
+            <p id="resolution-inspection" class="disclosure" hidden></p>
+
+            <div id="resolution-respond" hidden>
+              <div class="field">
+                <label for="resolution-comment" data-i18n="resolution.comment_label"
+                  >If it is not fixed, say what is still wrong</label
+                >
+                <textarea
+                  id="resolution-comment"
+                  rows="3"
+                  maxlength="600"
+                  aria-describedby="resolution-comment-hint"
+                ></textarea>
+                <p id="resolution-comment-hint" class="muted" data-i18n="resolution.comment_hint">
+                  Required if you disagree, so the crew knows what to look at.
+                </p>
+              </div>
+              <div class="button-row">
+                <button
+                  type="button"
+                  id="resolution-confirm"
+                  class="button button-primary"
+                  data-i18n="resolution.confirm"
+                >
+                  It looks fixed
+                </button>
+                <button
+                  type="button"
+                  id="resolution-dispute"
+                  class="button-secondary"
+                  data-i18n="resolution.dispute"
+                >
+                  It is not fixed
+                </button>
+              </div>
+            </div>
+
+            <div id="resolution-reopen" hidden>
+              <div class="field">
+                <label for="reopen-reason" data-i18n="resolution.reopen_label"
+                  >Why should this be reopened?</label
+                >
+                <textarea id="reopen-reason" rows="3" maxlength="600"></textarea>
+              </div>
+              <div class="button-row">
+                <button
+                  type="button"
+                  id="resolution-reopen-submit"
+                  class="button-secondary"
+                  data-i18n="resolution.reopen"
+                >
+                  Reopen this issue
+                </button>
+              </div>
+            </div>
+
+            <p id="resolution-blocked" class="muted" hidden></p>
+            <p id="resolution-error" class="field-error" role="alert" hidden></p>
+
+            <h4 data-i18n="resolution.history_heading">What has happened so far</h4>
+            <ul id="resolution-history" class="record-list"></ul>
+          </section>
+
+          <h3 data-i18n="detail.disclosures_heading">What is not confirmed</h3>
+          <ul id="detail-disclosures" class="record-list"></ul>
+
+          <button type="button" id="detail-close" class="button-quiet" data-i18n="detail.close">
+            Close these details
+          </button>
+        </section>
+
+        <!--
+        The citizen confirm/reject question (V031).
+
+        One question, two equal choices. The reject button carries no warning
+        and no confirmation step: hedging it teaches the reader that
+        disagreeing is the difficult path, and the question stops being real.
+      -->
+        <section id="candidate-panel" class="panel" aria-labelledby="candidate-heading" hidden>
+          <h2 id="candidate-heading" tabindex="-1" data-i18n="candidate.heading">
+            Is this the same problem?
+          </h2>
+          <p id="candidate-question"></p>
+          <p id="candidate-alias" class="notice" role="note" hidden></p>
+
+          <dl class="receipt-fields">
+            <dt data-i18n="candidate.existing">Existing report</dt>
+            <dd id="candidate-summary"></dd>
+            <dt data-i18n="candidate.opened">First reported</dt>
+            <dd id="candidate-opened"></dd>
+            <dt data-i18n="candidate.distance">Distance</dt>
+            <dd id="candidate-distance"></dd>
+          </dl>
+          <p id="candidate-participants"></p>
+
+          <h3 data-i18n="candidate.previews_heading">Photographs on the existing report</h3>
+          <ul id="candidate-previews" class="record-list"></ul>
+
+          <h3 data-i18n="candidate.choices_heading">What each answer does</h3>
+          <ul class="record-list">
+            <li id="candidate-confirm-consequence"></li>
+            <li id="candidate-reject-consequence"></li>
+          </ul>
+
+          <div class="button-row">
+            <button type="button" id="candidate-confirm" class="button"></button>
+            <button type="button" id="candidate-reject" class="button"></button>
+          </div>
+          <p id="candidate-result" class="notice" role="status" hidden></p>
+          <button
+            type="button"
+            id="candidate-close"
+            class="button-quiet"
+            data-i18n="candidate.close"
+          >
+            Answer this later
+          </button>
+        </section>
+      </div>
+
+      <!-- Evidence rail (V019 presentation).
+
+           A second view of state the form already holds, never the only one:
+           every value here also appears in the flow on the left, which is what
+           lets the rail fold away below 1100px without anything being lost.
+           That rule is also why the instrument's SVG is aria-hidden — the
+           readout beneath it carries the same coordinates in text.
+
+           Hierarchy is deliberate and not uniform. Location and evidence are
+           the hero cards because they are what the citizen is actually
+           producing; nearby and the pipeline are quieter, because they are
+           context rather than the task. -->
+      <aside class="evidence-rail" id="evidence-rail" aria-label="Report status">
+        <article class="rail-card rail-card-hero" id="rail-location" data-state="neutral">
+          <h2 class="rail-label" id="rail-location-label" data-i18n="rail.location_label">
+            Location Evidence
+          </h2>
+          <div class="rail-figure" id="rail-location-figure" hidden></div>
+          <p class="rail-empty" id="rail-location-empty" data-i18n="rail.location_empty">
+            Waiting for location
+          </p>
+          <dl class="rail-readout" id="rail-location-readout" hidden>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_coordinates">Coordinates</dt>
+              <dd id="rail-location-coords"></dd>
+            </div>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_accuracy">Accuracy</dt>
+              <dd id="rail-location-accuracy"></dd>
+            </div>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_source">Source</dt>
+              <dd id="rail-location-source"></dd>
+            </div>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_captured">Captured</dt>
+              <dd id="rail-location-time"></dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="rail-card rail-card-hero" id="rail-evidence" data-state="neutral">
+          <h2 class="rail-label" id="rail-evidence-label" data-i18n="rail.evidence_label">
+            Evidence
+          </h2>
+          <div class="rail-figure rail-figure-photo" id="rail-evidence-figure" hidden>
+            <img id="rail-evidence-image" alt="" />
+          </div>
+          <p class="rail-empty" id="rail-evidence-empty" data-i18n="rail.evidence_empty">
+            Add evidence to analyse
+          </p>
+          <dl class="rail-readout" id="rail-evidence-readout" hidden>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_file">File</dt>
+              <dd id="rail-evidence-name"></dd>
+            </div>
+            <div class="rail-row">
+              <dt data-i18n="rail.field_size">Size</dt>
+              <dd id="rail-evidence-size"></dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="rail-card rail-card-quiet" id="rail-nearby" data-state="neutral">
+          <h2 class="rail-label" data-i18n="rail.nearby_label">Nearby</h2>
+          <p class="rail-empty" id="rail-nearby-empty" data-i18n="rail.nearby_empty">
+            Locate to see nearby reports
+          </p>
+          <p class="rail-figure-count" id="rail-nearby-count" hidden></p>
+        </article>
+
+        <!-- Every stage below is a state that exists in
+             packages/domain/src/transitions.ts. "Verified" is deliberately
+             absent: no such state exists, and the product says elsewhere that a
+             repair claim is not a verified resolution. -->
+        <article class="rail-card rail-card-quiet" id="rail-pipeline" data-state="resolved">
+          <h2 class="rail-label" data-i18n="rail.pipeline_label">Pipeline</h2>
+          <ol class="rail-pipeline">
+            <li class="rail-stage is-current" data-stage="captured">
+              <span data-i18n="rail.stage_captured">Captured</span>
+            </li>
+            <li class="rail-stage" data-stage="checked">
+              <span data-i18n="rail.stage_checked">Checked</span>
+            </li>
+            <li class="rail-stage" data-stage="matched">
+              <span data-i18n="rail.stage_matched">Matched</span>
+            </li>
+            <li class="rail-stage" data-stage="routed">
+              <span data-i18n="rail.stage_routed">Routed</span>
+            </li>
+          </ol>
+          <p class="rail-note" id="rail-pipeline-note" data-i18n="rail.pipeline_note"></p>
+        </article>
+      </aside>
+    </main>
+
+    <footer class="app-footer">
+      <p id="footer-disclosure" class="disclosure"></p>
+    </footer>
+  </body>
+</html>

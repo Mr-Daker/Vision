@@ -1,0 +1,15 @@
+{
+  "//": "Emits the browser-safe shared packages the web app imports. There is no bundler: index.html's import map points '@vision/contracts' and '@vision/domain' at this output. `npm run check:browser-safe` is what keeps them importable here.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rewriteRelativeImportExtensions": true,
+    "sourceMap": true,
+    "declaration": false,
+    "types": [],
+    "rootDir": "../../packages",
+    "outDir": "public/js/vendor"
+  },
+  "include": ["../../packages/contracts/src/**/*.ts", "../../packages/domain/src/**/*.ts"],
+  "exclude": ["../../packages/*/src/**/*.test.ts", "../../packages/*/src/**/*.dbtest.ts"]
+}

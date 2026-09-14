@@ -1,0 +1,10 @@
+{
+  "name": "@vision/config-packs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned jurisdiction, locale, taxonomy and routing configuration packs (V001 Appendix G).",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

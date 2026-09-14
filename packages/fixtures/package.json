@@ -1,0 +1,10 @@
+{
+  "name": "@vision/fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reviewed fixture corpus and sealed evaluation holdout (V011).",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

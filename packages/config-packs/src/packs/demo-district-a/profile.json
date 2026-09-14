@@ -1,0 +1,67 @@
+{
+  "jurisdiction_profile_id": "demo-district-a",
+  "provenance": "team_created_synthetic",
+  "label": "Demo District A (synthetic)",
+  "level_scheme": "demo.generic.v1",
+  "directory_version": "demo-jurisdiction.v1",
+  "notice": "SYNTHETIC boundaries invented for demonstration. They correspond to no real administrative area and no external boundary dataset was ingested.",
+  "nodes": [
+    {
+      "internal_code": "DDA",
+      "level_code": "district",
+      "parent_internal_code": null,
+      "label": "Demo District A (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [74.5, 16.8],
+            [74.65, 16.8],
+            [74.65, 16.92],
+            [74.5, 16.92],
+            [74.5, 16.8]
+          ]
+        ]
+      ]
+    },
+    {
+      "internal_code": "DDA-B1",
+      "level_code": "block",
+      "parent_internal_code": "DDA",
+      "label": "Demo Block 1 (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [74.5, 16.8],
+            [74.58, 16.8],
+            [74.58, 16.92],
+            [74.5, 16.92],
+            [74.5, 16.8]
+          ]
+        ]
+      ]
+    },
+    {
+      "internal_code": "DDA-B2",
+      "level_code": "block",
+      "parent_internal_code": "DDA",
+      "label": "Demo Block 2 (synthetic)",
+      "external_source_code": null,
+      "effective_from": "2026-01-01T00:00:00Z",
+      "boundary_multipolygon": [
+        [
+          [
+            [74.58, 16.8],
+            [74.65, 16.8],
+            [74.65, 16.92],
+            [74.58, 16.92],
+            [74.58, 16.8]
+          ]
+        ]
+      ]
+    }
+  ]
+}

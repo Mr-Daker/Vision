@@ -1,0 +1,104 @@
+/* ============================================================
+   Shared design tokens (landing, sign in, citizen app).
+   Loaded before every page's own stylesheet, so a page can
+   override what it must and inherit everything else.
+
+   What lives here is the brand language the three pages share:
+   type, shape, shadow and the dark chrome. What deliberately does
+   NOT live here is the citizen app's functional colour palette —
+   those pairs carry measured contrast ratios and `contrast.test.ts`
+   asserts them against app.css. Moving them would put a WCAG
+   guarantee behind an indirection nobody is testing.
+   ============================================================ */
+
+/* ── Fonts, all served from this origin ────────────────────
+   Self-hosted rather than loaded from CDNs, for two reasons that
+   both matter here:
+
+     1. The API sends a strict Content-Security-Policy —
+        `style-src 'self'`, `media-src 'self'`, `default-src 'self'`.
+        Third-party stylesheets, font files and the background
+        video were all blocked by it, silently: the page rendered
+        in a fallback face on a black rectangle with no error.
+        Self-hosting keeps that policy intact instead of widening
+        it for the whole application.
+     2. A demonstration should not depend on the venue's wifi
+        reaching three CDNs.
+
+   Inter is SIL OFL 1.1. BubbledotICG-FinePos comes from
+   OnlineWebFonts and is licensed CC BY 4.0, which requires
+   attribution — see fonts/ATTRIBUTION.txt, which ships with it. */
+
+/* One variable file per subset covers 400–600; Google serves the same
+   binary for each weight, so splitting them would just duplicate it. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("fonts/inter-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("fonts/inter-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "BubbledotICG-FinePos";
+  src: url("fonts/BubbledotICG-FinePos.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fallback display face. Absent from the repository; the stack falls through
+   to the face above, then to monospace, so nothing depends on it. */
+@font-face {
+  font-family: "Geist Pixel Circle";
+  src: url("fonts/GeistPixel-Circle.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── Type ──────────────────────────────────────────────────
+     Inter leads, and "Noto Sans Devanagari" stays in the stack:
+     Inter has no Devanagari coverage, so dropping it would leave
+     every Marathi string to a system fallback chosen at random. */
+  --font-sans:
+    "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", "Noto Sans Devanagari",
+    sans-serif;
+
+  /* Latin-only by nature — a dot-matrix face with no Devanagari — so it is
+     used for display type and glyphs, never for body text that may be
+     translated. */
+  --font-display: "BubbledotICG-FinePos", "Geist Pixel Circle", monospace;
+
+  /* ── Brand chrome ─────────────────────────────────────────── */
+  --brand: #0b5c3f;
+  --pill-dark: #28282a;
+  --pill-dark-hover: #323234;
+  --sign-in-text: #c8c8c8;
+  --nav-text: #2e2e2e;
+  --nav-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+
+  /* ── Shape ─────────────────────────────────────────────────
+     One pill radius across the three pages. The app's own
+     `--radius` stays for panels and inputs that are not pills. */
+  --radius-pill: 999px;
+
+  /* The minimum touch target the interface holds itself to (V019). */
+  --target-min: 2.75rem;
+}

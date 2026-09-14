@@ -1,0 +1,1246 @@
+/* ============================================================
+   Public Intelligence.
+
+   The landing page at roughly two thirds intensity: the same ground, grid and
+   type, but denser, because this is an analytical surface rather than a form.
+   Tokens and fonts come from theme.css, which all pages load.
+
+   The graph is the page. Everything else — rail, filters, breadcrumb — is
+   deliberately quieter than it, and there are no decorative cards.
+   ============================================================ */
+
+:root {
+  --pi-ink: #ffffff;
+  --pi-muted: #9ea3ab;
+  --pi-dim: #6b7078;
+  --pi-line: rgba(255, 255, 255, 0.1);
+  --pi-glass: rgba(22, 23, 27, 0.62);
+  --pi-glass-edge: rgba(255, 255, 255, 0.11);
+  --pi-rail: 21rem;
+
+  /* Severity is one hue stepped in intensity, not four competing colours. A
+     four-colour ramp across 428 nodes is confetti; this keeps the country view
+     readable and still separates critical from the rest at a glance. */
+  --pi-sev-critical: #ff8a6b;
+  --pi-sev-high: #f0b06a;
+  --pi-sev-medium: #8d93a0;
+  --pi-sev-low: #545a64;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* This file sets `display` on elements that are also toggled with the `hidden`
+   attribute, and an author rule beats the browser's own `[hidden]`. Without
+   this the empty-state's "Clear filters" button floated over the graph at all
+   times. Same rule the citizen app carries, for the same reason. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  background: #000000;
+  color: var(--pi-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+/* ── Ground ───────────────────────────────────────────────────
+   Fixed behind everything: two gradients in the landing wave's colours, a
+   coordinate graticule, and nothing else. Drawn in CSS, so it downloads
+   nothing and works with no network at a venue. */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 42rem at 18% 4%, rgba(150, 128, 198, 0.2), transparent 66%),
+    radial-gradient(52rem 38rem at 84% 92%, rgba(206, 122, 104, 0.17), transparent 68%);
+  animation: pi-drift 48s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 72px);
+}
+
+@keyframes pi-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-1.5%, -1.2%, 0);
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 20;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.pi-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  padding: clamp(0.85rem, 2vw, 1.25rem) clamp(1rem, 3vw, 2rem);
+}
+
+.pi-brand {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  height: 2.5rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: var(--nav-shadow);
+}
+
+.pi-brand img {
+  display: block;
+  width: auto;
+  height: 1.7rem;
+}
+
+.pi-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pi-search {
+  position: relative;
+  margin-left: auto;
+  width: min(22rem, 40vw);
+}
+
+.pi-search-input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--pi-glass-edge);
+  border-radius: 999px;
+  background: var(--pi-glass);
+  color: var(--pi-ink);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.pi-search-input::placeholder {
+  color: var(--pi-dim);
+}
+
+.pi-search-results {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  left: 0;
+  z-index: 12;
+  overflow: hidden;
+  border: 1px solid var(--pi-glass-edge);
+  border-radius: 0.9rem;
+  background: rgba(14, 15, 18, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.search-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-bottom: 1px solid var(--pi-line);
+  background: none;
+  color: var(--pi-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search-result:last-child {
+  border-bottom: 0;
+}
+
+.search-result:hover,
+.search-result:focus-visible {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.search-result-hint {
+  color: var(--pi-dim);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* ── Disclosure ───────────────────────────────────────────────
+   Part of the composition rather than a footnote. */
+
+.pi-disclosure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 clamp(1rem, 3vw, 2rem);
+  padding: 0.5rem 0.85rem;
+  border: 1px solid rgba(240, 176, 106, 0.26);
+  border-radius: 0.65rem;
+  background: rgba(240, 176, 106, 0.07);
+  color: #e8d3b4;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.pi-disclosure-mark {
+  flex-shrink: 0;
+  color: var(--pi-sev-high);
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+/* ── Breadcrumb ──────────────────────────────────────────── */
+
+.pi-breadcrumb {
+  padding: clamp(0.6rem, 1.6vw, 1rem) clamp(1rem, 3vw, 2rem) 0;
+}
+
+.crumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crumb-item + .crumb-item::before {
+  content: "›";
+  margin: 0 0.45rem 0 0.3rem;
+  color: var(--pi-dim);
+}
+
+.crumb-link,
+.crumb-current {
+  font-size: 0.85rem;
+  letter-spacing: -0.01em;
+}
+
+.crumb-link {
+  min-height: 2rem;
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: var(--pi-muted);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.crumb-link:hover,
+.crumb-link:focus-visible {
+  color: var(--pi-ink);
+}
+
+.crumb-current {
+  color: var(--pi-ink);
+  font-weight: 500;
+}
+
+/* ── Main: graph and rail ────────────────────────────────── */
+
+.pi-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  min-height: 0;
+  padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1rem, 3vw, 2rem);
+}
+
+/* Every child occupies the same cell rather than its own row: the loading
+   line, the graph, the phone list and the empty state are alternatives, not a
+   stack. Rows made the stage as tall as all of them together, which pushed the
+   graph past the bottom of the screen. */
+.pi-stage {
+  position: relative;
+  display: grid;
+  grid-template-areas: "stage";
+  place-items: center;
+  min-height: 0;
+}
+
+.pi-stage > * {
+  grid-area: stage;
+  max-height: 100%;
+}
+
+.pi-graph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Fills its box and lets SVG do the fitting. The viewBox is square and the
+   default `preserveAspectRatio` is `xMidYMid meet`, so the ring stays circular
+   and centred inside a rectangle without any CSS aspect trickery — an earlier
+   `aspect-ratio: 1/1` with `height: 100%` did not resolve against the grid
+   area and left an 848px graph in a 608px cell. */
+/* Absolutely positioned so its box is definite.
+   An SVG with a viewBox carries an intrinsic aspect ratio, and `height: 100%`
+   quietly fell back to it when the percentage chain did not resolve — at
+   1440x900 that produced a 1008px-tall graph in a 648px stage and pushed three
+   states below the fold. `inset: 0` cannot fall back to anything.
+   `overflow: visible` so a node's label may sit outside the frame; the ring is
+   inset from the edge to leave room for it. */
+.hv-svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pi-loading,
+.pi-status {
+  margin: 0;
+  color: var(--pi-muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.pi-empty {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.pi-empty-title {
+  margin: 0;
+  color: var(--pi-muted);
+}
+
+.pi-button {
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Nodes ───────────────────────────────────────────────────
+   A node is a disc, a severity arc, a count and a label. Transform and opacity
+   only, so the browser animates without re-running layout. */
+
+/* Only transform and opacity are animated anywhere in this file. They are the
+   two properties a browser can composite without re-running layout, which is
+   what keeps a dozen nodes moving at once smooth. */
+.hv-node {
+  cursor: pointer;
+  /* Promotes the node to its own layer for the duration of a move. Without it
+     the browser re-rasterises the whole graph on every frame of a drill-down. */
+  will-change: transform, opacity;
+  transition:
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease-out;
+}
+
+.hv-node.is-focus {
+  cursor: default;
+}
+
+/* Departing nodes travel outward along their own bearing. Fading them in place
+   read as the data dissolving; moving them out says they are still there, just
+   not the level being looked at. Accelerating easing, because they are leaving
+   rather than arriving. */
+.hv-node.is-leaving {
+  transition:
+    transform 0.28s cubic-bezier(0.55, 0, 1, 0.45),
+    opacity 0.24s ease-in;
+}
+
+.hv-node.is-dimmed {
+  opacity: 0.24;
+}
+
+/* Carries the scale. `fill-box` is load-bearing: SVG defaults to `view-box`,
+   which would scale each node about the top-left of the whole frame and fling
+   it across the screen instead of growing it in place. */
+.hv-shape {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hv-disc {
+  fill: rgba(255, 255, 255, 0.045);
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
+}
+
+.hv-node.is-focus .hv-disc {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: rgba(255, 255, 255, 0.55);
+}
+
+.hv-node:hover .hv-disc,
+.hv-node:focus-visible .hv-disc {
+  fill: rgba(255, 255, 255, 0.12);
+  stroke: rgba(255, 255, 255, 0.75);
+}
+
+/* The severity arc: how much of this node is critical or high. One encoding,
+   one hue, sitting outside the disc so it never fights the count inside it. */
+.hv-arc {
+  fill: none;
+  stroke: var(--pi-sev-high);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.9;
+  transition: stroke 0.3s ease;
+}
+
+.hv-arc[data-weight="critical"] {
+  stroke: var(--pi-sev-critical);
+}
+
+.hv-value {
+  fill: var(--pi-ink);
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Sits below the disc and moves with its edge. Outside `.hv-shape` on
+   purpose: scaling type with the circle would make a small node's label
+   unreadable and the focus node's enormous. */
+.hv-label {
+  fill: var(--pi-muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+  transition:
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    fill 0.3s ease;
+}
+
+.hv-node.is-focus .hv-label {
+  fill: var(--pi-ink);
+  font-size: 13px;
+}
+
+.hv-node:hover .hv-label,
+.hv-node:focus-visible .hv-label {
+  fill: var(--pi-ink);
+}
+
+/* A level too dense to label. Every title is still in the rail and in each
+   node's accessible name; this only stops eleven of them being drawn over one
+   another at once. */
+.hv-nodes.is-crowded .hv-node:not(.is-focus) .hv-label {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hv-nodes.is-crowded .hv-node:hover .hv-label,
+.hv-nodes.is-crowded .hv-node:focus-visible .hv-label {
+  opacity: 1;
+}
+
+.hv-node:focus {
+  outline: none;
+}
+
+/* Focus has to be visible on an SVG group, where an outline draws around the
+   whole bounding box. A ring on the disc is clearer and follows the shape. */
+.hv-node:focus-visible .hv-disc {
+  stroke: var(--focus, #9ec5ff);
+  stroke-width: 3;
+}
+
+/* Faded in behind the arriving nodes rather than replaced outright — six
+   spokes appearing instantly while the nodes are still travelling was the most
+   visible jump in the whole sequence. */
+.hv-links {
+  transition: opacity 0.45s ease-out;
+}
+
+.hv-links.is-dimmed {
+  opacity: 0.3;
+}
+
+.hv-link {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+/* ── Rail ────────────────────────────────────────────────── */
+
+.pi-rail {
+  display: none;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.1rem 1.2rem 1.3rem;
+  border: 1px solid var(--pi-glass-edge);
+  border-radius: 1rem;
+  background: var(--pi-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.rail-eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rail-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.rail-metrics {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rail-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--pi-line);
+}
+
+.rail-metric-value {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.rail-metric-label {
+  color: var(--pi-muted);
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.rail-section-title {
+  margin: 0 0 0.55rem;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rail-bars {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.rail-bar-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.rail-bar-value {
+  color: var(--pi-muted);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+}
+
+.rail-bar-track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.rail-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rail-rank {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail-rank-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+}
+
+.rail-rank-index {
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+}
+
+.rail-rank-name {
+  flex: 1;
+}
+
+.rail-rank-count {
+  color: var(--pi-muted);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+}
+
+.rail-breakdown {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail-breakdown-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+}
+
+.rail-breakdown-count {
+  min-width: 1.5rem;
+  color: var(--pi-ink);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
+.rail-breakdown-label {
+  color: var(--pi-muted);
+}
+
+.rail-note-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.rail-note-text {
+  margin: 0.15rem 0 0;
+  color: var(--pi-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.rail-severity {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.rail-severity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--pi-sev-medium);
+  font-size: 0.8rem;
+}
+
+.rail-severity-row[data-severity="critical"] {
+  border-left-color: var(--pi-sev-critical);
+}
+
+.rail-severity-row[data-severity="high"] {
+  border-left-color: var(--pi-sev-high);
+}
+
+.rail-severity-row[data-severity="low"] {
+  border-left-color: var(--pi-sev-low);
+}
+
+.rail-severity-key {
+  color: var(--pi-muted);
+}
+
+.rail-severity-count {
+  font-family: var(--font-display);
+}
+
+/* ── Filters ─────────────────────────────────────────────────
+   Secondary by construction: below the graph, small, quiet. */
+
+.pi-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.4rem;
+  padding: 0.75rem clamp(1rem, 3vw, 2rem) clamp(1rem, 2vw, 1.5rem);
+}
+
+.pi-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pi-filter-legend {
+  margin-right: 0.25rem;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pi-chip {
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--pi-line);
+  border-radius: 999px;
+  background: none;
+  color: var(--pi-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.pi-chip:hover {
+  color: var(--pi-ink);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.pi-chip[aria-pressed="true"] {
+  border-color: transparent;
+  background: #ffffff;
+  color: #000000;
+}
+
+.pi-clear {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--pi-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ── Mobile hierarchy navigator ──────────────────────────── */
+
+.pi-mobile {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  align-self: start;
+}
+
+.ml-head {
+  margin-bottom: 0.35rem;
+}
+
+.ml-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.ml-count {
+  margin: 0.1rem 0 0;
+  color: var(--pi-muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+}
+
+.ml-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--pi-glass-edge);
+  border-radius: 0.8rem;
+  background: var(--pi-glass);
+  color: var(--pi-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ml-row-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.ml-row-gauge {
+  width: 3rem;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ml-row-gauge-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pi-sev-high);
+}
+
+.ml-row-meta {
+  min-width: 2.5rem;
+  color: var(--pi-muted);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+/* ── Issue drawer ────────────────────────────────────────── */
+
+.pi-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 14;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.pi-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  width: min(29rem, 100vw);
+  border-left: 1px solid var(--pi-glass-edge);
+  background: rgba(11, 12, 15, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: translateX(100%);
+  transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pi-drawer.is-open {
+  transform: none;
+}
+
+.pi-drawer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem 0.6rem;
+  border-bottom: 1px solid var(--pi-line);
+}
+
+.pi-drawer-eyebrow {
+  margin: 0;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pi-drawer-close {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  color: var(--pi-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pi-drawer-close:hover {
+  color: var(--pi-ink);
+}
+
+.pi-drawer-body {
+  flex: 1;
+  padding: 1.1rem 1.2rem 2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.detail-severity {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  color: var(--pi-sev-medium);
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.detail-severity[data-severity="critical"] {
+  color: var(--pi-sev-critical);
+}
+
+.detail-severity[data-severity="high"] {
+  color: var(--pi-sev-high);
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.detail-place {
+  margin: 0.35rem 0 0;
+  color: var(--pi-muted);
+  font-size: 0.85rem;
+}
+
+.detail-id {
+  margin: 0.2rem 0 0;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+}
+
+.detail-description {
+  margin: 0.9rem 0 0;
+  color: #d7dae0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.detail-block {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pi-line);
+}
+
+.detail-block-title {
+  margin: 0 0 0.6rem;
+  color: var(--pi-dim);
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detail-fields {
+  margin: 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--pi-line);
+  font-size: 0.8rem;
+}
+
+.detail-row:first-child {
+  border-top: 0;
+}
+
+.detail-key {
+  color: var(--pi-muted);
+}
+
+.detail-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.detail-figure {
+  margin-bottom: 0.7rem;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.detail-caveat {
+  margin: 0.6rem 0 0;
+  color: var(--pi-dim);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.detail-department {
+  margin: 0.8rem 0 0;
+  font-size: 0.85rem;
+}
+
+.detail-pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detail-stage {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--pi-line);
+  border-radius: 999px;
+  color: var(--pi-dim);
+  font-size: 0.72rem;
+}
+
+.detail-stage.is-done {
+  color: var(--pi-muted);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.detail-stage.is-current {
+  border-color: transparent;
+  background: #ffffff;
+  color: #000000;
+}
+
+/* The citizen app's instrument, reused. Only the palette is restated here. */
+.sp-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sp-grid {
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  opacity: 0.18;
+}
+
+.sp-grid-label {
+  fill: #ffffff;
+  font-family: var(--font-display);
+  font-size: 7px;
+  opacity: 0.45;
+}
+
+.sp-grid-label-v {
+  writing-mode: vertical-rl;
+}
+
+.sp-accuracy {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: #ffffff;
+  stroke-width: 0.75;
+  opacity: 0.5;
+}
+
+.sp-pulse {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1;
+  transform-origin: center;
+  animation: sp-pulse 3.2s ease-out infinite;
+}
+
+.sp-cross {
+  stroke: #ffffff;
+  stroke-width: 0.75;
+  opacity: 0.55;
+}
+
+.sp-pin {
+  fill: #ffffff;
+}
+
+.sp-nearby {
+  fill: none;
+  stroke: var(--pi-sev-high);
+  stroke-width: 1.25;
+  opacity: 0.8;
+}
+
+@keyframes sp-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.6);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* ── Focus visibility ────────────────────────────────────── */
+
+:focus-visible {
+  outline: 3px solid #9ec5ff;
+  outline-offset: 2px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────
+   The constellation needs room to be legible. Below 900px the page becomes a
+   hierarchy navigator instead — the same tree, the same numbers, laid out as
+   rows a thumb can reach. Shrinking the graph would keep the spectacle and
+   lose the usability, which is the wrong trade on a phone. */
+
+@media (max-width: 899px) {
+  .pi-graph,
+  .pi-rail {
+    display: none;
+  }
+}
+
+/* Below this the header cannot hold a brand, a title and a search field on one
+   line — the field was being clipped at the right edge — so the search wraps
+   to its own full-width row. */
+@media (max-width: 600px) {
+  .pi-header {
+    flex-wrap: wrap;
+  }
+
+  .pi-search {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .pi-title {
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  /* The desktop composition is one screen: graph, rail and filters all visible
+     without scrolling. `min-height` alone was not enough — a grid row of
+     `minmax(0, 1fr)` still grows past the viewport when its content asks to,
+     which pushed the filters 260px below the fold on a laptop. A definite
+     height is what actually caps it. The phone layout below keeps scrolling,
+     because a list has to. */
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .pi-mobile {
+    display: none;
+  }
+
+  .pi-main {
+    grid-template-columns: minmax(0, 1fr) var(--pi-rail);
+    min-height: 0;
+  }
+
+  .pi-stage {
+    min-height: 0;
+  }
+
+  .pi-rail {
+    display: flex;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
+
+/* ── Motion ──────────────────────────────────────────────────
+   Every animation here communicates hierarchy, so removing them has to leave
+   the final state rather than the starting one. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

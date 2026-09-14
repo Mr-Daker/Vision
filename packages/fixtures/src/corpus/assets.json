@@ -1,0 +1,60 @@
+{
+  "provenance": "team_created_synthetic",
+  "notice": "SYNTHETIC asset registry. Names, identifiers and coordinates are invented. No school register, UDISE record or Know Your School value was copied (V004 §5).",
+  "assets": [
+    {
+      "asset_id": "demo-asset-001",
+      "asset_type": "school_building",
+      "name": "Demo Primary School 1 (synthetic)",
+      "jurisdiction_internal_code": "DDA-B1",
+      "lon": 74.56,
+      "lat": 16.85,
+      "effective_from": "2026-01-01T00:00:00Z"
+    },
+    {
+      "asset_id": "demo-asset-002",
+      "asset_type": "school_building",
+      "name": "Demo Primary School 2 (synthetic)",
+      "jurisdiction_internal_code": "DDA-B1",
+      "lon": 74.521,
+      "lat": 16.872,
+      "effective_from": "2026-01-01T00:00:00Z"
+    },
+    {
+      "asset_id": "demo-asset-003",
+      "asset_type": "school_building",
+      "name": "Demo Upper Primary School 3 (synthetic)",
+      "jurisdiction_internal_code": "DDA-B2",
+      "lon": 74.61,
+      "lat": 16.89,
+      "effective_from": "2026-01-01T00:00:00Z"
+    },
+    {
+      "asset_id": "demo-asset-004",
+      "asset_type": "school_toilet_block",
+      "name": "Demo School 4 Toilet Block (synthetic)",
+      "jurisdiction_internal_code": "DDA-B2",
+      "lon": 74.63,
+      "lat": 16.83,
+      "effective_from": "2026-01-01T00:00:00Z"
+    },
+    {
+      "asset_id": "demo-asset-005",
+      "asset_type": "school_building",
+      "name": "Demo Primary School 5 (synthetic)",
+      "jurisdiction_internal_code": "DDA-B1",
+      "lon": 74.5405,
+      "lat": 16.8105,
+      "effective_from": "2026-01-01T00:00:00Z"
+    },
+    {
+      "asset_id": "demo-asset-006",
+      "asset_type": "school_building",
+      "name": "Demo Primary School 6 (synthetic)",
+      "jurisdiction_internal_code": "DDA-B2",
+      "lon": 74.6405,
+      "lat": 16.9005,
+      "effective_from": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

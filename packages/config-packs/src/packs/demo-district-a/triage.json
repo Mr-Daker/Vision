@@ -1,0 +1,6 @@
+{
+  "version": "demo-triage.v1",
+  "note": "The order this deployment chooses to look at reports in. This is NOT a severity, risk or urgency assessment: nothing in this system measures how dangerous a problem is, and no such measure has been calibrated (V046). It records that somebody configuring this deployment decided to look at one kind of report before another, and it is changeable without a code change precisely so that decision stays visible and attributable.",
+  "category_order": ["structural", "electrical", "water_supply", "sanitation"],
+  "age_escalation_days": 14
+}

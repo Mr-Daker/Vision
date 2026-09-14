@@ -1,0 +1,15 @@
+{
+  "//": "Emits browser ESM. Tests are excluded: they import node:test and never run in a browser. `rewriteRelativeImportExtensions` turns the './x.ts' specifiers this repo uses into './x.js' in the output.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rewriteRelativeImportExtensions": true,
+    "sourceMap": true,
+    "declaration": false,
+    "types": [],
+    "rootDir": "src",
+    "outDir": "public/js/app"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
+}

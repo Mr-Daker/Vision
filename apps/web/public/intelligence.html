@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Public Intelligence — Vision</title>
+    <meta
+      name="description"
+      content="A demonstration view of citizen infrastructure reports across India, using a synthetic dataset. Drill from the country to a state, a city, a category and an individual report."
+    />
+
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="intelligence.css" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <script type="module" src="js/app/intelligence/intelligence-page.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#stage">Skip to the visualisation</a>
+
+    <header class="pi-header">
+      <a class="pi-brand" href="index.html" aria-label="Vision — home">
+        <img src="assets/logo.png" alt="" width="480" height="271" />
+      </a>
+      <p class="pi-title">Public Intelligence</p>
+
+      <div class="pi-search">
+        <label class="visually-hidden" for="search-input">Search places or issues</label>
+        <input
+          id="search-input"
+          type="search"
+          class="pi-search-input"
+          placeholder="Search places or issues…"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="search-results"
+        />
+        <div id="search-results" class="pi-search-results" role="listbox" hidden></div>
+      </div>
+    </header>
+
+    <!--
+      The disclosure is part of the composition, not a footnote. A national view
+      carrying 428 issues could otherwise be read as a claim of national
+      deployment, which V001 Appendix B.2 explicitly excludes. Every record
+      below is fabricated.
+    -->
+    <p class="pi-disclosure">
+      <span class="pi-disclosure-mark" aria-hidden="true">SYNTHETIC</span>
+      Demonstration dataset. Every report, department and figure below is fabricated for this
+      walkthrough — none describes a real incident, and no government system is connected.
+    </p>
+
+    <nav class="pi-breadcrumb" id="breadcrumb" aria-label="Hierarchy"></nav>
+
+    <main class="pi-main">
+      <section class="pi-stage" id="stage" aria-label="Issue hierarchy">
+        <p class="pi-loading" id="stage-loading">Building public intelligence landscape…</p>
+        <p class="pi-status" id="stage-status" role="status" hidden></p>
+
+        <!-- Desktop and tablet: the constellation. -->
+        <div class="pi-graph" id="stage-graph"></div>
+
+        <!-- Phones get a hierarchy navigator instead of a shrunken graph.
+             Both are always in the DOM and CSS chooses; the list is also the
+             accessible path through the same hierarchy on any screen. -->
+        <div class="pi-mobile" id="mobile-list"></div>
+
+        <div class="pi-empty" id="stage-empty" hidden>
+          <p class="pi-empty-title">No issues match this view.</p>
+          <button type="button" class="pi-button" id="empty-clear">Clear filters</button>
+        </div>
+      </section>
+
+      <aside class="pi-rail" id="rail" aria-label="Selected area summary"></aside>
+    </main>
+
+    <section class="pi-filters" aria-label="Filters">
+      <div class="pi-filter-group" role="group" aria-label="Severity">
+        <span class="pi-filter-legend">Severity</span>
+        <button type="button" class="pi-chip" data-severity aria-pressed="true">All</button>
+        <button type="button" class="pi-chip" data-severity="critical" aria-pressed="false">
+          Critical
+        </button>
+        <button type="button" class="pi-chip" data-severity="high" aria-pressed="false">
+          High
+        </button>
+        <button type="button" class="pi-chip" data-severity="medium" aria-pressed="false">
+          Medium
+        </button>
+        <button type="button" class="pi-chip" data-severity="low" aria-pressed="false">Low</button>
+      </div>
+
+      <div class="pi-filter-group" role="group" aria-label="Reported within">
+        <span class="pi-filter-legend">Reported</span>
+        <button type="button" class="pi-chip" data-window="7" aria-pressed="false">7D</button>
+        <button type="button" class="pi-chip" data-window="30" aria-pressed="false">30D</button>
+        <button type="button" class="pi-chip" data-window="90" aria-pressed="false">90D</button>
+        <button type="button" class="pi-chip" data-window="all" aria-pressed="true">All</button>
+      </div>
+
+      <button type="button" class="pi-clear" id="filters-clear" hidden>Clear filters</button>
+    </section>
+
+    <div class="pi-drawer-scrim" id="drawer-scrim" hidden></div>
+    <aside
+      class="pi-drawer"
+      id="drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Issue intelligence"
+      hidden
+    >
+      <div class="pi-drawer-bar">
+        <p class="pi-drawer-eyebrow">Issue intelligence</p>
+        <button type="button" class="pi-drawer-close" id="drawer-close" aria-label="Close">
+          ×
+        </button>
+      </div>
+      <div class="pi-drawer-body" id="drawer-body"></div>
+    </aside>
+  </body>
+</html>

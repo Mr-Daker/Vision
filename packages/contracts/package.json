@@ -1,0 +1,10 @@
+{
+  "name": "@vision/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned API, event, error and provider-adapter contracts (V008). Leaf package: imports no other workspace package.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

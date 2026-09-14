@@ -1,0 +1,8 @@
+{
+  "version": "demo-matching.v1",
+  "note": "Retrieval bounds. These are reasoned defaults, NOT values measured against any labelled set — V046 is where they would be calibrated. Keeping them here rather than in code is what lets them be changed without a deployment and recorded when they are.",
+  "base_radius_metres": 150,
+  "unknown_accuracy_allowance_metres": 250,
+  "time_window_hours": 2160,
+  "candidate_limit": 50
+}

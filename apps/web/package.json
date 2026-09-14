@@ -1,0 +1,14 @@
+{
+  "name": "@vision/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Citizen capture and submission PWA (V019), with resilient drafts and retries (V020).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vision/contracts": "0.0.0",
+    "@vision/domain": "0.0.0"
+  }
+}

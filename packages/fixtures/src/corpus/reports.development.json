@@ -1,0 +1,435 @@
+{
+  "split": "development",
+  "provenance": "team_created_synthetic",
+  "notice": "SYNTHETIC reports. Text is authored by the team; no real citizen submitted any of it. Media entries are placeholders with no image or audio bytes — real consented media requires V005 consent and is collected separately (see MANIFEST.json media_status).",
+  "reports": [
+    {
+      "report_id": "dev-0001",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-001",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.56002,
+        "lat": 16.85003,
+        "accuracy_m": 12,
+        "observed_at": "2026-09-01T04:30:00Z"
+      },
+      "text": "The classroom roof on the east side leaks whenever it rains and the floor stays wet.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a1"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.roof",
+        "defect_id": "leaking",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-02T06:00:00Z",
+        "notes": "Clear single-defect report."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0002",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-001",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.55998,
+        "lat": 16.84997,
+        "accuracy_m": 18,
+        "observed_at": "2026-09-01T09:15:00Z"
+      },
+      "text": "वर्गखोलीच्या छताला गळती आहे. पाऊस पडला की जमिनीवर पाणी साचते.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a2"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.roof",
+        "defect_id": "leaking",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Marathi wording drafted by the team; a native Marathi reviewer must confirm phrasing and label before this row backs any V046 measurement."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0003",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-001",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.5601,
+        "lat": 16.85012,
+        "accuracy_m": 9,
+        "observed_at": "2026-09-03T05:00:00Z"
+      },
+      "text": "A window pane in the corridor of the same school is broken; glass edges are exposed.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a3"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.window",
+        "defect_id": "broken_pane",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-03T07:00:00Z",
+        "notes": "Same asset as dev-0001 but a genuinely different defect. Must NOT be merged."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0004",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-002",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.521,
+        "lat": 16.872,
+        "accuracy_m": 25,
+        "observed_at": "2026-09-04T03:45:00Z"
+      },
+      "text": "शाळेच्या शौचालयात पाणी पुरवठा नाही. मुलांना खूप त्रास होतो.",
+      "media": [
+        {
+          "media_type": "voice",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a4",
+          "transcript_expected": "शाळेच्या शौचालयात पाणी पुरवठा नाही."
+        }
+      ],
+      "expected": {
+        "category_id": "sanitation.toilet",
+        "defect_id": "no_water_supply",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Voice-path example. Transcript expectation is the team's own draft, not a measured transcription result."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0005",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-002",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.52095,
+        "lat": 16.87205,
+        "accuracy_m": 40,
+        "observed_at": "2026-09-05T10:20:00Z"
+      },
+      "text": "Wall plaster keeps falling in the room next to the office. Not sure if the crack behind it is serious.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a5"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.wall",
+        "defect_id": "plaster_falling",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted_with_unresolved",
+        "reviewed_by": "team-reviewer-2",
+        "reviewed_at": "2026-09-06T06:30:00Z",
+        "notes": "Reporter raises a possible structural crack. Severity is a triage flag routing to a human inspector; it is NOT a structural assessment."
+      },
+      "unresolved_labels": ["defect_id"]
+    },
+    {
+      "report_id": "dev-0006",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-004",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.63,
+        "lat": 16.83,
+        "accuracy_m": 15,
+        "observed_at": "2026-09-06T04:10:00Z"
+      },
+      "text": "The drain outside the toilet block is blocked and overflowing.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a6"
+        }
+      ],
+      "expected": {
+        "category_id": "sanitation.toilet",
+        "defect_id": "blocked_drain",
+        "severity_band": "elevated",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-06T09:00:00Z",
+        "notes": "Cross-block routing example."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0007",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-005",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.5405,
+        "lat": 16.8105,
+        "accuracy_m": 11,
+        "observed_at": "2026-06-10T05:00:00Z"
+      },
+      "text": "Drinking water tap near the gate is broken and water runs continuously.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a7"
+        }
+      ],
+      "expected": {
+        "category_id": "water.drinking",
+        "defect_id": "tap_broken",
+        "severity_band": "routine",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-2",
+        "reviewed_at": "2026-06-11T06:00:00Z",
+        "notes": "Earlier half of the recurrence pair; this episode was resolved and confirmed."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0008",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-005",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.54052,
+        "lat": 16.81048,
+        "accuracy_m": 14,
+        "observed_at": "2026-09-07T05:30:00Z"
+      },
+      "text": "गेटजवळचा पिण्याच्या पाण्याचा नळ पुन्हा तुटला आहे. आधी दुरुस्त केला होता.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a8"
+        }
+      ],
+      "expected": {
+        "category_id": "water.drinking",
+        "defect_id": "tap_broken",
+        "severity_band": "routine",
+        "department_id": "demo-dept-water-sanitation"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Later half of the recurrence pair. Reviewer judgement: recurrence after a confirmed resolution, so it may be a Reopening OR a new issue on the same asset — the system must not decide this silently (V003 §8)."
+      },
+      "unresolved_labels": ["recurrence_treatment"]
+    },
+    {
+      "report_id": "dev-0009",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-005",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.54049,
+        "lat": 16.81053,
+        "accuracy_m": 120,
+        "observed_at": "2026-09-08T05:40:00Z"
+      },
+      "text": "Exposed wiring hanging near the corridor light fitting.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000a9"
+        }
+      ],
+      "expected": {
+        "category_id": "electrical.lighting",
+        "defect_id": "exposed_wiring",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-electrical"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-08T08:00:00Z",
+        "notes": "Poor GPS accuracy (120 m) on purpose: matching must widen its radius and must not treat the pin as precise."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0010",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "en-IN",
+      "source_language": "en-IN",
+      "asset_id": "demo-asset-004",
+      "jurisdiction_internal_code": "DDA-B2",
+      "observed": {
+        "lon": 74.63005,
+        "lat": 16.83004,
+        "accuracy_m": 20,
+        "observed_at": "2026-09-09T04:00:00Z"
+      },
+      "text": "Corridor light does not work at the toilet block; wiring looks loose.",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000b0"
+        }
+      ],
+      "expected": {
+        "category_id": "electrical.lighting",
+        "defect_id": "exposed_wiring",
+        "severity_band": "needs_inspection",
+        "routing_review_expected": true
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "team-reviewer-2",
+        "reviewed_at": "2026-09-09T06:00:00Z",
+        "notes": "Deliberate routing gap: electrical.lighting is unmapped in DDA-B2, so this must enter routing_review instead of being assigned a custodian."
+      },
+      "unresolved_labels": ["department_id"]
+    },
+    {
+      "report_id": "dev-0011",
+      "participant_ref": "demo-citizen-one",
+      "interface_locale": "mr-IN",
+      "source_language": "mr-IN",
+      "asset_id": "demo-asset-002",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.52102,
+        "lat": 16.87198,
+        "accuracy_m": 16,
+        "observed_at": "2026-09-09T05:10:00Z"
+      },
+      "text": "भिंतीला मोठे तडे गेले आहेत.",
+      "media": [
+        { "media_type": "text", "synthetic_placeholder": false, "object_bytes_present": false }
+      ],
+      "expected": {
+        "category_id": "structure.wall",
+        "defect_id": "cracked",
+        "severity_band": "needs_inspection",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted",
+        "reviewed_by": "pending_native_review",
+        "reviewed_at": null,
+        "notes": "Text-only report: no media at all. Exercises the text-only evidence path."
+      },
+      "unresolved_labels": []
+    },
+    {
+      "report_id": "dev-0012",
+      "participant_ref": "demo-citizen-two",
+      "interface_locale": "en-IN",
+      "source_language": "und",
+      "asset_id": "demo-asset-001",
+      "jurisdiction_internal_code": "DDA-B1",
+      "observed": {
+        "lon": 74.56004,
+        "lat": 16.85001,
+        "accuracy_m": 30,
+        "observed_at": "2026-09-09T06:00:00Z"
+      },
+      "text": "roof leak + तडे both",
+      "media": [
+        {
+          "media_type": "photo",
+          "synthetic_placeholder": true,
+          "object_bytes_present": false,
+          "fingerprint_hash": "f1000000000000000000000000000000000000000000000000000000000000b1"
+        }
+      ],
+      "expected": {
+        "category_id": "structure.roof",
+        "defect_id": "leaking",
+        "severity_band": "routine",
+        "department_id": "demo-dept-education-works"
+      },
+      "reviewer": {
+        "decision": "accepted_with_unresolved",
+        "reviewed_by": "team-reviewer-1",
+        "reviewed_at": "2026-09-09T07:00:00Z",
+        "notes": "Mixed-language text naming two defects. Source language is 'und' because the reviewer could not assign one. Category is genuinely ambiguous and must not be guessed confidently."
+      },
+      "unresolved_labels": ["category_id", "source_language"]
+    }
+  ]
+}

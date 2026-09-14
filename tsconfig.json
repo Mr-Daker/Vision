@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/*/src/**/*.mts",
+    "packages/*/src/**/*.cts",
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "apps/*/src/**/*.mts",
+    "apps/*/src/**/*.cts"
+  ],
+  "exclude": ["**/node_modules", "**/dist", "apps/web"],
+  "//": "apps/web is type-checked by its own project (it needs the DOM lib); see the `typecheck` script."
+}

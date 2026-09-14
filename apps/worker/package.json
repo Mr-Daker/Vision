@@ -1,0 +1,16 @@
+{
+  "name": "@vision/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Private HTTP worker service (V006 D3). No public ingress.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vision/adapters": "0.0.0",
+    "@vision/config-packs": "0.0.0",
+    "@vision/contracts": "0.0.0",
+    "@vision/domain": "0.0.0"
+  }
+}
