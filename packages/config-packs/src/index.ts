@@ -559,3 +559,533 @@ export const loadTriagePolicy = (profileId: string, override?: unknown): TriageP
     ageEscalationDays: days,
   };
 };
+
+export type AgeingRulePack = {
+  readonly alertAfterDays: number;
+  readonly escalateAfterDays: number;
+};
+
+export type AgeingPolicy = {
+  readonly version: string;
+  readonly note: string;
+  readonly rules: Readonly<Record<string, AgeingRulePack>>;
+  readonly fallback: AgeingRulePack;
+};
+
+/**
+ * Loads the ageing and escalation thresholds (roadmap V036).
+ *
+ * The note is checked for an explicit disclaimer rather than merely for being
+ * present, exactly as `loadTriagePolicy` does. A pack whose note reads "how
+ * quickly each category must be fixed" would let a severity-looking promise
+ * reach a supervisor's screen with nothing saying the system cannot measure
+ * how dangerous anything is — which is the failure V034 refused and this
+ * deliverable inherits.
+ *
+ * The fallback is required, not defaulted. A deployment that has not decided
+ * how long an unlisted category may wait must say so by writing a number down;
+ * inventing one here would hold a department to a deadline nobody agreed.
+ */
+export const loadAgeingPolicy = (profileId: string, override?: unknown): AgeingPolicy => {
+  const parsed = (override ?? readPackFile(profileId, "ageing.json")) as Record<string, unknown>;
+
+  if (typeof parsed["version"] !== "string" || parsed["version"].trim().length === 0) {
+    throw new ConfigPackError("an ageing policy must declare a version");
+  }
+  const note = parsed["note"];
+  if (typeof note !== "string" || !/not a severity, risk or urgency/i.test(note)) {
+    throw new ConfigPackError(
+      "an ageing policy's note must say explicitly that it is not a severity, risk or urgency assessment",
+    );
+  }
+
+  const rule = (raw: unknown, label: string): AgeingRulePack => {
+    const value = (raw ?? {}) as Record<string, unknown>;
+    const alertAfterDays = value["alert_after_days"];
+    const escalateAfterDays = value["escalate_after_days"];
+    for (const [name, candidate] of [
+      ["alert_after_days", alertAfterDays],
+      ["escalate_after_days", escalateAfterDays],
+    ] as const) {
+      if (typeof candidate !== "number" || !Number.isFinite(candidate) || candidate <= 0) {
+        throw new ConfigPackError(`${label} must set a positive ${name}`);
+      }
+    }
+    if ((escalateAfterDays as number) <= (alertAfterDays as number)) {
+      // Otherwise the overdue and escalated queues hold the same rows, which
+      // tells a supervisor nothing and hides the second stage entirely.
+      throw new ConfigPackError(`${label} must escalate later than it alerts`);
+    }
+    return {
+      alertAfterDays: alertAfterDays as number,
+      escalateAfterDays: escalateAfterDays as number,
+    };
+  };
+
+  const rawRules = parsed["rules"];
+  if (typeof rawRules !== "object" || rawRules === null) {
+    throw new ConfigPackError(`ageing policy '${parsed["version"]}' declares no rules`);
+  }
+  const rules: Record<string, AgeingRulePack> = {};
+  for (const [category, raw] of Object.entries(rawRules as Record<string, unknown>)) {
+    rules[category] = rule(raw, `ageing category '${category}'`);
+  }
+
+  if (parsed["fallback"] === undefined) {
+    throw new ConfigPackError(
+      "an ageing policy must declare a fallback for categories it does not list, so an unconfigured category is not held to a guessed deadline",
+    );
+  }
+
+  return {
+    version: parsed["version"],
+    note,
+    rules,
+    fallback: rule(parsed["fallback"], "the ageing fallback"),
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Contextual data (V040)
+// ---------------------------------------------------------------------------
+
+export type ContextSourcePack = {
+  readonly sourceRecordId: string;
+  readonly sourceName: string;
+  readonly sourceUrlOrLocation: string;
+  readonly retrievedAt: string;
+  readonly sourceEffectiveAt?: string;
+  readonly licenceOrPermissionStatus: string;
+  readonly demoStatus: string;
+};
+
+export type ContextRowPack = {
+  readonly subjectKind: "jurisdiction" | "asset";
+  readonly subjectId: string;
+  readonly value: unknown;
+  readonly unit: string;
+  readonly vintage: string;
+  readonly note?: string;
+};
+
+export type ContextDatasetPack = {
+  readonly datasetId: string;
+  readonly kind: string;
+  readonly unit: string;
+  readonly label: string;
+  readonly maxAgeDays: number;
+  readonly rows: readonly ContextRowPack[];
+};
+
+export type ContextPack = {
+  readonly version: string;
+  /** What this data is and is not. Travels with every value loaded from it. */
+  readonly notice: string;
+  readonly source: ContextSourcePack;
+  readonly datasets: readonly ContextDatasetPack[];
+};
+
+/**
+ * Loads the district's contextual datasets (V040).
+ *
+ * The notice is validated rather than merely read. V004's downgrade rule means
+ * every context figure in this demonstration is team-created synthetic, and a
+ * pack that does not say so in its own words would let a screen inherit a
+ * claim nobody made. The licence is checked for the same reason: this loader
+ * refuses to hand over a pack whose source is reference-only or unavailable,
+ * so a mislabelled pack fails at load rather than at display.
+ */
+export const loadContextPack = (profileId: string, override?: unknown): ContextPack => {
+  const parsed = (override ?? readPackFile(profileId, "context.json")) as Record<string, unknown>;
+
+  if (typeof parsed["version"] !== "string" || parsed["version"].trim().length === 0) {
+    throw new ConfigPackError("a context pack must declare a version");
+  }
+  const notice = parsed["notice"];
+  if (typeof notice !== "string" || !/synthetic/i.test(notice)) {
+    throw new ConfigPackError(
+      "a context pack's notice must say in its own words that the figures are synthetic, because every screen showing one inherits that claim",
+    );
+  }
+
+  const rawSource = parsed["source"];
+  if (typeof rawSource !== "object" || rawSource === null) {
+    throw new ConfigPackError("a context pack must declare the source its figures came from");
+  }
+  const sourceFields = rawSource as Record<string, unknown>;
+  const text = (key: string): string => {
+    const value = sourceFields[key];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new ConfigPackError(`a context pack source must declare ${key}`);
+    }
+    return value;
+  };
+  const licence = text("licence_or_permission_status");
+  if (!["permitted", "synthetic", "consented"].includes(licence)) {
+    throw new ConfigPackError(
+      `a context pack source licensed '${licence}' may not be ingested; only permitted, synthetic or consented data may be loaded (V004 §5)`,
+    );
+  }
+  const effectiveAt = sourceFields["source_effective_at"];
+  const source: ContextSourcePack = {
+    sourceRecordId: text("source_record_id"),
+    sourceName: text("source_name"),
+    sourceUrlOrLocation: text("source_url_or_location"),
+    retrievedAt: text("retrieved_at"),
+    ...(typeof effectiveAt === "string" ? { sourceEffectiveAt: effectiveAt } : {}),
+    licenceOrPermissionStatus: licence,
+    demoStatus: text("demo_status"),
+  };
+
+  const rawDatasets = parsed["datasets"];
+  if (!Array.isArray(rawDatasets) || rawDatasets.length === 0) {
+    throw new ConfigPackError("a context pack must declare at least one dataset");
+  }
+
+  const datasets = rawDatasets.map((entry, index) => {
+    const dataset = (entry ?? {}) as Record<string, unknown>;
+    const field = (key: string): string => {
+      const value = dataset[key];
+      if (typeof value !== "string" || value.trim().length === 0) {
+        throw new ConfigPackError(`context dataset ${String(index)} must declare ${key}`);
+      }
+      return value;
+    };
+    const maxAgeDays = dataset["max_age_days"];
+    if (typeof maxAgeDays !== "number" || !Number.isFinite(maxAgeDays) || maxAgeDays <= 0) {
+      throw new ConfigPackError(
+        `context dataset '${field("dataset_id")}' must declare a positive max_age_days, so a reader can be told when a figure is stale`,
+      );
+    }
+    const rawRows = dataset["rows"];
+    if (!Array.isArray(rawRows)) {
+      throw new ConfigPackError(`context dataset '${field("dataset_id")}' declares no rows`);
+    }
+    const rows: ContextRowPack[] = rawRows.map((rawRow, rowIndex): ContextRowPack => {
+      const values = (rawRow ?? {}) as Record<string, unknown>;
+      const subjectKind = values["subject_kind"];
+      if (subjectKind !== "jurisdiction" && subjectKind !== "asset") {
+        throw new ConfigPackError(
+          `row ${String(rowIndex)} of '${field("dataset_id")}' must describe a jurisdiction or an asset`,
+        );
+      }
+      const note = values["note"];
+      return {
+        subjectKind,
+        subjectId: String(values["subject_id"] ?? ""),
+        value: values["value"],
+        unit: String(values["unit"] ?? ""),
+        vintage: String(values["vintage"] ?? ""),
+        ...(typeof note === "string" ? { note } : {}),
+      };
+    });
+    return {
+      datasetId: field("dataset_id"),
+      kind: field("kind"),
+      unit: field("unit"),
+      label: field("label"),
+      maxAgeDays,
+      rows,
+    };
+  });
+
+  return { version: parsed["version"], notice, source, datasets };
+};
+
+// ---------------------------------------------------------------------------
+// Sanctioned projects (V041)
+// ---------------------------------------------------------------------------
+
+export type SanctionedProjectPack = {
+  readonly projectId: string;
+  readonly projectName: string;
+  readonly scopeDescription: string;
+  readonly scopeTerms: readonly string[];
+  readonly assetId: string | null;
+  readonly jurisdictionInternalCode: string;
+  readonly longitude: number | null;
+  readonly latitude: number | null;
+  readonly sanctionedAt: string;
+  readonly completedAt: string | null;
+  readonly amount: number | null;
+  readonly amountUnit: string | null;
+};
+
+export type ProjectRegisterPack = {
+  readonly version: string;
+  readonly notice: string;
+  readonly source: ContextSourcePack;
+  readonly projects: readonly SanctionedProjectPack[];
+};
+
+/**
+ * Loads the district's sanctioned-project register (V041).
+ *
+ * The same licence gate as the context pack, for a sharper reason. Whether
+ * public infrastructure has been paid for is the most politically loaded thing
+ * this system could appear to say; a register whose provenance is not one of
+ * permitted, synthetic or consented must not be loadable at all, and its
+ * notice has to say what it is before any project in it reaches a screen.
+ */
+export const loadProjectRegister = (profileId: string, override?: unknown): ProjectRegisterPack => {
+  const parsed = (override ?? readPackFile(profileId, "projects.json")) as Record<string, unknown>;
+
+  if (typeof parsed["version"] !== "string" || parsed["version"].trim().length === 0) {
+    throw new ConfigPackError("a project register must declare a version");
+  }
+  const notice = parsed["notice"];
+  if (typeof notice !== "string" || !/synthetic/i.test(notice)) {
+    throw new ConfigPackError(
+      "a project register's notice must say in its own words that the projects are synthetic, because a funding claim inherits it",
+    );
+  }
+
+  const rawSource = parsed["source"];
+  if (typeof rawSource !== "object" || rawSource === null) {
+    throw new ConfigPackError("a project register must declare the source its projects came from");
+  }
+  const sourceFields = rawSource as Record<string, unknown>;
+  const text = (key: string): string => {
+    const value = sourceFields[key];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new ConfigPackError(`a project register source must declare ${key}`);
+    }
+    return value;
+  };
+  const licence = text("licence_or_permission_status");
+  if (!["permitted", "synthetic", "consented"].includes(licence)) {
+    throw new ConfigPackError(
+      `a project register licensed '${licence}' may not be ingested; only permitted, synthetic or consented data may be loaded (V004 §5)`,
+    );
+  }
+  const effectiveAt = sourceFields["source_effective_at"];
+  const source: ContextSourcePack = {
+    sourceRecordId: text("source_record_id"),
+    sourceName: text("source_name"),
+    sourceUrlOrLocation: text("source_url_or_location"),
+    retrievedAt: text("retrieved_at"),
+    ...(typeof effectiveAt === "string" ? { sourceEffectiveAt: effectiveAt } : {}),
+    licenceOrPermissionStatus: licence,
+    demoStatus: text("demo_status"),
+  };
+
+  const rawProjects = parsed["projects"];
+  if (!Array.isArray(rawProjects) || rawProjects.length === 0) {
+    throw new ConfigPackError("a project register must declare at least one project");
+  }
+
+  const projects: SanctionedProjectPack[] = rawProjects.map(
+    (entry, index): SanctionedProjectPack => {
+      const project = (entry ?? {}) as Record<string, unknown>;
+      const field = (key: string): string => {
+        const value = project[key];
+        if (typeof value !== "string" || value.trim().length === 0) {
+          throw new ConfigPackError(`project ${String(index)} must declare ${key}`);
+        }
+        return value;
+      };
+      const number = (key: string): number | null => {
+        const value = project[key];
+        if (value === null || value === undefined) return null;
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          throw new ConfigPackError(`project '${field("project_id")}' has an unreadable ${key}`);
+        }
+        return value;
+      };
+      const terms = project["scope_terms"];
+      if (!Array.isArray(terms) || terms.length === 0) {
+        throw new ConfigPackError(
+          `project '${field("project_id")}' must declare scope terms; without them it can only ever be matched on where it is, which is never enough`,
+        );
+      }
+      const amount = number("amount");
+      const amountUnit = project["amount_unit"];
+      if ((amount === null) !== (amountUnit === null || amountUnit === undefined)) {
+        throw new ConfigPackError(
+          `project '${field("project_id")}' must declare an amount and its unit together, or neither`,
+        );
+      }
+      const assetId = project["asset_id"];
+      const completedAt = project["completed_at"];
+      return {
+        projectId: field("project_id"),
+        projectName: field("project_name"),
+        scopeDescription: field("scope_description"),
+        scopeTerms: terms.map((term) => String(term)),
+        assetId: typeof assetId === "string" && assetId.length > 0 ? assetId : null,
+        jurisdictionInternalCode: field("jurisdiction_internal_code"),
+        longitude: number("longitude"),
+        latitude: number("latitude"),
+        sanctionedAt: field("sanctioned_at"),
+        completedAt: typeof completedAt === "string" ? completedAt : null,
+        amount,
+        amountUnit: typeof amountUnit === "string" ? amountUnit : null,
+      };
+    },
+  );
+
+  return { version: parsed["version"], notice, source, projects };
+};
+
+// ---------------------------------------------------------------------------
+// Prioritization policy (V042)
+// ---------------------------------------------------------------------------
+
+export type PriorityWeightingPack = {
+  readonly id: string;
+  readonly label: string;
+  readonly rationale: string;
+  readonly weights: Readonly<Record<string, number>>;
+};
+
+export type PrioritizationPack = {
+  readonly version: string;
+  readonly note: string;
+  readonly budgetAssumption: string;
+  readonly minimumFactorsForRanking: number;
+  readonly existingProjectDirection: "prioritise" | "deprioritise";
+  readonly existingProjectRationale: string;
+  readonly references: {
+    readonly persistenceReferenceDays: number;
+    readonly persistencePerReopening: number;
+    readonly populationReferenceCount: number;
+    readonly equityReferenceRatePer1000: number;
+    readonly alternativesReferenceCount: number;
+  };
+  readonly weightings: readonly PriorityWeightingPack[];
+};
+
+/**
+ * Loads the recommendation policy (V042).
+ *
+ * Refuses a pack with fewer than two weightings. One weighting produces a
+ * ranking that reads as a finding; the interval between several is what the
+ * evidence supports, and a pack that cannot express an interval would make the
+ * sensitivity analysis a formality.
+ *
+ * Also refuses a pack that does not state its budget assumption, because this
+ * ordering knows nothing about cost and every reader will assume otherwise
+ * unless told.
+ */
+export const loadPrioritizationPolicy = (
+  profileId: string,
+  override?: unknown,
+): PrioritizationPack => {
+  const parsed = (override ?? readPackFile(profileId, "prioritization.json")) as Record<
+    string,
+    unknown
+  >;
+
+  const text = (key: string, test?: RegExp): string => {
+    const value = parsed[key];
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new ConfigPackError(`a prioritization policy must declare ${key}`);
+    }
+    if (test !== undefined && !test.test(value)) {
+      throw new ConfigPackError(`a prioritization policy's ${key} must say what it does not know`);
+    }
+    return value;
+  };
+
+  const version = text("version");
+  const note = text("note", /not a (finding|measure|statement)/i);
+  // Stated in the pack's own words: a reader who is not told will assume the
+  // ordering knows what these things cost.
+  const budgetAssumption = text("budget_assumption", /no budget|no cost/i);
+  const existingProjectDirection = text("existing_project_direction");
+  if (existingProjectDirection !== "prioritise" && existingProjectDirection !== "deprioritise") {
+    throw new ConfigPackError(
+      "existing_project_direction must be 'prioritise' or 'deprioritise'; both readings are defensible, so the pack has to choose one explicitly",
+    );
+  }
+  const existingProjectRationale = text("existing_project_rationale");
+
+  const minimum = parsed["minimum_factors_for_ranking"];
+  if (typeof minimum !== "number" || !Number.isInteger(minimum) || minimum < 1) {
+    throw new ConfigPackError(
+      "a prioritization policy must declare a positive minimum_factors_for_ranking, below which a candidate is reported rather than ranked",
+    );
+  }
+
+  const rawReferences = parsed["references"];
+  if (typeof rawReferences !== "object" || rawReferences === null) {
+    throw new ConfigPackError("a prioritization policy must declare its reference points");
+  }
+  const referenceFields = rawReferences as Record<string, unknown>;
+  const reference = (key: string): number => {
+    const value = referenceFields[key];
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+      throw new ConfigPackError(`reference point '${key}' must be a positive number`);
+    }
+    return value;
+  };
+
+  const rawWeightings = parsed["weightings"];
+  if (!Array.isArray(rawWeightings) || rawWeightings.length < 2) {
+    throw new ConfigPackError(
+      "a prioritization policy must declare at least two plausible weightings; one produces a ranking that looks like a finding",
+    );
+  }
+
+  const weightings: PriorityWeightingPack[] = rawWeightings.map(
+    (entry, index): PriorityWeightingPack => {
+      const weighting = (entry ?? {}) as Record<string, unknown>;
+      const field = (key: string): string => {
+        const value = weighting[key];
+        if (typeof value !== "string" || value.trim().length === 0) {
+          throw new ConfigPackError(`weighting ${String(index)} must declare ${key}`);
+        }
+        return value;
+      };
+      const rawWeights = weighting["weights"];
+      if (typeof rawWeights !== "object" || rawWeights === null) {
+        throw new ConfigPackError(`weighting '${field("id")}' declares no weights`);
+      }
+      const weights: Record<string, number> = {};
+      for (const [factor, value] of Object.entries(rawWeights as Record<string, unknown>)) {
+        if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+          throw new ConfigPackError(
+            `weighting '${field("id")}' has an unreadable weight for ${factor}`,
+          );
+        }
+        weights[factor] = value;
+      }
+      const total = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+      if (Math.abs(total - 1) > 0.001) {
+        // Weights that do not sum to one make two weightings incomparable, and
+        // comparing them is the entire point of having several.
+        throw new ConfigPackError(
+          `weighting '${field("id")}' sums to ${String(Math.round(total * 1000) / 1000)}; weightings must sum to 1 or the intervals between them mean nothing`,
+        );
+      }
+      return {
+        id: field("id"),
+        label: field("label"),
+        rationale: field("rationale"),
+        weights,
+      };
+    },
+  );
+
+  const ids = new Set(weightings.map((weighting) => weighting.id));
+  if (ids.size !== weightings.length) {
+    throw new ConfigPackError("weighting ids must be distinct");
+  }
+
+  return {
+    version,
+    note,
+    budgetAssumption,
+    minimumFactorsForRanking: minimum,
+    existingProjectDirection,
+    existingProjectRationale,
+    references: {
+      persistenceReferenceDays: reference("persistence_reference_days"),
+      persistencePerReopening: reference("persistence_per_reopening"),
+      populationReferenceCount: reference("population_reference_count"),
+      equityReferenceRatePer1000: reference("equity_reference_rate_per_1000"),
+      alternativesReferenceCount: reference("alternatives_reference_count"),
+    },
+    weightings,
+  };
+};

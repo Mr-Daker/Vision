@@ -1,0 +1,456 @@
+{
+  "runId": "20260917135352",
+  "reason": "V046 scored held-out evaluation run",
+  "split": "holdout",
+  "providerMode": "real",
+  "startedAt": "2026-09-17T13:53:52.701Z",
+  "finishedAt": "2026-09-17T14:02:59.848Z",
+  "verdict": {
+    "permitted": false,
+    "reasons": [
+      "the reviewed corpus and the deployment pack declare the same taxonomy version while using different category identifiers, so a classification figure would compare a model's answer against a list the reviewer never chose from",
+      "4 of 8 corpus reports were withheld from every label-dependent figure, so the measured subset is not the corpus",
+      "every mr-IN row was withheld, so this run carries no per-language result for mr-IN — which is a result V046 explicitly requires",
+      "candidate recall rests on 1 reviewed duplicate pair(s); one pair is an example, not a recall measurement",
+      "the incorrect-merge figure rests on 1 reviewed distinct pair(s), which cannot distinguish a system that never merges wrongly from one that has not been given the chance",
+      "no figure in this run has a 95% interval narrower than 20 percentage points, so none may be written as a rate"
+    ]
+  },
+  "scores": [
+    {
+      "reportId": "hold-0001",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "match",
+        "value": "structure.roof"
+      },
+      "proposedDefect": {
+        "kind": "match",
+        "value": "collapsed_section"
+      },
+      "appliedCategory": {
+        "kind": "match",
+        "value": "structure.roof"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: routed to 'demo-dept-education-works'. From the reviewed label: routed to 'demo-dept-education-works'"
+    },
+    {
+      "reportId": "hold-0002",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0003",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0004",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "appliedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-water-sanitation' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-water-sanitation'"
+    },
+    {
+      "reportId": "hold-0005",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0006",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "appliedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_503), so there is no answer to compare against"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "end to end: the corpus names no expected custodian for this report. From the reviewed label: no routing was produced for this report"
+    },
+    {
+      "reportId": "hold-0007",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_429), so there is no answer to compare against"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_429), so there is no answer to compare against"
+      },
+      "appliedCategory": {
+        "kind": "unscorable",
+        "reason": "the classifier returned no proposal for this report (provider_http_429), so there is no answer to compare against"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: left for operational review (no_directory_entry). From the reviewed label: left for operational review (no_directory_entry)"
+    },
+    {
+      "reportId": "hold-0008",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    }
+  ],
+  "duplicatePairs": [
+    {
+      "relationId": "dup-hold-001",
+      "retrieved": true,
+      "merged": true,
+      "detail": "both reports were attached to one issue"
+    }
+  ],
+  "distinctPairs": [
+    {
+      "relationId": "dist-hold-001",
+      "retrieved": true,
+      "merged": false,
+      "detail": "1 candidate(s) were retrieved for the later report and it was still opened separately (assignment: created)"
+    }
+  ],
+  "calls": [
+    {
+      "operation": "classification",
+      "subject": "hold-0001",
+      "status": 200,
+      "latencyMs": 30697.41875,
+      "promptTokens": 234,
+      "outputTokens": 29,
+      "totalTokens": 483,
+      "modelVersion": "gemini-3.5-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0002",
+      "status": 200,
+      "latencyMs": 16572.803917,
+      "promptTokens": 232,
+      "outputTokens": 38,
+      "totalTokens": 728,
+      "modelVersion": "gemini-3.5-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0003",
+      "status": 503,
+      "latencyMs": 704.686833,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0003",
+      "status": 200,
+      "latencyMs": 18618.073625,
+      "promptTokens": 232,
+      "outputTokens": 6,
+      "totalTokens": 728,
+      "modelVersion": "gemini-3.5-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 503,
+      "latencyMs": 5344.645291,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 503,
+      "latencyMs": 47173.315416,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 503,
+      "latencyMs": 736.175417,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 503,
+      "latencyMs": 28337.210125,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 503,
+      "latencyMs": 924.869875,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 503,
+      "latencyMs": 553.00175,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 503,
+      "latencyMs": 555.358541,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 503,
+      "latencyMs": 909.570833,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 503,
+      "latencyMs": 882.099792,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 503,
+      "latencyMs": 745.625625,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 503,
+      "latencyMs": 548.611458,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 503,
+      "latencyMs": 568.825125,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 503,
+      "latencyMs": 1555.237625,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 503,
+      "latencyMs": 1582.2265,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 503,
+      "latencyMs": 2386.659584,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 503,
+      "latencyMs": 993.616041,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 429,
+      "latencyMs": 279.764625,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 429,
+      "latencyMs": 334.32725,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 429,
+      "latencyMs": 288.571667,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 429,
+      "latencyMs": 298.132875,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 429,
+      "latencyMs": 332.216375,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 429,
+      "latencyMs": 598.280042,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 429,
+      "latencyMs": 304.731625,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 429,
+      "latencyMs": 313.564584,
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 429,
+      "latencyMs": 574.672333,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0001",
+      "status": 200,
+      "latencyMs": 662.581209,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0002",
+      "status": 200,
+      "latencyMs": 526.714,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0003",
+      "status": 200,
+      "latencyMs": 548.50125,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0004",
+      "status": 200,
+      "latencyMs": 613.562083,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0005",
+      "status": 200,
+      "latencyMs": 664.239375,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0006",
+      "status": 200,
+      "latencyMs": 549.039666,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0007",
+      "status": 200,
+      "latencyMs": 606.574584,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0008",
+      "status": 200,
+      "latencyMs": 569.776333,
+      "statementFindings": []
+    }
+  ]
+}

@@ -21,6 +21,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import {
+  ErasureError,
+  eraseParticipant,
+  type ErasureReasonCode,
   confirmMatch,
   discoverNearbyIssues,
   findIssueIdByReference,
@@ -541,6 +544,50 @@ export const createCitizenRoutes = (deps: CitizenRouteDependencies) => {
       } catch (error) {
         if (error instanceof ResolutionError) {
           sendError(response, "conflict", error.message, correlationId);
+          return true;
+        }
+        throw error;
+      }
+      return true;
+    }
+
+    // ---- POST /v1/me/erasure : private, session-bound ----
+    if (method === "POST" && path === "/v1/me/erasure") {
+      // Derived from the session, never from the body. A request to erase
+      // somebody is the last place a client-supplied identifier belongs.
+      const participantId = await deps.resolveParticipantId(request);
+      if (participantId === undefined) {
+        sendError(response, "unauthenticated", "no active session", correlationId);
+        return true;
+      }
+      const body = await readJsonBody(request);
+      const reasonCode = String(body?.["reason_code"] ?? "participant_request");
+      try {
+        const result = await eraseParticipant(deps.client, {
+          participantId,
+          reasonCode: reasonCode as ErasureReasonCode,
+          asOf: new Date(),
+        });
+        sendJson(
+          response,
+          200,
+          {
+            erased: true,
+            already_erased: result.alreadyErased,
+            submissions_erased: result.submissionsErased,
+            evidence_erased: result.evidenceErased,
+            sessions_revoked: result.sessionsRevoked,
+            // Said back to the person, because it is the part they would not
+            // expect and have a right to know before they ask.
+            participation_kept: result.participationKept,
+            counts_note:
+              "Your reports and their content are gone. The record that somebody reported each problem is kept without anything identifying you, so the counts other people see do not silently drop.",
+          },
+          correlationId,
+        );
+      } catch (error) {
+        if (error instanceof ErasureError) {
+          sendError(response, "validation_failed", error.message, correlationId);
           return true;
         }
         throw error;

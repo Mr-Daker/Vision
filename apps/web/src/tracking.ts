@@ -16,6 +16,8 @@
  *    does not exist the reader is told why rather than shown a blank.
  */
 
+import type { Translate } from "./i18n.ts";
+
 export type ReportPayload = {
   readonly submission_id: string;
   readonly submitted_at: string;
@@ -508,32 +510,44 @@ export type CandidateView = {
 const coarsePlace = (place: { readonly lon: number; readonly lat: number }): string =>
   `${place.lat.toFixed(3)}, ${place.lon.toFixed(3)}`;
 
-export const toCandidateView = (payload: CandidatePayload): CandidateView => {
+/**
+ * Builds the confirm/reject screen, in the reader's own language.
+ *
+ * Every sentence comes from the locale pack. It was English-only until V045,
+ * which requires duplicate confirmation to be testable in each selected
+ * language — a Marathi reader reached this screen, the one place the system
+ * asks them a direct question, and was answered in English.
+ */
+export const toCandidateView = (payload: CandidatePayload, t: Translate): CandidateView => {
   const candidate = payload.candidate;
   const others = candidate.counted_participants;
+  const date = candidate.opened_at.slice(0, 10);
 
   return {
-    question: "Is this the same problem you are reporting?",
-    summary: `${candidate.public_reference}, first reported ${candidate.opened_at.slice(0, 10)}${
-      candidate.coarse_location === null ? "" : `, near ${coarsePlace(candidate.coarse_location)}`
-    }`,
+    question: t("candidate.question"),
+    summary:
+      candidate.coarse_location === null
+        ? t("candidate.summary", { reference: candidate.public_reference, date })
+        : t("candidate.summary_near", {
+            reference: candidate.public_reference,
+            date,
+            place: coarsePlace(candidate.coarse_location),
+          }),
     // "reported this" and not "agreed": see the note above.
     participantsLabel:
-      others === 1 ? "1 person reported this" : `${String(others)} people reported this`,
+      others === 1
+        ? t("candidate.participants_one")
+        : t("candidate.participants_many", { count: others }),
     distanceLabel:
       candidate.distance_metres === null
         ? undefined
-        : `about ${String(Math.round(candidate.distance_metres))} m from where you reported`,
-    openedLabel: `First reported ${candidate.opened_at.slice(0, 10)}`,
-    confirmLabel: "Yes, it is the same problem",
-    rejectLabel: "No, it is a different problem",
-    confirmConsequence:
-      "Your report is added to this one. Your entry stays yours, and it is counted once.",
-    rejectConsequence:
-      "Your report stays separate and gets its own reference. Nothing you sent is deleted.",
-    aliasNote: payload.resolved_through_alias
-      ? "This report was merged with another one, so the reference shown here may differ from the one you saw earlier. Nothing was removed."
-      : undefined,
+        : t("candidate.distance_label", { metres: Math.round(candidate.distance_metres) }),
+    openedLabel: t("candidate.opened_label", { date }),
+    confirmLabel: t("candidate.confirm"),
+    rejectLabel: t("candidate.reject"),
+    confirmConsequence: t("candidate.confirm_consequence"),
+    rejectConsequence: t("candidate.reject_consequence"),
+    aliasNote: payload.resolved_through_alias ? t("candidate.alias_note") : undefined,
     previewReferences: candidate.preview_derivatives,
   };
 };

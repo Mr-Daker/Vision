@@ -1,165 +1,661 @@
-# V037 — Analytics Metric Semantics
+# V037 — Analytics populations, denominators, and time semantics
 
-**Status:** Ready for owner approval
-**Roadmap task:** V037 · **Prerequisites:** V014, V029, V035 · **Owner:** Analytics + Backend
+**Roadmap task:** V037 · **Prerequisites:** V003, V029, V035 · **Owner:** Data + Product
 
-This document defines reproducible analytics contracts for the Vision system. The foundational rule for analytics in this system is that missing data stays missing, and an unresolved or claimed status is never a standing resolution.
+Fifteen metrics, each with a population, a denominator, a horizon, and a statement that can be replayed against the database by hand. The contracts live in `packages/domain/src/metric-semantics.ts`, the SQL in `packages/adapters/src/analytics-metrics.ts`, and the reference section at the foot of this document is generated from both — so a number cannot appear on a screen without a contract saying what it means, and a contract cannot sit here describing a number nothing computes.
 
-## 1. Mandatory Core Rules
+This task defines and computes the metrics. It deliberately builds no summary tables and no dashboard: replayable projections are V038 and the district dashboard is V039, and both are specified against what is written here.
 
-- **A resolution claim is not a resolution.** It is only a staff assertion.
-- **Only a standing `resolution_confirmed` issue counts as currently closed.**
-- **Reopening removes the issue from current closure counts.**
-- **Resolution speed must not be calculated only from resolved issues** and presented as performance for the full cohort (this is survivorship bias).
-- **Fixed-window comparisons must include only cohorts with sufficient observation time.** A 30-day resolution rate cannot include issues opened 10 days ago.
-- **Reopening during the observation window invalidates the earlier resolution.** If an issue is resolved on day 5 and reopened on day 10, it is not "resolved within 30 days" if the observation window closes while it is reopened.
-- **Count canonical issue roots, not complaint rows.** Issues with an active outgoing alias (merged away) are excluded from base issue counts, though their data contributes to their root.
-- **Merged issues must not be double-counted.** All aggregates apply to the active alias closure.
-- **Unique contributors are distinct `participant_id`s across the active alias closure.**
-- **Local distinct contributor counts cannot be summed** to obtain a higher-level distinct count (the same person might report in multiple jurisdictions).
-- **Report volume must never be called affected population.**
-- **Estimated population must come from a separate source** with source date, coverage, and units. It is never derived from submission counts.
-- **Unknown or missing data must remain unknown, never silently become zero.**
-- **Simulated records and integrations must remain visibly simulated.**
-- **Do not invent national-scale claims from the demonstration dataset.**
+## 1. The four rules
 
-## 2. Metric Definition Table
+**Missing stays missing.** An absent value is `null` and carries a reason from a closed list. Substituting `0` for "we do not know" is the most common way a civic dashboard invents good news: no reports from a ward reads as no problems there, when it far more often means nobody could file one. `M15` exists so a reader can tell those apart.
 
-For each metric, the following semantics apply across the board unless otherwise specified:
-- **Treatment of merged/separated issues:** Metrics are evaluated against the active canonical root (following `issue_alias` edges where `valid_to` IS NULL). Merged-away issues are excluded from the denominator as independent entities.
-- **Issue-alias root semantics:** All child data (events, evidence, participants) is logically folded into the active root before calculation.
-- **Jurisdiction/boundary version:** Uses the active jurisdiction at the `as-of timestamp`.
-- **Category/taxonomy version:** Uses the issue's active category at the `as-of timestamp`.
-- **Late corrections/rebuild behavior:** Rebuilding analytics from the event stream (`status_event`) as of a historical timestamp must yield the exact historical value, applying only corrections with an `occurred_at` <= the `as-of timestamp`.
+**A rate must name its population.** `MetricDenominator` is a discriminated field, so a percentage cannot be declared without saying what it is a percentage of, and a count has to say in words why it has none. A zero denominator yields `null` — never `0`, never a division error. Zero out of seven and zero out of zero are different facts and never render the same.
 
-| Stable Identifier | Plain-Language Meaning | Authoritative Tables / Events | Exact Numerator | Exact Denominator | Start Timestamp | End Timestamp | As-of Timestamp |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `metric_current_backlog` | Number of unresolved canonical issues currently active. | `canonical_issue`, `issue_alias` | Count of canonical roots where `current_status` != 'resolution_confirmed'. | N/A (absolute count) | `opened_at` | N/A | Evaluation time (now) |
-| `metric_backlog_by_category_jurisdiction` | Unresolved issues grouped by category and jurisdiction. | `canonical_issue`, `issue_alias` | Count of canonical roots where `current_status` != 'resolution_confirmed', grouped. | N/A | `opened_at` | N/A | Evaluation time (now) |
-| `metric_accepted_issue_cohorts` | Issues created in a specific time window. | `canonical_issue`, `issue_alias` | Count of canonical roots opened within the window. | N/A | Window start | Window end | Window end |
-| `metric_resolution_rate` | Percentage of an accepted cohort that is currently resolved. | `canonical_issue`, `issue_alias` | Canonical roots from cohort currently in `resolution_confirmed`. | All canonical roots from the cohort. | `opened_at` | N/A | Evaluation time (now) |
-| `metric_fixed_window_resolution_rate_30d` | Percentage of a cohort resolved within 30 days of opening, without reopening within those 30 days. | `canonical_issue`, `issue_alias`, `status_event` | Canonical roots resolved within 30 days and NOT reopened within 30 days. | Canonical roots opened > 30 days ago. | `opened_at` | `opened_at` + 30 days | `opened_at` + 30 days |
-| `metric_time_to_resolution` | Distribution of time taken to reach standing confirmed resolution, including censored data. | `canonical_issue`, `status_event` | Time from `opened_at` to first `resolution_confirmed` (adjusted for reopenings). | All canonical roots in cohort. | `opened_at` | Final `resolution_confirmed` event | Evaluation time (now) |
-| `metric_age_unresolved_issues` | Age distribution of the current backlog. | `canonical_issue`, `issue_alias` | `as_of_timestamp` - `opened_at` for unresolved roots. | Unresolved canonical roots. | `opened_at` | N/A | Evaluation time (now) |
-| `metric_resolution_claims_awaiting` | Number of staff repair claims needing participant/reviewer confirmation. | `canonical_issue`, `resolution_claim` | Count of roots where `current_status` = 'resolution_claimed'. | N/A | Claim `claimed_at` | N/A | Evaluation time (now) |
-| `metric_disputed_resolutions` | Number of claims currently rejected by citizens. | `canonical_issue` | Count of roots where `current_status` = 'resolution_disputed'. | N/A | Dispute event time | N/A | Evaluation time (now) |
-| `metric_reopening_rate` | Percentage of confirmed resolutions that were later reopened. | `canonical_issue`, `reopening`, `status_event` | Count of roots with at least one `issue_reopened` event. | Roots that ever reached `resolution_confirmed`. | First `resolution_confirmed` | N/A | Evaluation time (now) |
-| `metric_standing_confirmed_resolutions` | Total successfully closed issues not currently reopened. | `canonical_issue`, `issue_alias` | Count of roots where `current_status` = 'resolution_confirmed'. | N/A | `opened_at` | Confirmation event | Evaluation time (now) |
-| `metric_unique_contributors` | Number of distinct people who reported an issue. | `issue_participation`, `issue_alias` | Count of distinct `participant_id` where `counted = true` in active alias closure. | N/A | First evidence | Last evidence | Evaluation time (now) |
-| `metric_evidence_submission_counts` | Volume of evidence items attached to an issue. | `issue_evidence_link`, `evidence_item` | Count of `issue_evidence_link` where `effective_to` IS NULL. | N/A | `effective_from` | N/A | Evaluation time (now) |
-| `metric_estimated_population_served` | External population size for a jurisdiction. | External authoritative source | Value from external source. | N/A | Source effective date | Source expiry | Source effective date |
-| `metric_data_coverage_unknowns` | Proportion of records with missing categorical data. | `canonical_issue` | Count of rows missing the field. | All rows in scope. | `opened_at` | N/A | Evaluation time (now) |
+**Speed never travels alone.** An average computed only over resolved issues flatters any backlog, because the slowest cases are precisely the ones still open: excluding them makes a department look faster the more it neglects. `ResolutionSpeed` has no field a caller could read as an overall resolution time, it carries `stillWaitingCount`, and `speedStatement` is the only supported rendering — it states the unresolved count every time, including when that count is zero.
 
-### Metric Specific Rules
+**Some numbers do not add up.** Distinct counts of people and externally sourced populations are not additive across areas. Two wards each reporting nine contributors are not eighteen contributors, and two overlapping boundaries cannot have their populations summed at all. `combineAcrossBoundaries` refuses, rather than returning a plausible wrong total. It also refuses to add values measured against two different boundary versions, because that total describes an area that never existed.
 
-#### Treatment of unresolved/censored issues
-For `metric_time_to_resolution`, unresolved issues must be included in the denominator (using survival analysis methods like Kaplan-Meier). Calculating average time-to-resolution *only* on resolved issues is explicitly forbidden, as it hides long-standing unresolved issues.
+## 2. Two clocks
 
-#### Treatment of reopening
-Reopening immediately transitions the issue out of `resolution_confirmed`. For fixed-window metrics (e.g., 30-day resolution), if an issue is resolved on day 5 and reopened on day 10, it is NOT counted in the numerator for the 30-day window. If it is reopened on day 35, it IS counted in the numerator for the 30-day window (as the window closed while it was resolved).
+Every event predicate carries both bounds:
 
-#### Treatment of disputed claims
-Disputes keep an issue out of the `resolution_confirmed` state. Claims awaiting confirmation or currently disputed do NOT count as resolved.
+- **`occurred_at <= :as_of`** — what had happened in the world by that moment.
+- **`recorded_at <= :knowledge_cutoff`** — what this system had been told by that moment.
 
-#### Missing-data behaviour
-Missing data (e.g., population) yields `NULL` or `UNKNOWN`. It must never fallback to `0`. 
+They are different questions, and a backdated correction answers them differently: it belongs in the first from the day it describes, and in the second only from the day it arrived. Holding both means a figure published last month can be reproduced exactly as it was published, and separately re-asked with everything since taken into account. A late-recorded event can never leak backwards into a snapshot that predates its ingestion.
 
-#### Mandatory Disclosures
-- Any dashboard showing contributor counts must disclose: "A count of counted participants; it does not mean nobody else is affected, and it is not evidence that the reports are accurate."
-- Any dashboard showing resolutions must disclose: "A confirmed repair means people agreed the problem looks fixed; it is not an inspection or an engineer's certification."
+Two honest limits on this today. First, `appendIssueEvent` stamps `occurred_at` with `now()`, so no production path currently backdates an issue event — the machinery is built, bound and tested, but every event in the live database has the two clocks within milliseconds of each other. Offline capture (V020) is where they will diverge in practice. Second, `issue_alias` has no `recorded_at` column, so the knowledge cutoff does not bound merge topology; alias edges are bounded by `valid_from`/`valid_to` against `:as_of` only.
 
-#### Claims the UI must never make
-- Never claim report volume is "affected population".
-- Never claim "0 corroborations" means "0 other people are affected".
-- Never present Reviewer Confirmation as Citizen Confirmation.
-- Never present a Staff Claim as a Verified Resolution.
+## 3. Status at a horizon, and what cannot be reconstructed
 
-## 3. Formulas and Pseudocode
+At a **live** horizon the stored `current_status` column is the answer, and it is complete. At a **past** horizon it is not — it is today's value, and reading it would let a state reached last week appear in a snapshot of the week before. Past horizons reconstruct status from `status_event`, mapping each status-bearing event type to the state it established. Where the ledger cannot establish a status, the answer is `UNKNOWN`: it is reported next to the value as `unknownRows` and it is never folded into a number.
 
-### Canonical Root Resolution (SQL-like)
+`horizonMode` is that seam, stated as one function, and every reading records which side of it produced the figure.
+
+**Reconstructible from the ledger:** resolution claims, confirmations, disputes, disputed work returned to the crew, reopenings, acknowledgments, planned work, merges and merge reversals.
+
+**Not reconstructible:**
+
+- **Category and jurisdiction.** Both are corrected in place on `canonical_issue` with no effective-dated history table, so at any past horizon both dimensions read `UNKNOWN` rather than borrowing today's value. `M02` at a past horizon therefore returns a single `UNKNOWN`/`UNKNOWN` group — visibly useless, which is the correct rendering of a dimension that was not recorded rather than a plausible one that was not true.
+- **`routing_review` and `routed_internal`.** No production path writes either as a status event today; V033 records routing decisions in `routing_decision` without moving `current_status`, and only the demo seeds set those states directly. The mapping is in place for when that path appends events.
+- **Estimated population.** There is no population source table. `M14` lists every boundary with an `UNKNOWN` population rather than returning an empty list, so uncovered areas are visible instead of looking like no areas at all. The import, with its source record, unit and vintage, is V040.
+
+## 4. Alias resolution fails safely
+
+Alias edges active at the horizon are followed to the canonical root. A cycle, or a chain longer than `MAX_ALIAS_HOPS` (16), resolves to nothing and drops out of every count rather than resolving to whichever issue the walk happened to stop on. An undercount that can be found is recoverable; a confident wrong root is not. Child participation and evidence fold into the resolved root, and a merge **unions** contributors — it never adds the two totals.
+
+`uniqueContributors` returns both the distinct count and `sumOfPerRoot`, which is what a dashboard would print if it added the per-issue counts. Having both side by side is what makes the double-counting visible rather than merely asserted.
+
+## 5. Fixed windows
+
+`M04` is a status snapshot: the share of a cohort standing confirmed _right now_. It moves whenever anything in the cohort changes and is not comparable between cohorts of different ages.
+
+`M05` is the comparable one. A cohort member enters the denominator only once its window has fully elapsed at the horizon — an issue opened yesterday cannot yet have failed a thirty-day window, and counting it as a failure is how a fixed-window rate drops every time reporting picks up. A reopening **inside** the window invalidates the resolution, because a repair that failed within the period it was measured against did not hold. A reopening **after** the window closes leaves the historical figure alone: that number was true of the period it describes, and silently restating closed history is its own kind of dishonesty.
+
+## 6. Vocabulary
+
+Checked by test against every metric title and measurement description, and deliberately not against the disclosures — a disclosure has to be free to say plainly that people agreed, because that is exactly what was recorded.
+
+| Never                                | Instead                                      |
+| ------------------------------------ | -------------------------------------------- |
+| successfully closed                  | standing confirmed                           |
+| verified repair, certified           | confirmed by participants                    |
+| rejected                             | disputed                                     |
+| number of people, residents affected | counted demo participants                    |
+| affected population                  | estimated population from an external source |
+
+<!-- BEGIN generated: metric reference. npm run docs:v037 -->
+
+## Metric reference
+
+Generated from `packages/domain/src/metric-semantics.ts` and
+`packages/adapters/src/analytics-metrics.ts` by `npm run docs:v037`. Edit those files,
+not this section: `analytics-doc-sync.test.ts` fails the build if the two disagree.
+
+Every statement below is executed by appending it to the shared prelude and binding
+`$1` as-of, `$2` knowledge cutoff, `$3` live-horizon flag, `$4` window start,
+`$5` window end, `$6` fixed-window days. Nothing else is interpolated, so any of them
+can be replayed against the database by hand.
+
+### Shared prelude
+
 ```sql
--- CTE to find the active root for any issue
-WITH RECURSIVE active_roots AS (
-    SELECT issue_id AS original_id, issue_id AS root_id
-    FROM canonical_issue
-    WHERE NOT EXISTS (SELECT 1 FROM issue_alias WHERE source_issue_id = canonical_issue.issue_id AND valid_to IS NULL)
-    
-    UNION ALL
-    
-    SELECT a.source_issue_id, r.root_id
-    FROM issue_alias a
-    JOIN active_roots r ON a.target_issue_id = r.original_id
-    WHERE a.valid_to IS NULL
-)
+with recursive
+  params as (
+    -- Every metric body is appended to this same prelude and is executed with
+    -- the same five bindings plus this one, so the parameter has to be named
+    -- here even where the body does not read it.
+    select $6::int as fixed_window_days
+  ),
+  bounded_event as (
+    select (aggregate_id)::uuid as issue_id, event_type, occurred_at, aggregate_version
+      from status_event
+     where aggregate_type = 'canonical_issue'
+       and occurred_at <= $1::timestamptz
+       and recorded_at <= $2::timestamptz
+  ),
+  active_alias as (
+    select source_issue_id, target_issue_id
+      from issue_alias
+     where valid_from <= $1::timestamptz
+       and (valid_to is null or valid_to > $1::timestamptz)
+  ),
+  walk as (
+    select c.issue_id as original_id, c.issue_id as current_id, 0 as hops,
+           array[c.issue_id] as path, false as cycle
+      from canonical_issue c
+     where c.opened_at <= $1::timestamptz
+    union all
+    select w.original_id, a.target_issue_id, w.hops + 1,
+           w.path || a.target_issue_id, a.target_issue_id = any(w.path)
+      from walk w
+      join active_alias a on a.source_issue_id = w.current_id
+     where w.cycle = false and w.hops < 16
+  ),
+  walked as (
+    select distinct on (original_id) original_id, current_id as root_id, hops, cycle
+      from walk
+     order by original_id, hops desc
+  ),
+  active_roots as (
+    select w.original_id, w.root_id
+      from walked w
+     where w.cycle = false
+       and not exists (select 1 from active_alias a where a.source_issue_id = w.root_id)
+  ),
+  roots as (
+    select distinct ar.root_id
+      from active_roots ar
+      join canonical_issue c on c.issue_id = ar.root_id
+     where c.opened_at <= $1::timestamptz
+  ),
+  ledger_status as (
+    select distinct on (issue_id) issue_id,
+           case event_type
+             when 'issue_created' then 'created'
+             when 'routing_review' then 'routing_review'
+             when 'routed_internal' then 'routed_internal'
+             when 'agency_ack_received' then 'agency_ack_received'
+             when 'work_planned' then 'work_planned'
+             when 'disputed_work_returned' then 'work_planned'
+             when 'resolution_claimed' then 'resolution_claimed'
+             when 'resolution_confirmed' then 'resolution_confirmed'
+             when 'resolution_disputed' then 'resolution_disputed'
+             when 'issue_reopened' then 'reopened'
+           end as status
+      from bounded_event
+     where event_type in ('issue_created','routing_review','routed_internal',
+                          'agency_ack_received','work_planned','disputed_work_returned',
+                          'resolution_claimed','resolution_confirmed','resolution_disputed',
+                          'issue_reopened')
+     order by issue_id, occurred_at desc, aggregate_version desc
+  ),
+  issue_status as (
+    select r.root_id as issue_id,
+           case when $3::boolean then c.current_status else l.status end as status,
+           case when $3::boolean then c.category else null end as category,
+           case when $3::boolean then c.jurisdiction_id else null end as jurisdiction_id,
+           c.opened_at
+      from roots r
+      join canonical_issue c on c.issue_id = r.root_id
+      left join ledger_status l on l.issue_id = r.root_id
+  ),
+  lifecycle as (
+    select issue_id,
+           min(occurred_at) filter (where event_type = 'resolution_confirmed') as first_confirmed_at,
+           max(occurred_at) filter (where event_type = 'resolution_confirmed') as last_confirmed_at,
+           min(occurred_at) filter (where event_type = 'issue_reopened') as first_reopened_at,
+           count(*) filter (where event_type = 'issue_reopened') as reopened_count
+      from bounded_event
+     group by issue_id
+  ),
+  cohort as (
+    select s.issue_id, s.status, s.opened_at
+      from issue_status s
+     where s.opened_at >= $4::timestamptz and s.opened_at < $5::timestamptz
+  )
 ```
 
-### Unique Contributors
+### M01 — Current backlog
+
+Canonical issues that are open at the horizon and have no standing confirmation.
+
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                     |
+| Numerator       | Distinct active canonical roots whose reconstructed status at the horizon is not resolution_confirmed.                                                                                                                    |
+| Denominator     | None — A count of open work, not a share of anything.                                                                                                                                                                     |
+| Cohort          | Every canonical root opened at or before the horizon.                                                                                                                                                                     |
+| Horizon         | `:as_of`                                                                                                                                                                                                                  |
+| Inclusions      | Open; claimed but unconfirmed; disputed; reopened                                                                                                                                                                         |
+| Exclusions      | Standing confirmed issues; Issues retired by an active alias at the horizon                                                                                                                                               |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | Status at a past horizon is reconstructed from status_event bounded by both occurred_at and the knowledge cutoff, so a later state never leaks backwards. Where the ledger cannot establish it, the dimension is UNKNOWN. |
+| Missing data    | An issue whose status cannot be reconstructed is reported as UNKNOWN, not open.                                                                                                                                           |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | None.                                                                                                                                                                                                                     |
+
 ```sql
-SELECT root_id, COUNT(DISTINCT p.participant_id) as unique_contributors
-FROM active_roots r
-JOIN issue_participation p ON p.canonical_issue_id = r.original_id
-WHERE p.counted = true
-GROUP BY root_id;
+select
+  count(*) filter (where s.status is not null and s.status <> 'resolution_confirmed')::int as value,
+  count(*) filter (where s.status is null)::int as unknown_rows
+from issue_status s
 ```
 
-### 30-Day Fixed Window Resolution Rate
+### M02 — Backlog by category and jurisdiction
+
+The current backlog split by category and jurisdiction.
+
+| Field           | Contract                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                                        |
+| Numerator       | M01 grouped by the root's category and jurisdiction.                                                                                                                                                                                         |
+| Denominator     | None — A count per group, not a share of anything.                                                                                                                                                                                           |
+| Cohort          | Every canonical root opened at or before the horizon.                                                                                                                                                                                        |
+| Horizon         | `:as_of`                                                                                                                                                                                                                                     |
+| Inclusions      | Open; claimed but unconfirmed; disputed; reopened                                                                                                                                                                                            |
+| Exclusions      | Standing confirmed issues; Issues retired by an active alias at the horizon                                                                                                                                                                  |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root.                    |
+| Corrections     | Category and jurisdiction are corrected in place on canonical_issue with no effective-dated history, so neither can be reconstructed for a past horizon. At a past horizon both dimensions read UNKNOWN rather than borrowing today's value. |
+| Missing data    | A null jurisdiction is UNKNOWN and is never folded into another group.                                                                                                                                                                       |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                                      |
+| Disclosures     | None.                                                                                                                                                                                                                                        |
+
 ```sql
--- Denominator: all roots opened strictly more than 30 days before as_of_timestamp
-SELECT 
-    COUNT(CASE WHEN resolved_within_30d AND NOT reopened_within_30d THEN 1 END) AS numerator,
-    COUNT(*) AS denominator
-FROM cohort_issues;
+select s.category, s.jurisdiction_id, j.directory_version as boundary_version,
+       count(*) filter (where s.status is not null and s.status <> 'resolution_confirmed')::int as value,
+       count(*) filter (where s.status is null)::int as unknown_rows
+  from issue_status s
+  left join jurisdiction j on j.jurisdiction_id = s.jurisdiction_id
+ group by s.category, s.jurisdiction_id, j.directory_version
+ order by s.category nulls last, s.jurisdiction_id nulls last
 ```
 
-## 4. Worked Examples
+### M03 — Accepted issue cohort
 
-**1. Normal Closure:** 
-- Day 1: Issue opened. 
-- Day 5: Staff claims resolution (`current_status` = 'resolution_claimed'). Not resolved. 
-- Day 7: Citizen confirms (`current_status` = 'resolution_confirmed'). Resolved.
-- *Fixed-window 30d result:* Numerator = 1, Denominator = 1.
+Distinct canonical roots opened inside a window.
 
-**2. Dispute:** 
-- Day 1: Issue opened. 
-- Day 5: Staff claims resolution. 
-- Day 6: Citizen disputes (`current_status` = 'resolution_disputed').
-- *Fixed-window 30d result (if still disputed at Day 30):* Numerator = 0, Denominator = 1.
+| Field           | Contract                                                                                                                                                                                                                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                                                                                                                                 |
+| Numerator       | Distinct roots whose opened_at falls in [window_start, window_end).                                                                                                                                                                                                                                                                   |
+| Denominator     | None — A cohort size, which is itself a denominator for M04.                                                                                                                                                                                                                                                                          |
+| Cohort          | Roots opened in [window_start, window_end).                                                                                                                                                                                                                                                                                           |
+| Horizon         | `[:window_start, :window_end)`, read at `:as_of`                                                                                                                                                                                                                                                                                      |
+| Inclusions      | Every accepted issue in the window                                                                                                                                                                                                                                                                                                    |
+| Exclusions      | Submissions that never became a canonical issue                                                                                                                                                                                                                                                                                       |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. Membership is fixed at the window end; a later merge does not retrospectively change who was in the cohort. |
+| Corrections     | Status at a past horizon is reconstructed from status_event bounded by both occurred_at and the knowledge cutoff, so a later state never leaks backwards. Where the ledger cannot establish it, the dimension is UNKNOWN.                                                                                                             |
+| Missing data    | Not applicable: opened_at is mandatory.                                                                                                                                                                                                                                                                                               |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                                                                                                                               |
+| Disclosures     | None.                                                                                                                                                                                                                                                                                                                                 |
 
-**3. Reopening:** 
-- Day 1: Issue opened. 
-- Day 5: Confirmed. 
-- Day 10: Reopened (`current_status` = 'reopened'). 
-- *Fixed-window 30d result:* Numerator = 0, Denominator = 1.
+```sql
+select count(*)::int as value, 0 as unknown_rows from cohort
+```
 
-**4. Merge:** 
-- Issue A and Issue B both have 2 contributors, with 1 person reporting both. 
-- B is merged into A. B has an active `issue_alias` to A. 
-- Backlog count: 1 (Issue A is the root).
-- Unique contributors for A: 3 (union of sets, not sum).
+### M04 — Standing resolution rate, status as of a date
 
-**5. Insufficient Observation Window:** 
-- Issue opened 15 days ago. Resolved 5 days ago. 
-- *Fixed-window 30d result:* Excluded from denominator entirely.
+The share of one opened cohort that is standing confirmed at the horizon. A status snapshot, not a speed.
 
-**6. Missing Population Data:** 
-- Jurisdiction X has no population estimate loaded.
-- *Result:* `estimated_population` = NULL. Per-capita metrics = NULL.
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | percent                                                                                                                                                                                                                   |
+| Numerator       | Cohort roots whose reconstructed status at the horizon is resolution_confirmed.                                                                                                                                           |
+| Denominator     | Every root in the opened cohort (M03).                                                                                                                                                                                    |
+| Cohort          | Roots opened in [window_start, window_end).                                                                                                                                                                               |
+| Horizon         | `[:window_start, :window_end)`, read at `:as_of`                                                                                                                                                                          |
+| Inclusions      | Roots standing confirmed at the horizon                                                                                                                                                                                   |
+| Exclusions      | Roots currently reopened, disputed, or claimed but unconfirmed                                                                                                                                                            |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | A reopening at or before the horizon removes the root from the numerator, because the resolution no longer stands.                                                                                                        |
+| Missing data    | An empty cohort yields UNKNOWN, never 0%.                                                                                                                                                                                 |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | A confirmed repair means the people who reported it agreed the problem looks fixed. It is not an inspection and not an engineer's certification.                                                                          |
 
-## 5. Invariants V038 Must Preserve
+```sql
+select
+  count(*) filter (where c.status = 'resolution_confirmed')::int as numerator,
+  count(*)::int as denominator,
+  count(*) filter (where c.status is null)::int as unknown_rows
+from cohort c
+```
 
-- V038 (Analytics Pipeline Implementation) must use `current_version` and `status_event` ledgers to reconstruct state at `as_of_timestamp` exactly.
-- V038 must project `issue_participation` folding rules (as defined in V029) accurately when aggregating unique contributors across aliases.
-- V038 must NEVER emit an assumed `0` for missing population or demographic data.
+### M05 — Fixed-window resolution rate
 
-## 6. Acceptance Tests V038 Should Later Implement
+The share of a cohort that reached a confirmation within the window and still stood at the window's end. Comparable between cohorts in a way M04 is not.
 
-1. **Survivorship Bias Test:** Assert that `time_to_resolution` calculation accepts censored inputs (unresolved issues) and does not drop them from the denominator.
-2. **Reopening Window Test:** Assert an issue confirmed on day 5 and reopened on day 10 yields `false` for `resolved_within_30d_window`.
-3. **Double Counting Test:** Assert that summing unique contributors across two merged issues equals the mathematical union, not the scalar sum.
-4. **Hierarchical Disaggregation Test:** Assert that a dashboard querying `sum(unique_contributors)` across multiple jurisdictions triggers a validation failure or returns a prominent warning that summing distinct counts yields incorrect results.
-5. **Observation Window Test:** Assert that an issue opened 29 days ago is excluded from the 30-day fixed-window denominator.
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | percent                                                                                                                                                                                                                   |
+| Numerator       | Cohort roots first confirmed at or before opened_at + window, with no reopening at or before that same instant.                                                                                                           |
+| Denominator     | Cohort roots whose window has fully elapsed at the horizon. Younger roots are in neither the numerator nor the denominator.                                                                                               |
+| Cohort          | Roots opened in [window_start, window_end) and observed for the full window.                                                                                                                                              |
+| Horizon         | `[:window_start, :window_end)`, read at `:as_of`                                                                                                                                                                          |
+| Inclusions      | Resolutions that still stood at the window's end                                                                                                                                                                          |
+| Exclusions      | Roots not yet observed for the full window; Roots confirmed inside the window and reopened inside it                                                                                                                      |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | A reopening after the window closes does not restate the historical figure; the resolution did stand for the period the number describes.                                                                                 |
+| Missing data    | No sufficiently observed root yields UNKNOWN, never 0%.                                                                                                                                                                   |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | A confirmed repair means the people who reported it agreed the problem looks fixed. It is not an inspection and not an engineer's certification.                                                                          |
 
-## 7. Explicit Unresolved Product Decisions
+```sql
+select
+  count(*) filter (
+    where l.first_confirmed_at is not null
+      and l.first_confirmed_at
+            <= c.opened_at + make_interval(days => (select fixed_window_days from params))
+      and (l.first_reopened_at is null
+           or l.first_reopened_at
+                > c.opened_at + make_interval(days => (select fixed_window_days from params)))
+  )::int as numerator,
+  count(*)::int as denominator,
+  0 as unknown_rows
+from cohort c
+left join lifecycle l on l.issue_id = c.issue_id
+where c.opened_at + make_interval(days => (select fixed_window_days from params))
+        <= $1::timestamptz
+```
 
-1. **Cross-jurisdiction distinct counts:** While summing distinct counts locally is banned, how should the UI handle a user explicitly requesting a national-level distinct contributor count? (Option: Force a full table scan query, or disable the metric entirely).
-2. **Reopening after fixed window:** If an issue is reopened on Day 40, does it retrospectively alter the historical report of the 30-day cohort rate generated on Day 31? (Recommendation: Fixed windows are snapshots; Day 40 events do not rewrite the Day 30 snapshot).
+### M06 — Time to resolution
+
+Separated duration components, reported only alongside the count of issues that have no resolution time because they are still open.
+
+| Field           | Contract                                                                                                                                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | hours                                                                                                                                               |
+| Numerator       | Median elapsed hours for first confirmation, for the resolution that currently stands, and for the gap before a reopening.                          |
+| Denominator     | The resolved part of the cohort, reported with the unresolved remainder so the coverage of every figure is visible.                                 |
+| Cohort          | Roots opened in [window_start, window_end).                                                                                                         |
+| Horizon         | `[:window_start, :window_end)`, read at `:as_of`                                                                                                    |
+| Inclusions      | First-confirmation duration; Standing-resolution duration, less reopened gaps; Reopening-cycle duration; The count of roots with no resolution time |
+| Exclusions      | Any single headline average that omits the unresolved remainder                                                                                     |
+| Alias semantics | Durations are measured on the canonical root's own lifecycle events.                                                                                |
+| Corrections     | Gaps are recomputed from status_event, so a late correction changes the figure.                                                                     |
+| Missing data    | No resolved root yields UNKNOWN for every duration, never 0 hours.                                                                                  |
+| Aggregation     | **Not additive.** Two areas cannot be added; recompute over the combined area.                                                                      |
+| Disclosures     | A confirmed repair means the people who reported it agreed the problem looks fixed. It is not an inspection and not an engineer's certification.    |
+
+```sql
+, reopen_gap as (
+    select e.issue_id,
+           sum(extract(epoch from (
+             coalesce((select min(n.occurred_at) from bounded_event n
+                        where n.issue_id = e.issue_id
+                          and n.event_type = 'resolution_confirmed'
+                          and n.occurred_at > e.occurred_at), $1::timestamptz)
+             - e.occurred_at))) / 3600.0 as gap_hours
+      from bounded_event e
+     where e.event_type = 'issue_reopened'
+     group by e.issue_id
+  ),
+  reopen_cycle as (
+    select e.issue_id,
+           extract(epoch from (e.occurred_at - (
+             select max(p.occurred_at) from bounded_event p
+              where p.issue_id = e.issue_id
+                and p.event_type = 'resolution_confirmed'
+                and p.occurred_at <= e.occurred_at))) / 3600.0 as cycle_hours
+      from bounded_event e
+     where e.event_type = 'issue_reopened'
+  )
+select c.issue_id,
+       c.status,
+       round((extract(epoch from (l.first_confirmed_at - c.opened_at)) / 3600.0)::numeric, 1)
+         as first_confirmation_hours,
+       round(((extract(epoch from (l.last_confirmed_at - c.opened_at)) / 3600.0)
+              - coalesce(g.gap_hours, 0))::numeric, 1) as standing_resolution_hours,
+       round((select avg(rc.cycle_hours) from reopen_cycle rc where rc.issue_id = c.issue_id)::numeric, 1)
+         as reopening_cycle_hours
+  from cohort c
+  left join lifecycle l on l.issue_id = c.issue_id
+  left join reopen_gap g on g.issue_id = c.issue_id
+```
+
+### M07 — Age of unresolved issues
+
+Elapsed hours since opening for everything still in the backlog.
+
+| Field           | Contract                                                                       |
+| --------------- | ------------------------------------------------------------------------------ |
+| Unit            | hours                                                                          |
+| Numerator       | Median and maximum elapsed hours from opened_at to the horizon.                |
+| Denominator     | The current backlog (M01).                                                     |
+| Cohort          | Unresolved roots at the horizon.                                               |
+| Horizon         | `:as_of`                                                                       |
+| Inclusions      | Open; claimed but unconfirmed; disputed; reopened                              |
+| Exclusions      | Standing confirmed issues                                                      |
+| Alias semantics | Age is measured on the canonical root.                                         |
+| Corrections     | None: opened_at is not corrected.                                              |
+| Missing data    | An empty backlog yields UNKNOWN, never 0 hours.                                |
+| Aggregation     | **Not additive.** Two areas cannot be added; recompute over the combined area. |
+| Disclosures     | None.                                                                          |
+
+```sql
+select
+  round(percentile_cont(0.5) within group (
+    order by extract(epoch from ($1::timestamptz - s.opened_at)) / 3600.0)::numeric, 1) as median_hours,
+  round(max(extract(epoch from ($1::timestamptz - s.opened_at)) / 3600.0)::numeric, 1) as max_hours,
+  count(*)::int as denominator,
+  count(*) filter (where s.status is null)::int as unknown_rows
+from issue_status s
+where s.status is not null and s.status <> 'resolution_confirmed'
+```
+
+### M08 — Claims awaiting a response
+
+Repair claims recorded by staff that nobody has confirmed or disputed yet.
+
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                     |
+| Numerator       | Distinct roots whose reconstructed status at the horizon is resolution_claimed.                                                                                                                                           |
+| Denominator     | None — A count of outstanding responses.                                                                                                                                                                                  |
+| Cohort          | Backlog roots.                                                                                                                                                                                                            |
+| Horizon         | `:as_of`                                                                                                                                                                                                                  |
+| Inclusions      | Claims with no confirmation and no dispute                                                                                                                                                                                |
+| Exclusions      | Claims already confirmed; Claims already disputed; Reopened issues                                                                                                                                                        |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | Status at a past horizon is reconstructed from status_event bounded by both occurred_at and the knowledge cutoff, so a later state never leaks backwards. Where the ledger cannot establish it, the dimension is UNKNOWN. |
+| Missing data    | Not applicable.                                                                                                                                                                                                           |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | A claim is a department's account of its own work. It is not a resolution until somebody who reported the problem responds.                                                                                               |
+
+```sql
+select count(*) filter (where s.status = 'resolution_claimed')::int as value,
+       count(*) filter (where s.status is null)::int as unknown_rows
+  from issue_status s
+```
+
+### M09 — Disputed resolutions
+
+Claims a participant has disputed and that nobody has since resolved.
+
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                     |
+| Numerator       | Distinct roots whose reconstructed status at the horizon is resolution_disputed.                                                                                                                                          |
+| Denominator     | None — A count of open disagreements.                                                                                                                                                                                     |
+| Cohort          | Backlog roots.                                                                                                                                                                                                            |
+| Horizon         | `:as_of`                                                                                                                                                                                                                  |
+| Inclusions      | Disputes still standing at the horizon                                                                                                                                                                                    |
+| Exclusions      | Disputes a reviewer overruled, which become standing confirmed; Disputes returned to the crew, which become planned work                                                                                                  |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | Status at a past horizon is reconstructed from status_event bounded by both occurred_at and the knowledge cutoff, so a later state never leaks backwards. Where the ledger cannot establish it, the dimension is UNKNOWN. |
+| Missing data    | Not applicable.                                                                                                                                                                                                           |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | None.                                                                                                                                                                                                                     |
+
+```sql
+select count(*) filter (where s.status = 'resolution_disputed')::int as value,
+       count(*) filter (where s.status is null)::int as unknown_rows
+  from issue_status s
+```
+
+### M10 — Reopening rate
+
+The share of issues that reached a confirmation and were later reopened.
+
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | percent                                                                                                                                                                                                                   |
+| Numerator       | Roots with at least one issue_reopened event at or before the horizon, among those that had been confirmed.                                                                                                               |
+| Denominator     | Roots that reached resolution_confirmed at least once at or before the horizon.                                                                                                                                           |
+| Cohort          | Every root ever confirmed at or before the horizon.                                                                                                                                                                       |
+| Horizon         | `:as_of`                                                                                                                                                                                                                  |
+| Inclusions      | Roots reopened at least once                                                                                                                                                                                              |
+| Exclusions      | Roots never confirmed, which could not be reopened                                                                                                                                                                        |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | Reconstructed from the event ledger, so a late-recorded reopening changes it.                                                                                                                                             |
+| Missing data    | No confirmed root yields UNKNOWN, never 0%.                                                                                                                                                                               |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | A reopening is a sign the system worked, not that it failed: somebody was able to say a repair had not held.                                                                                                              |
+
+```sql
+select
+  count(*) filter (where l.reopened_count > 0)::int as numerator,
+  count(*)::int as denominator,
+  0 as unknown_rows
+from issue_status s
+join lifecycle l on l.issue_id = s.issue_id
+where l.first_confirmed_at is not null
+```
+
+### M11 — Standing confirmed resolutions
+
+Issues whose confirmation stands at the horizon and that are not currently reopened.
+
+| Field           | Contract                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                                                                     |
+| Numerator       | Distinct roots whose reconstructed status at the horizon is resolution_confirmed.                                                                                                                                         |
+| Denominator     | None — A count; M04 is the rate built on it.                                                                                                                                                                              |
+| Cohort          | Every canonical root opened at or before the horizon.                                                                                                                                                                     |
+| Horizon         | `:as_of`                                                                                                                                                                                                                  |
+| Inclusions      | Standing confirmations                                                                                                                                                                                                    |
+| Exclusions      | Issues reopened at or before the horizon                                                                                                                                                                                  |
+| Alias semantics | Alias edges active at the horizon are followed to the canonical root; a cycle or a chain longer than 16 hops resolves to nothing and is excluded from every count rather than guessed at. Child data folds into the root. |
+| Corrections     | Status at a past horizon is reconstructed from status_event bounded by both occurred_at and the knowledge cutoff, so a later state never leaks backwards. Where the ledger cannot establish it, the dimension is UNKNOWN. |
+| Missing data    | Not applicable.                                                                                                                                                                                                           |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                                                                   |
+| Disclosures     | A confirmed repair means the people who reported it agreed the problem looks fixed. It is not an inspection and not an engineer's certification.                                                                          |
+
+```sql
+select count(*) filter (where s.status = 'resolution_confirmed')::int as value,
+       count(*) filter (where s.status is null)::int as unknown_rows
+  from issue_status s
+```
+
+### M12 — Unique counted demo participants
+
+Distinct participants whose participation counts, folded across merged issues.
+
+| Field           | Contract                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                 |
+| Numerator       | Distinct participant_id with counted = true across the active alias closure of each root.                                             |
+| Denominator     | None — A distinct count of subjects, not a share.                                                                                     |
+| Cohort          | Participants attached to a canonical root at the horizon.                                                                             |
+| Horizon         | `:as_of`                                                                                                                              |
+| Inclusions      | Participation rows with counted = true and first evidence at or before the horizon                                                    |
+| Exclusions      | Participation explicitly not counted, with its recorded reason                                                                        |
+| Alias semantics | A merge unions contributors into the surviving root; it never adds the two totals.                                                    |
+| Corrections     | Reconstructed from first_evidence_at.                                                                                                 |
+| Missing data    | Not applicable.                                                                                                                       |
+| Aggregation     | **Not additive.** Two areas cannot be added; recompute over the combined area.                                                        |
+| Disclosures     | A count of counted demo participants. It does not mean nobody else is affected, and it is not evidence that the reports are accurate. |
+
+```sql
+select
+  (select count(distinct p.participant_id)
+     from active_roots ar
+     join roots r on r.root_id = ar.root_id
+     join issue_participation p on p.canonical_issue_id = ar.original_id
+    where p.counted = true and p.first_evidence_at <= $1::timestamptz)::int as distinct_in_scope,
+  (select coalesce(sum(n), 0) from (
+     select count(distinct p.participant_id) as n
+       from active_roots ar
+       join roots r on r.root_id = ar.root_id
+       join issue_participation p on p.canonical_issue_id = ar.original_id
+      where p.counted = true and p.first_evidence_at <= $1::timestamptz
+      group by ar.root_id) per_root)::int as sum_of_per_root,
+  (select count(*) from issue_participation p2
+     join active_roots ar2 on ar2.original_id = p2.canonical_issue_id
+    where p2.counted = false and p2.first_evidence_at <= $1::timestamptz)::int as not_counted_rows
+```
+
+### M13 — Evidence and submission volumes
+
+How much evidence is attached, kept separate from how many people reported.
+
+| Field           | Contract                                                                                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | count                                                                                                                                                                         |
+| Numerator       | Four separated counts: distinct submissions, links active at the horizon, links ever created before the horizon, and completion-evidence items attached to resolution claims. |
+| Denominator     | None — Volumes, not shares. Never a proxy for concern.                                                                                                                        |
+| Cohort          | Evidence belonging to a canonical root's alias closure.                                                                                                                       |
+| Horizon         | `:as_of`                                                                                                                                                                      |
+| Inclusions      | Active links for the active count; Every historical link for the historical count                                                                                             |
+| Exclusions      | Superseded or corrected links, for the active count only                                                                                                                      |
+| Alias semantics | Summed across the active alias closure.                                                                                                                                       |
+| Corrections     | Reconstructed from effective_from and effective_to.                                                                                                                           |
+| Missing data    | Not applicable.                                                                                                                                                               |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                                                                                       |
+| Disclosures     | Evidence volume measures how much was uploaded, not how many people are affected and not how serious anything is.                                                             |
+
+```sql
+select
+  (select count(distinct e.submission_id)
+     from active_roots ar
+     join roots r on r.root_id = ar.root_id
+     join issue_evidence_link l on l.canonical_issue_id = ar.original_id
+     join evidence_item e on e.evidence_id = l.evidence_id
+    where l.effective_from <= $1::timestamptz)::int as submissions,
+  (select count(*)
+     from active_roots ar
+     join roots r on r.root_id = ar.root_id
+     join issue_evidence_link l on l.canonical_issue_id = ar.original_id
+    where l.effective_from <= $1::timestamptz
+      and (l.effective_to is null or l.effective_to > $1::timestamptz))::int as active_links,
+  (select count(*)
+     from active_roots ar
+     join roots r on r.root_id = ar.root_id
+     join issue_evidence_link l on l.canonical_issue_id = ar.original_id
+    where l.effective_from <= $1::timestamptz)::int as historical_links,
+  (select count(*)
+     from roots r
+     join resolution_claim rc on rc.issue_id = r.root_id
+     join resolution_evidence_item ri on ri.claim_id = rc.claim_id
+    where rc.claimed_at <= $1::timestamptz and ri.privacy_state = 'active')::int as completion_evidence
+```
+
+### M14 — Estimated population served
+
+Population for a jurisdiction, taken only from a named external source.
+
+| Field           | Contract                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit            | population                                                                                                                                                                                                                                                                                                                                       |
+| Numerator       | The value the loaded context source published for that boundary, carried with its unit, its vintage and its licence. Nothing is converted between units.                                                                                                                                                                                         |
+| Denominator     | None — An externally sourced size, not a computed share.                                                                                                                                                                                                                                                                                         |
+| Cohort          | Jurisdiction boundaries.                                                                                                                                                                                                                                                                                                                         |
+| Horizon         | `:as_of`                                                                                                                                                                                                                                                                                                                                         |
+| Inclusions      | Values carrying a source, a unit, and a vintage                                                                                                                                                                                                                                                                                                  |
+| Exclusions      | Anything derived from report volume or contributor counts                                                                                                                                                                                                                                                                                        |
+| Alias semantics | Not applicable.                                                                                                                                                                                                                                                                                                                                  |
+| Corrections     | Managed by the V040 context import, which replaces a dataset's observations wholesale and records every row it refused.                                                                                                                                                                                                                          |
+| Missing data    | A boundary with no loaded observation is UNKNOWN; a boundary whose source recorded a missing-data indicator is UNKNOWN for a different, reported reason. Neither ever falls back to 0, and report volume is never substituted.                                                                                                                   |
+| Aggregation     | **Only across boundaries proven not to overlap.** Unproven disjointness yields UNKNOWN.                                                                                                                                                                                                                                                          |
+| Disclosures     | Population comes from a named source with its own unit, vintage and licence, and is shown with all three. Report volume is never used to estimate how many people a problem affects. The figures loaded in this demonstration are team-created synthetic data: they describe no real place and must not be quoted as a statistic about anywhere. |
+
+```sql
+select j.jurisdiction_id, j.directory_version as boundary_version,
+       o.value as population, o.missing_indicator, o.unit, o.vintage,
+       s.source_name as population_source, s.licence_or_permission_status as licence,
+       d.synthetic_provenance
+  from jurisdiction j
+  left join context_dataset d
+    on d.kind = 'population' and d.jurisdiction_profile_id = j.jurisdiction_profile_id
+  left join context_observation o
+    on o.dataset_id = d.dataset_id and o.jurisdiction_id = j.jurisdiction_id
+   and o.vintage <= $1::timestamptz
+  left join source_record s on s.source_record_id = d.source_record_id
+ where j.effective_from <= $1::timestamptz
+   and (j.effective_to is null or j.effective_to > $1::timestamptz)
+ order by j.internal_code
+```
+
+### M15 — Data coverage
+
+The share of records missing a dimension, so a reader can tell a real zero from an absence of data.
+
+| Field           | Contract                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| Unit            | percent                                                                                                     |
+| Numerator       | Records whose dimension is null or UNKNOWN.                                                                 |
+| Denominator     | Every record in scope at the horizon.                                                                       |
+| Cohort          | Canonical roots at the horizon.                                                                             |
+| Horizon         | `:as_of`                                                                                                    |
+| Inclusions      | Genuinely unknown dimensions                                                                                |
+| Exclusions      | None.                                                                                                       |
+| Alias semantics | Evaluated against the active root.                                                                          |
+| Corrections     | Recomputed at each horizon.                                                                                 |
+| Missing data    | This metric measures missing data; an empty scope yields UNKNOWN.                                           |
+| Aggregation     | Additive across disjoint areas of one boundary version.                                                     |
+| Disclosures     | Missing coverage is not zero incidence. A jurisdiction with no data has not been shown to have no problems. |
+
+```sql
+select
+  count(*)::int as denominator,
+  count(*) filter (where s.status is null
+                      or s.category is null
+                      or s.jurisdiction_id is null)::int as any_dimension_unknown,
+  count(*) filter (where s.status is null)::int as status_unknown,
+  count(*) filter (where s.category is null)::int as category_unknown,
+  count(*) filter (where s.jurisdiction_id is null)::int as jurisdiction_unknown
+from issue_status s
+```
+
+<!-- END generated: metric reference -->

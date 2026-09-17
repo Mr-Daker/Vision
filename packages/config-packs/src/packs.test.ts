@@ -22,6 +22,9 @@ import {
   loadTaxonomy,
   loadTriagePolicy,
   loadMatchingBounds,
+  loadContextPack,
+  loadProjectRegister,
+  loadPrioritizationPolicy,
   ConfigPackError,
 } from "./index.ts";
 
@@ -456,4 +459,343 @@ test("PACK: the demo taxonomy's labels are declared English and untranslated", (
   assert.equal(taxonomy.labelLanguage, "en-IN");
   assert.match(taxonomy.labelNote, /not translated/i);
   assert.equal(taxonomy.categories[0]?.label, "Water supply");
+});
+
+// ---------------------------------------------------------------------------
+// Context pack (V040)
+// ---------------------------------------------------------------------------
+
+const contextOverride = (over: Record<string, unknown>): Record<string, unknown> => ({
+  version: "test-context.v1",
+  notice: "SYNTHETIC context data invented for demonstration.",
+  source: {
+    source_record_id: "a0400000-0000-4000-8000-000000000040",
+    source_name: "test register",
+    source_url_or_location: "packs/test/context.json",
+    retrieved_at: "2026-09-17T00:00:00Z",
+    licence_or_permission_status: "synthetic",
+    demo_status: "team_created_synthetic",
+  },
+  datasets: [
+    {
+      dataset_id: "test.population",
+      kind: "population",
+      unit: "persons",
+      label: "Population (synthetic)",
+      max_age_days: 365,
+      rows: [
+        {
+          subject_kind: "jurisdiction",
+          subject_id: "T-1",
+          value: 100,
+          unit: "persons",
+          vintage: "2026-01-01T00:00:00Z",
+        },
+      ],
+    },
+  ],
+  ...over,
+});
+
+test("PACK: a context pack whose notice does not say the figures are synthetic is refused", () => {
+  // Every screen showing one of these figures inherits the claim the notice
+  // makes, so a pack that makes none cannot be loaded.
+  assert.throws(
+    () => loadContextPack("demo-district-a", contextOverride({ notice: "District context data." })),
+    ConfigPackError,
+  );
+});
+
+test("PACK: a context pack whose source may not be ingested is refused at load", () => {
+  for (const licence of ["reference_only", "unavailable", "verification_pending"]) {
+    assert.throws(
+      () =>
+        loadContextPack(
+          "demo-district-a",
+          contextOverride({
+            source: {
+              ...(contextOverride({}) as { source: Record<string, unknown> }).source,
+              licence_or_permission_status: licence,
+            },
+          }),
+        ),
+      ConfigPackError,
+      `${licence} data must not be loadable (V004 §5)`,
+    );
+  }
+});
+
+test("PACK: a context dataset with no currency window is refused", () => {
+  // Without one there is no threshold at which a reader is told a figure is
+  // old, and a stale number shown as current is the failure V040 prevents.
+  assert.throws(
+    () =>
+      loadContextPack(
+        "demo-district-a",
+        contextOverride({
+          datasets: [
+            {
+              ...(contextOverride({}) as { datasets: Record<string, unknown>[] }).datasets[0],
+              max_age_days: 0,
+            },
+          ],
+        }),
+      ),
+    ConfigPackError,
+  );
+});
+
+test("PACK: the demo context pack is synthetic, and says so in its own words", () => {
+  const pack = loadContextPack("demo-district-a");
+  assert.equal(pack.source.licenceOrPermissionStatus, "synthetic");
+  assert.equal(pack.source.demoStatus, "team_created_synthetic");
+  assert.match(pack.notice, /SYNTHETIC/);
+  assert.match(pack.notice, /describes a real place|describe no real place|no real place/i);
+  assert.match(pack.notice, /no external dataset was ingested/i);
+});
+
+test("PACK: the demo context pack models a missing figure and a stale one on purpose", () => {
+  const pack = loadContextPack("demo-district-a");
+  const rows = pack.datasets.flatMap((dataset) => dataset.rows);
+
+  // A ward with no population figure must read as unknown everywhere, never as
+  // zero people — so the pack ships one.
+  assert.ok(
+    rows.some((row) => typeof row.value === "string" && /not surveyed|NA/i.test(row.value)),
+    "the pack must contain at least one deliberately absent figure",
+  );
+
+  // And one figure old enough that every screen showing it has to say so.
+  const access = pack.datasets.find((dataset) => dataset.kind === "access");
+  assert.notEqual(access, undefined);
+  const oldest = Math.min(...(access?.rows ?? []).map((row) => Date.parse(row.vintage)));
+  assert.ok(
+    Date.now() - oldest > (access?.maxAgeDays ?? 0) * 86_400_000,
+    "the pack must contain at least one figure past its currency window",
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Project register (V041)
+// ---------------------------------------------------------------------------
+
+const registerOverride = (over: Record<string, unknown>): Record<string, unknown> => ({
+  version: "test-projects.v1",
+  notice: "SYNTHETIC sanctioned-project register invented for demonstration.",
+  source: {
+    source_record_id: "a0410000-0000-4000-8000-000000000041",
+    source_name: "test register",
+    source_url_or_location: "packs/test/projects.json",
+    retrieved_at: "2026-09-17T00:00:00Z",
+    licence_or_permission_status: "synthetic",
+    demo_status: "team_created_synthetic",
+  },
+  projects: [
+    {
+      project_id: "T-PRJ-1",
+      project_name: "Test works (synthetic)",
+      scope_description: "Scope.",
+      scope_terms: ["water_supply"],
+      asset_id: null,
+      jurisdiction_internal_code: "T-1",
+      longitude: 74.5,
+      latitude: 16.8,
+      sanctioned_at: "2025-04-01T00:00:00Z",
+      completed_at: null,
+      amount: 100,
+      amount_unit: "inr",
+    },
+  ],
+  ...over,
+});
+
+const firstProject = (): Record<string, unknown> =>
+  (registerOverride({}) as { projects: Record<string, unknown>[] }).projects[0] as Record<
+    string,
+    unknown
+  >;
+
+test("PACK: a project register whose notice does not say the projects are synthetic is refused", () => {
+  // A funding claim inherits whatever the register says about itself, and
+  // "this asset was paid for" is the most loaded thing this system can appear
+  // to say. A register that makes no claim about its own provenance cannot be
+  // loaded at all.
+  assert.throws(
+    () => loadProjectRegister("demo-district-a", registerOverride({ notice: "Project register." })),
+    ConfigPackError,
+  );
+});
+
+test("PACK: a project register that may not be ingested is refused at load", () => {
+  for (const licence of ["reference_only", "unavailable", "verification_pending"]) {
+    assert.throws(
+      () =>
+        loadProjectRegister(
+          "demo-district-a",
+          registerOverride({
+            source: {
+              ...(registerOverride({}) as { source: Record<string, unknown> }).source,
+              licence_or_permission_status: licence,
+            },
+          }),
+        ),
+      ConfigPackError,
+      `${licence} funding data must not be loadable (V004 §5)`,
+    );
+  }
+});
+
+test("PACK: a project with no scope terms is refused", () => {
+  // Without them it can only ever be matched on where it is, and proximity
+  // alone is never enough to propose a link (V041).
+  assert.throws(
+    () =>
+      loadProjectRegister(
+        "demo-district-a",
+        registerOverride({ projects: [{ ...firstProject(), scope_terms: [] }] }),
+      ),
+    ConfigPackError,
+  );
+});
+
+test("PACK: an amount without its unit is refused, and so is a unit without an amount", () => {
+  for (const broken of [{ amount_unit: null }, { amount: null }]) {
+    assert.throws(
+      () =>
+        loadProjectRegister(
+          "demo-district-a",
+          registerOverride({ projects: [{ ...firstProject(), ...broken }] }),
+        ),
+      ConfigPackError,
+    );
+  }
+});
+
+test("PACK: the demo register models one defensible match, one ambiguity and one distractor", () => {
+  const pack = loadProjectRegister("demo-district-a");
+  assert.equal(pack.source.licenceOrPermissionStatus, "synthetic");
+  assert.match(pack.notice, /SYNTHETIC/);
+  assert.match(pack.notice, /nothing here may be quoted as evidence/i);
+
+  // Projects naming an asset: the only signal that can carry a proposal alone.
+  // Two of them, with different jobs — one demonstrates a defensible link, the
+  // other a report whose lifecycle falls inside a project's own dates (V043).
+  assert.equal(pack.projects.filter((project) => project.assetId !== null).length, 2);
+
+  // Two sharing a place and a scope, so the matcher has to say it cannot
+  // separate them rather than picking one.
+  const sanitation = pack.projects.filter((project) => project.scopeTerms.includes("sanitation"));
+  assert.equal(sanitation.length, 2);
+  assert.notEqual(sanitation[0]?.projectId, sanitation[1]?.projectId);
+
+  // And at least one that matches nothing, so a no-match is a real search
+  // rather than a search of an empty register.
+  assert.ok(pack.projects.length >= 4);
+});
+
+// ---------------------------------------------------------------------------
+// Prioritization policy (V042)
+// ---------------------------------------------------------------------------
+
+const priorityOverride = (over: Record<string, unknown>): Record<string, unknown> => ({
+  version: "test-priority.v1",
+  note: "An ordering by configured factors. It is not a finding about need.",
+  budget_assumption: "No budget or cost information is used anywhere in this ordering.",
+  minimum_factors_for_ranking: 2,
+  existing_project_direction: "deprioritise",
+  existing_project_rationale: "a confirmed project suggests the work is already planned",
+  references: {
+    persistence_reference_days: 120,
+    persistence_per_reopening: 0.25,
+    population_reference_count: 20000,
+    equity_reference_rate_per_1000: 8,
+    alternatives_reference_count: 3,
+  },
+  weightings: [
+    {
+      id: "a",
+      label: "A",
+      rationale: "one defensible reading",
+      weights: { persistence: 0.5, reporting_equity: 0.5 },
+    },
+    {
+      id: "b",
+      label: "B",
+      rationale: "another defensible reading",
+      weights: { persistence: 0.8, reporting_equity: 0.2 },
+    },
+  ],
+  ...over,
+});
+
+test("PACK: a prioritization policy with one weighting is refused", () => {
+  // One weighting produces a ranking that reads as a finding; the interval
+  // between several is what the evidence supports.
+  assert.throws(
+    () =>
+      loadPrioritizationPolicy(
+        "demo-district-a",
+        priorityOverride({
+          weightings: [(priorityOverride({}) as { weightings: unknown[] }).weightings[0]],
+        }),
+      ),
+    ConfigPackError,
+  );
+});
+
+test("PACK: weightings that do not sum to one are refused", () => {
+  assert.throws(
+    () =>
+      loadPrioritizationPolicy(
+        "demo-district-a",
+        priorityOverride({
+          weightings: [
+            { id: "a", label: "A", rationale: "r", weights: { persistence: 0.5 } },
+            { id: "b", label: "B", rationale: "r", weights: { persistence: 1 } },
+          ],
+        }),
+      ),
+    ConfigPackError,
+    "intervals between weightings that are not comparable mean nothing",
+  );
+});
+
+test("PACK: a policy that does not state its budget assumption is refused", () => {
+  // The ordering knows nothing about cost, and every reader will assume
+  // otherwise unless the pack says so.
+  assert.throws(
+    () =>
+      loadPrioritizationPolicy(
+        "demo-district-a",
+        priorityOverride({ budget_assumption: "Costs are considered." }),
+      ),
+    ConfigPackError,
+  );
+});
+
+test("PACK: the direction of the existing-project factor must be chosen explicitly", () => {
+  assert.throws(
+    () =>
+      loadPrioritizationPolicy(
+        "demo-district-a",
+        priorityOverride({ existing_project_direction: "either" }),
+      ),
+    ConfigPackError,
+  );
+});
+
+test("PACK: the demo policy declares four plausible weightings that genuinely differ", () => {
+  const pack = loadPrioritizationPolicy("demo-district-a");
+  assert.ok(pack.weightings.length >= 4);
+  assert.match(pack.budgetAssumption, /No budget, cost, capacity or delivery-time/);
+  assert.match(pack.note, /not a finding about need/);
+
+  // Each weighting must lead on a different factor, or the "plausible
+  // alternatives" are the same reading four times and the interval is fake.
+  const leaders = pack.weightings.map((weighting) => {
+    const entries = Object.entries(weighting.weights).sort((a, b) => b[1] - a[1]);
+    return entries[0]?.[0];
+  });
+  assert.equal(new Set(leaders).size >= 3, true, `weightings lead on ${leaders.join(", ")}`);
+  assert.match(pack.existingProjectRationale, /equally defensible/);
 });

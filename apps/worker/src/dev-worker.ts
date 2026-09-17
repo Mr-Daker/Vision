@@ -22,8 +22,14 @@ import {
   resolveJurisdictionAtLocation,
   seedJurisdictionProfile,
   seedRoutingDirectoryForProfile,
+  summaryStatus,
+  sweepAgeingAlerts,
+  applySummaryEvents,
+  rebuildSummaries,
+  reconcileSummaries,
 } from "@vision/adapters";
 import {
+  loadAgeingPolicy,
   loadJurisdictionProfile,
   loadMatchingBounds,
   loadRoutingDirectory,
@@ -94,6 +100,37 @@ console.log(
   `  routing:      ${directory.directoryVersion} (${String(seededDirectory.inserted)} inserted, ${String(seededDirectory.alreadyPresent)} present)`,
 );
 
+// Loaded once: a pack that fails validation should stop the worker at startup
+// rather than silently skip every sweep.
+const ageingPolicy = loadAgeingPolicy(profileId);
+
+/** Jurisdictions this profile actually seeded, so the sweep is scoped. */
+const ageingJurisdictions = async (): Promise<readonly string[]> => {
+  const { rows } = await client.query(
+    "select jurisdiction_id from jurisdiction where jurisdiction_profile_id = $1",
+    [profileId],
+  );
+  return rows.map((row) => String(row["jurisdiction_id"]));
+};
+
+// V038 summary projection. Seeded by a rebuild when it has never been built,
+// then maintained incrementally. Reconciled on a slower cadence than it is
+// applied, because a reconciliation reads every issue and a projection that
+// was checked a moment ago is not what a reader needs — a projection that is
+// checked *often enough that a fault surfaces the same day* is.
+const reconcileEveryPasses = Number(process.env["SUMMARY_RECONCILE_EVERY"] ?? 30);
+let summaryPass = 0;
+
+const startupSummary = await summaryStatus(client, { asOf: new Date() });
+if (startupSummary.freshness.state === "never_built") {
+  const built = await rebuildSummaries(client, { asOf: new Date() });
+  console.log(
+    `  summaries:   seeded by rebuild — ${String(built.issuesProjected)} issue(s) into ${String(built.cellsWritten)} cell(s)`,
+  );
+} else {
+  console.log(`  summaries:   ${startupSummary.freshness.explanation}`);
+}
+
 let running = true;
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
@@ -123,6 +160,63 @@ while (running) {
   } catch (error) {
     console.error(`  relay pass failed: ${error instanceof Error ? error.name : "unknown"}`);
   }
+
+  // V036 ageing sweep. Separate from the relay pass because it is not outbox
+  // work: nothing is delivered, and a failure here must not make a delivered
+  // task look unhandled. `asOf` is passed rather than read inside, so this and
+  // the tests drive the same code path.
+  try {
+    const asOf = new Date();
+    for (const jurisdictionId of await ageingJurisdictions()) {
+      const swept = await sweepAgeingAlerts(client, {
+        jurisdictionId,
+        policy: ageingPolicy,
+        asOf,
+        limit: 500,
+      });
+      if (swept.raised > 0) {
+        console.log(
+          `  ageing: raised ${String(swept.raised)} alert(s) across ${String(swept.evaluated)} issue(s) in ${jurisdictionId}`,
+        );
+      }
+    }
+  } catch (error) {
+    console.error(`  ageing sweep failed: ${error instanceof Error ? error.name : "unknown"}`);
+  }
+
+  // V038 summary projection. Its own try/catch for the same reason as the
+  // ageing sweep: a projection that cannot keep up must not make delivered
+  // outbox work look unhandled, and a reconciliation that finds a fault must
+  // not stop the relay.
+  try {
+    summaryPass += 1;
+    const pass = await applySummaryEvents(client, { asOf: new Date(), limit: 500 });
+    if (pass.eventsApplied > 0 || pass.issuesDiscovered > 0) {
+      console.log(
+        `  summaries: applied ${String(pass.eventsApplied)} event(s), found ${String(pass.issuesDiscovered)} unprojected issue(s), reprojected ${String(pass.issuesProjected)} into ${String(pass.cellsRefreshed)} cell(s)`,
+      );
+    }
+    if (reconcileEveryPasses > 0 && summaryPass % reconcileEveryPasses === 0) {
+      const run = await reconcileSummaries(client, { asOf: new Date() });
+      if (!run.reconciled) {
+        // Loud, and specific enough to act on. A reconciliation failure that
+        // logs only "mismatch" gets muted rather than investigated.
+        console.error(
+          `  summaries: RECONCILIATION FAILED — ${String(run.mismatchedFacts)} issue(s) and ${String(run.mismatchedCells)} cell(s) disagree with a clean rebuild (run ${run.runId})`,
+        );
+        for (const difference of run.factDifferences.slice(0, 5)) {
+          console.error(
+            `    ${difference.issueId} ${difference.field}: projected ${difference.incremental}, rebuilt ${difference.rebuilt}`,
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error(
+      `  summary projection failed: ${error instanceof Error ? error.name : "unknown"}`,
+    );
+  }
+
   await new Promise((resolve) => setTimeout(resolve, intervalMs));
 }
 

@@ -204,6 +204,17 @@ const reviewCard = (item: ReviewerQueueItem): HTMLElement => {
     }
   }
 
+  // V041. The caveat that has to sit on this card is the one about what a
+  // *rejection* does not mean: deciding a report does not concern a project
+  // says nothing about whether the asset has been paid for.
+  if (item.kind === "project_link_proposal") {
+    const caveat = document.createElement("p");
+    caveat.className = "claim-caveat";
+    caveat.textContent =
+      "Confirming means this report concerns that project. Rejecting means it does not — it is not a finding about whether this asset has been funded, and no answer here is evidence about public spending.";
+    article.append(caveat);
+  }
+
   if (item.citizenNote !== undefined) {
     const note = document.createElement("blockquote");
     const label = document.createElement("strong");

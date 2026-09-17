@@ -63,6 +63,17 @@ export const resolvePreferredLocale = (
   return fallback;
 };
 
+/**
+ * The translator function on its own.
+ *
+ * Named so a pure view builder can take it without taking the whole
+ * translator, and so a caller cannot pass something that merely looks like one.
+ */
+export type Translate = (
+  key: StringKey,
+  params?: Readonly<Record<string, string | number>>,
+) => string;
+
 export type Translator = {
   readonly pack: LocalePack;
   readonly t: (key: StringKey, params?: Readonly<Record<string, string | number>>) => string;

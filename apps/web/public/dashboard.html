@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — district dashboard</title>
+    <meta
+      name="description"
+      content="District summary of reports by ward and category, with the population its totals reconcile to and a route from every figure to its records."
+    />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/reviewer.css" />
+    <!--
+      staff.css carries the operator card patterns — the facts readout, the
+      caution aside and the "why is this here?" disclosure — which this screen
+      uses exactly as the department inbox and the oversight workspace do.
+      Loaded rather than duplicated, so the four operator screens stay one
+      product rather than drifting into four.
+    -->
+    <link rel="stylesheet" href="/staff.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/dashboard-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#dashboard-main">Skip to the district dashboard</a>
+    <header class="reviewer-header">
+      <a class="reviewer-brand" href="/">
+        <img src="/assets/logo.png" alt="" width="480" height="271" />
+        <span>Vision district dashboard</span>
+      </a>
+      <nav aria-label="Workspace navigation">
+        <!-- V043. Shares this session, so a supervisor arrives signed in. -->
+        <a href="/compare.html">Compare candidates</a>
+        <a href="/supervisor.html">Oversight queues</a>
+        <a href="/staff.html">Department inbox</a>
+        <a href="/reviewer.html">Review queue</a>
+        <button type="button" id="dashboard-signout" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="dashboard-main">
+      <div class="page-intro">
+        <p class="eyebrow">Private district dashboard</p>
+        <h1>What has been reported, and where</h1>
+        <p>
+          Counts of reports this demonstration received, by ward and category, taken from the
+          prepared summaries. Every total on this page says what population it is a total of, and
+          every figure can be opened down to the records behind it. Nothing here measures how
+          serious a problem is or how many people it affects.
+        </p>
+      </div>
+
+      <p id="dashboard-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+      <p id="dashboard-live" class="visually-hidden" aria-live="polite"></p>
+
+      <section id="dashboard-login" class="login-panel" aria-labelledby="dashboard-login-heading">
+        <p class="eyebrow">Access required</p>
+        <h2 id="dashboard-login-heading" tabindex="-1">Choose a supervisor account</h2>
+        <p class="disclosure">Simulated demonstration identity — not a real identity check</p>
+        <p>
+          The dashboard reads what a supervisor is already authorized to see: counts inside their
+          own jurisdictions, and redacted copies of evidence. It cannot open an original photograph,
+          and it changes nothing.
+        </p>
+        <div id="dashboard-login-choices" class="login-choices" aria-live="polite"></div>
+      </section>
+
+      <section id="dashboard-workspace" aria-labelledby="dashboard-workspace-heading" hidden>
+        <div class="workspace-heading-row">
+          <div>
+            <p id="dashboard-role" class="eyebrow"></p>
+            <h2 id="dashboard-workspace-heading" tabindex="-1">District summary</h2>
+          </div>
+          <button type="button" id="refresh-dashboard" class="secondary-button">Refresh</button>
+        </div>
+
+        <!--
+          Three banners, above the table rather than below it. Each says a
+          different way this page can be wrong: the totals may not add up to
+          the records, the summary may be behind them, and the coverage may be
+          incomplete. A reader who scrolls past the numbers has already been
+          told.
+        -->
+        <div id="dashboard-banners" class="dashboard-banners"></div>
+
+        <p id="dashboard-as-of" class="queue-note"></p>
+
+        <h3 class="dashboard-section-heading">Reports by ward and category</h3>
+        <div class="dashboard-table-scroll">
+          <table id="dashboard-table" class="dashboard-table">
+            <caption class="visually-hidden">
+              Reports by ward and category. A cell reading “No data” means nothing can be concluded
+              about it, which is not the same as a cell reading zero. Each row adds up to its ward
+              total, including the “Other categories” column.
+            </caption>
+            <thead id="dashboard-table-head"></thead>
+            <tbody id="dashboard-table-body"></tbody>
+          </table>
+        </div>
+
+        <aside class="triage-disclosure" aria-labelledby="reading-heading">
+          <strong id="reading-heading">How to read this table</strong>
+          <p>
+            <strong class="legend-zero">0</strong> means the summary is up to date and matches the
+            records, and it found no reports here.
+            <strong class="legend-absent">No data</strong> means the summary is behind the records
+            or has not been checked, so nothing can be concluded — it is not zero, and it is not
+            evidence that there is nothing wrong there. The same empty slot is shown one way or the
+            other depending on whether the summary above can be trusted. Select any count to open
+            the reports behind it.
+          </p>
+          <p>
+            “Other categories” holds reports filed under a category this deployment does not track.
+            They are counted so every row adds up to its ward total.
+          </p>
+        </aside>
+
+        <section id="untracked-section" aria-labelledby="untracked-heading" hidden>
+          <h3 id="untracked-heading" class="dashboard-section-heading">
+            Filed under categories this deployment does not track
+          </h3>
+          <p class="queue-note">
+            These reports are counted in the total above. They are listed separately because the
+            taxonomy pack does not list their category, so no ward can be said to be missing data in
+            them.
+          </p>
+          <details class="ordering-detail">
+            <summary id="untracked-summary">Show the untracked categories</summary>
+            <div id="untracked-list" class="untracked-list"></div>
+          </details>
+        </section>
+
+        <h3 class="dashboard-section-heading">District context</h3>
+        <p class="queue-note">
+          Population, enrolment, access and investment figures for these wards. Every figure states
+          where it came from, when it was recorded as true, and — for the data in this demonstration
+          — that it was invented. None of it may be quoted as a statistic about anywhere.
+        </p>
+        <div id="context-banner" class="dashboard-banners"></div>
+        <div id="context-list" class="context-list"></div>
+        <details id="context-rejections" class="ordering-detail" hidden>
+          <summary id="context-rejections-summary">Show the refused rows</summary>
+          <div id="context-rejection-list" class="untracked-list"></div>
+        </details>
+
+        <h3 class="dashboard-section-heading">District measures</h3>
+        <p class="queue-note">
+          Each of these states the population it was measured over. Open a definition to see the
+          numerator, the denominator, and what the figure does not mean.
+        </p>
+        <div id="dashboard-metrics" class="dashboard-metrics"></div>
+
+        <section id="drilldown" class="drilldown" aria-labelledby="drilldown-heading" hidden>
+          <div class="workspace-heading-row">
+            <h3 id="drilldown-heading" tabindex="-1" class="dashboard-section-heading">
+              Supporting records
+            </h3>
+            <button type="button" id="close-drilldown" class="secondary-button">Close</button>
+          </div>
+          <p id="drilldown-summary" class="queue-note"></p>
+          <div id="drilldown-list" class="review-list staff-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      Every report, department and figure shown here is part of a simulation. No number on this page
+      is an official statistic, and no screen here is an official government record.
+    </footer>
+  </body>
+</html>

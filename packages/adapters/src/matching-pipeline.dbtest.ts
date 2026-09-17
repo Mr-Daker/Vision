@@ -1408,3 +1408,82 @@ test("V023: without a classifier the stage still works, on the fallback category
   );
   assert.equal(rows[0]?.["n"], 0);
 });
+
+// ---------------------------------------------------------------------------
+// The ledger, which is what V037 and V038 read
+// ---------------------------------------------------------------------------
+
+test("PIPE: opening an issue appends a creation event stamped at opened_at", async () => {
+  // Nothing wrote a `canonical_issue` event on creation, so an event-driven
+  // reader could not learn that a report existed: V038's projection found new
+  // issues only by their absence, and V037's historical status reconstruction
+  // had no ledger to reconstruct from.
+  const { submissionId } = await newSubmission({ origin: nextOrigin(), observedHoursAgo: 30 });
+
+  const result = await runMatchingStage(client, {
+    submissionId,
+    jurisdictionId,
+    ...stageOptions(),
+  });
+  assert.equal(result.status, "completed");
+  if (result.status !== "completed") return;
+  collect(result.issueId);
+  assert.equal(result.assignment, "created");
+
+  const { rows } = await client.query(
+    `select e.event_type, e.actor_type, e.aggregate_version,
+            e.occurred_at = i.opened_at as at_opened_at,
+            e.recorded_at >= e.occurred_at as recorded_after
+       from status_event e
+       join canonical_issue i on i.issue_id = e.aggregate_id::uuid
+      where e.aggregate_type = 'canonical_issue' and e.aggregate_id = $1
+      order by e.aggregate_version asc`,
+    [result.issueId],
+  );
+
+  const created = rows[0];
+  assert.equal(created?.["event_type"], "issue_created");
+  assert.equal(created?.["actor_type"], "system_worker");
+  assert.equal(created?.["aggregate_version"], 1);
+  // Event time is when the issue was opened, not when the row was written.
+  // The two differ by the 30 hours this report was observed before it was
+  // filed, and a horizon between them must not see an issue whose own
+  // `opened_at` says it already existed while its ledger says nothing.
+  assert.equal(created?.["at_opened_at"], true, "creation is stamped at the issue's opened_at");
+  assert.equal(created?.["recorded_after"], true, "ingestion time is still now");
+});
+
+test("PIPE: routing moves the issue and the versions stay contiguous", async () => {
+  const { submissionId } = await newSubmission({ origin: nextOrigin() });
+
+  const result = await runMatchingStage(client, {
+    submissionId,
+    jurisdictionId,
+    ...stageOptions(),
+  });
+  assert.equal(result.status, "completed");
+  if (result.status !== "completed") return;
+  collect(result.issueId);
+  assert.equal(result.routing?.outcome, "routed");
+
+  const { rows } = await client.query(
+    `select event_type, aggregate_version from status_event
+      where aggregate_type = 'canonical_issue' and aggregate_id = $1
+      order by aggregate_version asc`,
+    [result.issueId],
+  );
+  assert.deepEqual(
+    rows.map((row) => [String(row["event_type"]), Number(row["aggregate_version"])]),
+    [
+      ["issue_created", 1],
+      ["routed_internal", 2],
+    ],
+    "a gap here is indistinguishable from a dropped event",
+  );
+
+  const status = await client.query(
+    "select current_status from canonical_issue where issue_id = $1",
+    [result.issueId],
+  );
+  assert.equal(status.rows[0]?.["current_status"], "routed_internal");
+});

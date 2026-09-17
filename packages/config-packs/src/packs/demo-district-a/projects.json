@@ -1,0 +1,90 @@
+{
+  "version": "demo-projects.v1",
+  "notice": "SYNTHETIC sanctioned-project register invented for demonstration. Every project below was authored by the team. None describes real public spending anywhere, no external funding dataset was ingested, and nothing here may be quoted as evidence about what has or has not been funded.",
+  "source": {
+    "source_record_id": "a0410000-0000-4000-8000-000000000041",
+    "source_name": "Demo District A synthetic sanctioned-project register",
+    "source_url_or_location": "packages/config-packs/src/packs/demo-district-a/projects.json",
+    "retrieved_at": "2026-09-17T00:00:00Z",
+    "source_effective_at": "2026-04-01T00:00:00Z",
+    "licence_or_permission_status": "synthetic",
+    "demo_status": "team_created_synthetic"
+  },
+  "projects": [
+    {
+      "project_id": "DDA-PRJ-001",
+      "project_name": "Demo Primary School 1 water connection (synthetic)",
+      "scope_description": "Replace the handpump and connect the school building to the piped water supply.",
+      "scope_terms": ["water_supply", "handpump", "piped_connection"],
+      "asset_id": "demo-asset-001",
+      "jurisdiction_internal_code": "DDA-B1",
+      "longitude": 74.56,
+      "latitude": 16.85,
+      "sanctioned_at": "2025-04-01T00:00:00Z",
+      "completed_at": "2025-11-01T00:00:00Z",
+      "amount": 860000,
+      "amount_unit": "inr",
+      "note": "The defensible link: it names the asset a report is attached to, which identifies the thing itself rather than a place near it."
+    },
+    {
+      "project_id": "DDA-PRJ-002",
+      "project_name": "Demo Primary School 5 water main repair (synthetic)",
+      "scope_description": "Repair the water main serving the school compound and reinstate the supply.",
+      "scope_terms": ["water_supply", "mains_repair"],
+      "asset_id": "demo-asset-005",
+      "jurisdiction_internal_code": "DDA-B1",
+      "longitude": 74.5405,
+      "latitude": 16.8105,
+      "sanctioned_at": "2026-09-10T00:00:00Z",
+      "completed_at": "2026-09-30T00:00:00Z",
+      "amount": 1180000,
+      "amount_unit": "inr",
+      "note": "Deliberately overlapping a report's own lifecycle. The report attached to this asset was claimed fixed, disputed, confirmed and then reopened inside these dates \u2014 so the comparison view has to show events falling during a project without any of them becoming evidence that the money worked. A reopening inside the window is the case that resists that reading on its own."
+    },
+    {
+      "project_id": "DDA-PRJ-010",
+      "project_name": "Block sanitation block refurbishment, phase one (synthetic)",
+      "scope_description": "Refurbish the toilet block drainage and resurface the approach.",
+      "scope_terms": ["sanitation", "drainage"],
+      "asset_id": null,
+      "jurisdiction_internal_code": "DDA-B1",
+      "longitude": 75.9059,
+      "latitude": 17.6593,
+      "sanctioned_at": "2025-06-01T00:00:00Z",
+      "completed_at": null,
+      "amount": 1240000,
+      "amount_unit": "inr",
+      "note": "One half of the deliberate ambiguity: same place, same scope, different phase."
+    },
+    {
+      "project_id": "DDA-PRJ-011",
+      "project_name": "Block sanitation block refurbishment, phase two (synthetic)",
+      "scope_description": "Second-phase sanitation works on the same approach road.",
+      "scope_terms": ["sanitation", "drainage"],
+      "asset_id": null,
+      "jurisdiction_internal_code": "DDA-B1",
+      "longitude": 75.9057,
+      "latitude": 17.659,
+      "sanctioned_at": "2026-02-01T00:00:00Z",
+      "completed_at": null,
+      "amount": 980000,
+      "amount_unit": "inr",
+      "note": "The other half. Nothing in the register separates these two, so the matcher must say so rather than pick one."
+    },
+    {
+      "project_id": "DDA-PRJ-020",
+      "project_name": "District road resurfacing, southern stretch (synthetic)",
+      "scope_description": "Resurface four kilometres of the southern district road.",
+      "scope_terms": ["roads", "resurfacing"],
+      "asset_id": null,
+      "jurisdiction_internal_code": "DDA",
+      "longitude": 74.6,
+      "latitude": 16.82,
+      "sanctioned_at": "2024-01-15T00:00:00Z",
+      "completed_at": "2024-09-30T00:00:00Z",
+      "amount": 7400000,
+      "amount_unit": "inr",
+      "note": "Far from every demo report and sharing no scope with any of them. It exists so the register is not trivially small, and so a no-match is a real search rather than an empty one."
+    }
+  ]
+}

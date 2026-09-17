@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — supervisor oversight</title>
+    <meta
+      name="description"
+      content="Private oversight workspace for waiting, disputed and reopened issues in the Vision demonstration."
+    />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/reviewer.css" />
+    <!--
+      staff.css carries the operator *card* patterns — the facts readout, the
+      status line, the caution aside and the "why is this here?" disclosure —
+      which this screen uses in exactly the same way the department inbox does.
+      Loaded rather than duplicated: two copies of the same forty lines would
+      drift, and the point of reusing them is that the two workspaces stay
+      visually one product.
+    -->
+    <link rel="stylesheet" href="/staff.css" />
+    <link rel="stylesheet" href="/supervisor.css" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/supervisor-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#supervisor-main">Skip to supervisor oversight</a>
+    <header class="reviewer-header">
+      <a class="reviewer-brand" href="/">
+        <img src="/assets/logo.png" alt="" width="480" height="271" />
+        <span>Vision oversight</span>
+      </a>
+      <nav aria-label="Workspace navigation">
+        <!--
+          The dashboard shares this session, so a supervisor who is signed in
+          here arrives there signed in. It is linked from this screen alone:
+          the reviewer and department workspaces hold different sessions and
+          would meet a refusal.
+        -->
+        <a href="/dashboard.html">District dashboard</a>
+        <a href="/staff.html">Department inbox</a>
+        <a href="/reviewer.html">Review queue</a>
+        <button type="button" id="supervisor-signout" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="supervisor-main">
+      <div class="page-intro">
+        <p class="eyebrow">Private oversight workspace</p>
+        <h1>What is still waiting</h1>
+        <p>
+          Issues that have been with a department longer than this deployment said they would wait,
+          plus those a citizen has disputed or reopened. Every figure here is elapsed time measured
+          against a configured promise. Nothing on this page measures how serious a problem is.
+        </p>
+      </div>
+
+      <p id="supervisor-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+      <p id="supervisor-live" class="visually-hidden" aria-live="polite"></p>
+
+      <section id="supervisor-login" class="login-panel" aria-labelledby="supervisor-login-heading">
+        <p class="eyebrow">Access required</p>
+        <h2 id="supervisor-login-heading" tabindex="-1">Choose a supervisor account</h2>
+        <p class="disclosure">Simulated demonstration identity — not a real identity check</p>
+        <p>
+          This demonstration does not contact DigiLocker or a government staff directory. The
+          supervisor role and its jurisdictions are stored and enforced by the server.
+        </p>
+        <div id="supervisor-login-choices" class="login-choices" aria-live="polite"></div>
+      </section>
+
+      <section id="supervisor-workspace" aria-labelledby="supervisor-workspace-heading" hidden>
+        <div class="workspace-heading-row">
+          <div>
+            <p id="supervisor-role" class="eyebrow"></p>
+            <h2 id="supervisor-workspace-heading" tabindex="-1">Oversight queues</h2>
+          </div>
+          <button type="button" id="refresh-queues" class="secondary-button">Refresh</button>
+        </div>
+
+        <div class="queue-controls">
+          <label>
+            Authorized jurisdiction
+            <select id="jurisdiction-select"></select>
+          </label>
+          <label>
+            Queue
+            <select id="queue-filter">
+              <option value="all">Every queue</option>
+              <option value="unacknowledged">No recipient reply yet</option>
+              <option value="overdue">Past the configured wait</option>
+              <option value="escalated">Past the escalation wait</option>
+              <option value="disputed">Repair claim disputed</option>
+              <option value="reopened">Reopened after confirmation</option>
+            </select>
+          </label>
+        </div>
+
+        <dl class="queue-summary" aria-label="Oversight queue summary">
+          <div>
+            <dt>No recipient reply</dt>
+            <dd id="count-unacknowledged">0</dd>
+          </div>
+          <div>
+            <dt>Past configured wait</dt>
+            <dd id="count-overdue">0</dd>
+          </div>
+          <div>
+            <dt>Past escalation wait</dt>
+            <dd id="count-escalated">0</dd>
+          </div>
+          <div>
+            <dt>Disputed</dt>
+            <dd id="count-disputed">0</dd>
+          </div>
+          <div>
+            <dt>Reopened</dt>
+            <dd id="count-reopened">0</dd>
+          </div>
+        </dl>
+
+        <p id="as-of" class="queue-note"></p>
+
+        <!--
+          The two notes that have to travel with this screen. The first says the
+          thresholds are a configured promise rather than a severity judgement;
+          the second says an alert here was recorded and not sent to anybody.
+        -->
+        <aside class="triage-disclosure" aria-labelledby="policy-heading">
+          <strong id="policy-heading">Elapsed time, not an urgency score</strong>
+          <p id="policy-note"></p>
+        </aside>
+        <aside class="triage-disclosure" aria-labelledby="delivery-heading">
+          <strong id="delivery-heading">Recorded internally, not delivered</strong>
+          <p id="delivery-note"></p>
+        </aside>
+
+        <div id="supervisor-list" class="review-list staff-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      Every department, recipient and alert shown here is simulated and internal. No alert on this
+      page has been sent to any official, and no screen here is an official government
+      acknowledgment.
+    </footer>
+  </body>
+</html>

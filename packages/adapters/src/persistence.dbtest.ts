@@ -811,12 +811,26 @@ test("V012: a project link targets exactly one of an issue or an asset", async (
       [sourceId],
     );
 
+    // V041 added `project_id` and made it mandatory for every status except
+    // `unmatched`: a proposal has to name the project it proposes. The shape
+    // this test is about — exactly one of an issue or an asset — is unchanged,
+    // so the row gains a project and the assertion below stays as it was.
+    const projectId = `persistence-prj-${randomUUID().slice(0, 8)}`;
+    await client.query(
+      `insert into sanctioned_project (
+         project_id, project_name, scope_description, scope_terms, sanctioned_at,
+         source_record_id, synthetic_provenance
+       ) values ($1,'synthetic project','fixture scope',array['water_supply'], now(), $2, true)`,
+      [projectId, sourceId],
+    );
+
     const link = (issueId: string | null, assetId: string | null) =>
       client.query(
         `insert into project_link (
-           project_link_id, issue_id, asset_id, source_project_id, match_basis, proposed_at
-         ) values ($1,$2,$3,$4,'{"basis":"asset_id"}'::jsonb, now())`,
-        [randomUUID(), issueId, assetId, sourceId],
+           project_link_id, issue_id, asset_id, project_id, source_project_id,
+           match_basis, proposed_at
+         ) values ($1,$2,$3,$4,$5,'{"basis":"asset_id"}'::jsonb, now())`,
+        [randomUUID(), issueId, assetId, projectId, sourceId],
       );
 
     await expectViolation(

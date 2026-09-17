@@ -1188,3 +1188,106 @@ body.menu-open {
     animation: none;
   }
 }
+
+/* ── Skip link (V045) ─────────────────────────────────────────
+   The landing page had none, so a keyboard user traversed the whole
+   header on every visit. Off-screen until focused, matching the
+   operator screens exactly rather than introducing a second pattern. */
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -5rem;
+  z-index: 60;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background: var(--pill-dark, #28282a);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ── Staggered entrance delays (V045) ─────────────────────────
+   These were `style="--d: ..."` attributes. The Content Security
+   Policy is `style-src 'self'`, which blocks a parsed style attribute,
+   so every one of them was refused and the stagger never ran — nine
+   console errors on the landing page and an animation nobody saw.
+   Carried as classes instead, which the policy permits. */
+
+.d-005 {
+  --d: 0.05s;
+}
+
+.d-008 {
+  --d: 0.08s;
+}
+
+.d-012 {
+  --d: 0.12s;
+}
+
+.d-02 {
+  --d: 0.2s;
+}
+
+.d-028 {
+  --d: 0.28s;
+}
+
+.d-03 {
+  --d: 0.3s;
+}
+
+.d-04 {
+  --d: 0.4s;
+}
+
+.d-042 {
+  --d: 0.42s;
+}
+
+.d-05 {
+  --d: 0.5s;
+}
+
+.d-058 {
+  --d: 0.58s;
+}
+
+.d-066 {
+  --d: 0.66s;
+}
+
+.d-074 {
+  --d: 0.74s;
+}
+
+/* Reveal stagger, set by class because the policy refuses a style write. */
+.rd-1 {
+  --rd: 0.08s;
+}
+
+.rd-2 {
+  --rd: 0.16s;
+}
+
+.rd-3 {
+  --rd: 0.24s;
+}
+
+.rd-4 {
+  --rd: 0.32s;
+}
+
+.rd-5 {
+  --rd: 0.4s;
+}
+
+.rd-6 {
+  --rd: 0.48s;
+}

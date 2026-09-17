@@ -17,9 +17,11 @@
  */
 
 import {
+  loadAgeingPolicy,
   loadConfirmationPolicy,
   loadMatchingBounds,
   loadTaxonomy,
+  loadPrioritizationPolicy,
   loadTriagePolicy,
   ConfigPackError,
 } from "@vision/config-packs";
@@ -136,3 +138,53 @@ export const resolveTriagePolicy = (
 };
 
 export { ConfigPackError };
+
+export type ResolvedAgeingPolicy = {
+  readonly version: string;
+  readonly note: string;
+  readonly rules: Readonly<
+    Record<string, { readonly alertAfterDays: number; readonly escalateAfterDays: number }>
+  >;
+  readonly fallback: { readonly alertAfterDays: number; readonly escalateAfterDays: number };
+};
+
+/**
+ * Loads how long this deployment said it would tolerate a report waiting (V036).
+ *
+ * Same reasoning as `resolveConfirmationPolicy`: a missing or malformed pack is
+ * an error rather than a fallback, because a built-in default would be holding
+ * a department to a deadline nobody configured — and the note the pack carries
+ * is the only place the alert states it is not a severity judgement.
+ */
+export const resolveAgeingPolicy = (
+  profileId: string,
+  override?: unknown,
+): ResolvedAgeingPolicy => {
+  const loaded = loadAgeingPolicy(profileId, override);
+  return {
+    version: loaded.version,
+    note: loaded.note,
+    rules: loaded.rules,
+    fallback: loaded.fallback,
+  };
+};
+
+/**
+ * Loads the V042 recommendation policy.
+ *
+ * Loaded, never defaulted: an ordering produced from a policy nobody wrote is
+ * an ordering nobody can argue with.
+ */
+export const resolveRecommendationPolicy = (profileId: string, override?: unknown) => {
+  const pack = loadPrioritizationPolicy(profileId, override);
+  return {
+    version: pack.version,
+    weightings: pack.weightings,
+    references: pack.references,
+    existingProjectDirection: pack.existingProjectDirection,
+    existingProjectRationale: pack.existingProjectRationale,
+    minimumFactorsForRanking: pack.minimumFactorsForRanking,
+    budgetAssumption: pack.budgetAssumption,
+    note: pack.note,
+  };
+};

@@ -1,0 +1,280 @@
+{
+  "runId": "20260917130139",
+  "reason": "V046 harness rehearsal",
+  "split": "development",
+  "providerMode": "stub",
+  "startedAt": "2026-09-17T13:01:40.029Z",
+  "finishedAt": "2026-09-17T13:01:40.244Z",
+  "verdict": {
+    "permitted": false,
+    "reasons": [
+      "this run used the development split, which the pipeline has been developed against; a figure from it is a rehearsal result and not a held-out measurement",
+      "the deterministic stub answered, not a model: this run measures the stub's fixed replies and says nothing about model quality",
+      "4 of 12 corpus reports were withheld from every label-dependent figure, so the measured subset is not the corpus",
+      "every mr-IN row was withheld, so this run carries no per-language result for mr-IN — which is a result V046 explicitly requires",
+      "candidate recall rests on 1 reviewed duplicate pair(s); one pair is an example, not a recall measurement",
+      "no figure in this run has a 95% interval narrower than 20 percentage points, so none may be written as a rate"
+    ]
+  },
+  "scores": [
+    {
+      "reportId": "dev-0001",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.roof"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "leaking"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.roof"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-education-works' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-education-works'"
+    },
+    {
+      "reportId": "dev-0002",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "dev-0003",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.window"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "broken_pane"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.window"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-education-works' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-education-works'"
+    },
+    {
+      "reportId": "dev-0004",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "dev-0005",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.wall"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'defect_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "structure.wall"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-education-works' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-education-works'"
+    },
+    {
+      "reportId": "dev-0006",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "sanitation.toilet"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "blocked_drain"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "sanitation.toilet"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-water-sanitation' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-water-sanitation'"
+    },
+    {
+      "reportId": "dev-0007",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "water.drinking"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "tap_broken"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "water.drinking"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-water-sanitation' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-water-sanitation'"
+    },
+    {
+      "reportId": "dev-0008",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "dev-0009",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "electrical.lighting"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "exposed_wiring"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "electrical.lighting"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-electrical' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-electrical'"
+    },
+    {
+      "reportId": "dev-0010",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "electrical.lighting"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "exposed_wiring"
+      },
+      "appliedCategory": {
+        "kind": "abstained_where_labelled",
+        "expected": "electrical.lighting"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: left for operational review (no_directory_entry). From the reviewed label: left for operational review (no_directory_entry)"
+    },
+    {
+      "reportId": "dev-0011",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "dev-0012",
+      "language": "und",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'category_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "proposedDefect": {
+        "kind": "abstained_where_labelled",
+        "expected": "leaking"
+      },
+      "appliedCategory": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'category_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "systemAbstained": true,
+      "routingEndToEnd": "incorrect",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: expected 'demo-dept-education-works' and nothing was routed (no_directory_entry). From the reviewed label: routed to 'demo-dept-education-works'"
+    }
+  ],
+  "duplicatePairs": [
+    {
+      "relationId": "dup-dev-001",
+      "retrieved": true,
+      "merged": false,
+      "detail": "1 candidate(s) were retrieved for the later report and it was still opened separately (assignment: created)"
+    }
+  ],
+  "distinctPairs": [
+    {
+      "relationId": "dist-dev-001",
+      "retrieved": true,
+      "merged": false,
+      "detail": "2 candidate(s) were retrieved for the later report and it was still opened separately (assignment: created)"
+    },
+    {
+      "relationId": "dist-dev-002",
+      "retrieved": true,
+      "merged": false,
+      "detail": "1 candidate(s) were retrieved for the later report and it was still opened separately (assignment: created)"
+    }
+  ],
+  "calls": []
+}

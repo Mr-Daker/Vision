@@ -1,0 +1,65 @@
+{
+  "version": "demo-priority.v1",
+  "note": "An ordering of reports by the factors configured below. It is not a finding about need, not a measure of how serious anything is, and not a statement about how public money should be spent. Every figure behind it is team-created synthetic data.",
+  "budget_assumption": "No budget, cost, capacity or delivery-time information is used anywhere in this ordering. It does not sequence spending, cannot say what is affordable, and does not know what any of this would cost.",
+  "minimum_factors_for_ranking": 2,
+  "existing_project_direction": "deprioritise",
+  "existing_project_rationale": "a confirmed sanctioned project suggests work is already planned for this asset, so this deployment lowers it rather than raising it — the opposite reading, that a funded asset which is still broken is a repeat failure, is equally defensible and is why this is configured rather than assumed",
+  "references": {
+    "persistence_reference_days": 120,
+    "persistence_per_reopening": 0.25,
+    "population_reference_count": 20000,
+    "equity_reference_rate_per_1000": 8,
+    "alternatives_reference_count": 3
+  },
+  "weightings": [
+    {
+      "id": "balanced",
+      "label": "Balanced",
+      "rationale": "no single factor is treated as decisive",
+      "weights": {
+        "persistence": 0.3,
+        "service_population": 0.2,
+        "reporting_equity": 0.25,
+        "alternatives": 0.15,
+        "existing_project": 0.1
+      }
+    },
+    {
+      "id": "equity-led",
+      "label": "Equity-led",
+      "rationale": "wards that report less are treated as under-served rather than untroubled",
+      "weights": {
+        "persistence": 0.2,
+        "service_population": 0.15,
+        "reporting_equity": 0.45,
+        "alternatives": 0.15,
+        "existing_project": 0.05
+      }
+    },
+    {
+      "id": "waiting-led",
+      "label": "Waiting-led",
+      "rationale": "how long people have already waited is treated as the strongest claim",
+      "weights": {
+        "persistence": 0.55,
+        "service_population": 0.15,
+        "reporting_equity": 0.15,
+        "alternatives": 0.1,
+        "existing_project": 0.05
+      }
+    },
+    {
+      "id": "reach-led",
+      "label": "Reach-led",
+      "rationale": "how many people a fix would reach is treated as the strongest claim",
+      "weights": {
+        "persistence": 0.2,
+        "service_population": 0.45,
+        "reporting_equity": 0.15,
+        "alternatives": 0.15,
+        "existing_project": 0.05
+      }
+    }
+  ]
+}

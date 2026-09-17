@@ -174,6 +174,93 @@ export class PostgresStaffGrantRepository {
   }
 
   /**
+   * Provisions the fixed simulated supervisor fixture (roadmap V036).
+   *
+   * Identical in shape to the reviewer provisioner, and deliberately so: a
+   * supervisor's oversight powers are jurisdiction-scoped exactly as a
+   * reviewer's decision powers are, and an existing account is never promoted
+   * to supervisor. A department staff member who could grant themselves
+   * oversight of their own backlog would not be oversight.
+   */
+  async ensureSimulatedSupervisor(
+    participantId: string,
+    jurisdictionProfileId: string,
+    jurisdictionInternalCodes: readonly string[],
+  ): Promise<StaffGrant> {
+    await this.db.query("begin");
+    try {
+      const jurisdictions = await this.db.query(
+        `select jurisdiction_id
+           from jurisdiction
+          where jurisdiction_profile_id = $1
+            and internal_code = any($2::text[])
+            and effective_from <= now()
+            and (effective_to is null or effective_to > now())
+          order by jurisdiction_id`,
+        [jurisdictionProfileId, jurisdictionInternalCodes],
+      );
+      const configuredCodes = new Set(jurisdictionInternalCodes);
+      if (configuredCodes.size === 0 || jurisdictions.rows.length !== configuredCodes.size) {
+        throw new StaffGrantError(
+          `the configured supervisor jurisdictions for profile '${jurisdictionProfileId}' are not fully seeded`,
+        );
+      }
+
+      const existing = await this.findActiveByParticipant(participantId);
+      let staffId: string;
+      if (existing === undefined) {
+        staffId = randomUUID();
+        await this.db.query(
+          `insert into staff_account
+             (staff_id, participant_id, role, account_state, provider_mode)
+           values ($1,$2,'supervisor','active','simulated')
+           on conflict (participant_id) do nothing`,
+          [staffId, participantId],
+        );
+        const stored = await this.db.query(
+          `select staff_id, role, account_state, provider_mode
+             from staff_account where participant_id = $1`,
+          [participantId],
+        );
+        const row = stored.rows[0];
+        if (
+          row === undefined ||
+          String(row["role"]) !== "supervisor" ||
+          String(row["account_state"]) !== "active" ||
+          String(row["provider_mode"]) !== "simulated"
+        ) {
+          throw new StaffGrantError("the authenticated identity is not an active demo supervisor");
+        }
+        staffId = String(row["staff_id"]);
+      } else {
+        if (existing.role !== "supervisor" || existing.providerMode !== "simulated") {
+          throw new StaffGrantError("the authenticated identity is not a simulated supervisor");
+        }
+        staffId = existing.staffId;
+      }
+
+      for (const row of jurisdictions.rows) {
+        await this.db.query(
+          `insert into staff_jurisdiction_grant (staff_id, jurisdiction_id)
+           values ($1,$2)
+           on conflict (staff_id, jurisdiction_id) do nothing`,
+          [staffId, String(row["jurisdiction_id"])],
+        );
+      }
+
+      const grant = await this.findActiveByParticipant(participantId);
+      if (grant === undefined || grant.role !== "supervisor") {
+        throw new StaffGrantError("the supervisor grant could not be provisioned");
+      }
+      await this.db.query("commit");
+      return grant;
+    } catch (error) {
+      await this.db.query("rollback").catch(() => undefined);
+      throw error;
+    }
+  }
+
+  /**
    * Provisions the fixed simulated department-staff fixture.
    *
    * Responsibility pairs come from the selected, versioned routing pack. The

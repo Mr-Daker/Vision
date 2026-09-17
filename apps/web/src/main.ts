@@ -1639,7 +1639,7 @@ const openCandidateQuestion = async (
     showErrors([result.offline ? t("error.offline") : t("error.server")]);
     return;
   }
-  const view = toCandidateView(result.value as CandidatePayload);
+  const view = toCandidateView(result.value as CandidatePayload, t);
   pendingCandidate = { submissionId, candidateIssueId };
 
   el("candidate-question").textContent = view.question;

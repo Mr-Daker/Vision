@@ -1,0 +1,11 @@
+{
+  "version": "demo-ageing.v1",
+  "note": "How long this deployment said it would tolerate a report waiting with a department before raising an internal alert. This is NOT a severity, risk or urgency assessment: nothing in this system measures how dangerous a problem is, and no such measure has been calibrated (V046). An alert means a configured promise about time has passed, and nothing more. The clock runs from when the department became responsible and pauses while the department is not the party being waited on.",
+  "rules": {
+    "electrical": { "alert_after_days": 3, "escalate_after_days": 7 },
+    "structural": { "alert_after_days": 3, "escalate_after_days": 7 },
+    "water_supply": { "alert_after_days": 7, "escalate_after_days": 14 },
+    "sanitation": { "alert_after_days": 7, "escalate_after_days": 14 }
+  },
+  "fallback": { "alert_after_days": 21, "escalate_after_days": 42 }
+}

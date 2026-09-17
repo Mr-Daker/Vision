@@ -32,6 +32,17 @@ const RULES = {
     "@vision/adapters",
     "@vision/config-packs",
   ],
+  // The evaluation harness (V046). It is the only consumer of @vision/fixtures
+  // outside the fixtures package itself, because it is the only code permitted
+  // to unseal the holdout — and it may not be imported by anything, so the
+  // dependency cannot travel back the other way.
+  "apps/eval": [
+    "@vision/contracts",
+    "@vision/domain",
+    "@vision/adapters",
+    "@vision/config-packs",
+    "@vision/fixtures",
+  ],
   // The web app runs in a browser, so it may only import packages that are
   // free of Node built-ins: @vision/contracts and @vision/domain are (checked
   // by `npm run check:browser-safe`). @vision/adapters is excluded on purpose

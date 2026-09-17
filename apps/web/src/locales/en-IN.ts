@@ -88,6 +88,8 @@ export const enIN: LocalePack = {
     "receipt.received_at": "Received at",
     "receipt.saved_note":
       "This report is stored on the demonstration server. You can close this page and it will still be there.",
+    "demo.simulated_notice":
+      "Identity here is simulated, and every department and recipient is simulated. Nothing you send from this page reaches a real government system.",
     "receipt.not_a_promise":
       "This is a record that the report was received. It is not an official government acknowledgement, and it is not a promise that the problem will be repaired.",
     "receipt.replayed":
@@ -196,6 +198,21 @@ export const enIN: LocalePack = {
     "resolution.saved_confirmed": "Your confirmation was recorded.",
     "resolution.saved_disputed": "Your disagreement was recorded and the claim is now disputed.",
     "resolution.saved_reopened": "This issue was reopened and is no longer counted as closed.",
+    "candidate.question": "Is this the same problem you are reporting?",
+    "candidate.summary": "{reference}, first reported {date}",
+    "candidate.summary_near": "{reference}, first reported {date}, near {place}",
+    "candidate.participants_one": "1 person reported this",
+    "candidate.participants_many": "{count} people reported this",
+    "candidate.distance_label": "about {metres} m from where you reported",
+    "candidate.opened_label": "First reported {date}",
+    "candidate.confirm": "Yes, it is the same problem",
+    "candidate.reject": "No, it is a different problem",
+    "candidate.confirm_consequence":
+      "Your report is added to this one. Your entry stays yours, and it is counted once.",
+    "candidate.reject_consequence":
+      "Your report stays separate and gets its own reference. Nothing you sent is deleted.",
+    "candidate.alias_note":
+      "This report was merged with another one, so the reference shown here may differ from the one you saw earlier. Nothing was removed.",
     "candidate.heading": "Is this the same problem?",
     "candidate.existing": "Existing report",
     "candidate.opened": "First reported",

@@ -24,7 +24,13 @@ const EVALUATION_ALLOWLIST = [
   /^packages\/fixtures\/src\/index\.ts$/, // defines the seal
   /^packages\/fixtures\/src\/fixtures\.test\.ts$/, // tests the seal
   /^tools\/check-holdout-seal\.mjs$/, // this checker
-  /^evals?\//, // future V046 evaluation harness
+  // The V046 harness, and only its entry point. A root `evals/` directory was
+  // allowlisted here before V046 existed, which could never match: this
+  // scanner walks packages, apps, tools and .github, so a file outside those
+  // was neither allowed nor checked — including for the committed seal flag,
+  // in exactly the place that flag would be set. `apps/eval` is inside the
+  // walk, inside the typechecker, and inside the formatter.
+  /^apps\/eval\/src\/holdout-run\.ts$/,
 ];
 
 const HOLDOUT_REFERENCES = [

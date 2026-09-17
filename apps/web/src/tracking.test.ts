@@ -13,6 +13,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { interpolate, type Translate } from "./i18n.ts";
+import { enIN } from "./locales/en-IN.ts";
 import {
   type CandidatePayload,
   type DetailPayload,
@@ -492,18 +494,25 @@ const candidate = (overrides: Record<string, unknown> = {}): CandidatePayload =>
   } as CandidatePayload;
 };
 
+/**
+ * An English translator, so these assertions read as the sentences a reader
+ * sees. The Marathi pack is exercised by the locale-pack tests; what matters
+ * here is that the view builder renders whichever pack it is handed.
+ */
+const translate: Translate = (key, params) => interpolate(enIN.strings[key], params);
+
 test("V031: the question asked is whether it is the same problem", () => {
   // Not whether the category is right, and not which department owns it. V031
   // exists to remove the classification burden from the citizen (V018 §2), and
   // the wording is where that either holds or quietly fails.
-  const view = toCandidateView(candidate());
+  const view = toCandidateView(candidate(), translate);
 
   assert.match(view.question, /same problem/i);
   assert.doesNotMatch(view.question, /categor|department|severity|classif/i);
 });
 
 test("V031: the candidate is described without naming anyone who reported it", () => {
-  const view = toCandidateView(candidate());
+  const view = toCandidateView(candidate(), translate);
 
   assert.match(view.summary, /VIS-0A1B2C3D/);
   assert.doesNotMatch(view.summary, /reporter|name|phone|@/i);
@@ -513,7 +522,7 @@ test("V031: a count of others is reported as a count, never as agreement", () =>
   // Three people reporting a problem is three reports. It is not three people
   // agreeing with *this* reporter, and it is not corroboration of anything
   // they said.
-  const view = toCandidateView(candidate({ candidate: { counted_participants: 3 } }));
+  const view = toCandidateView(candidate({ candidate: { counted_participants: 3 } }), translate);
 
   assert.match(view.participantsLabel, /3/);
   assert.doesNotMatch(view.participantsLabel, /agree|confirm|verif|corrobor/i);
@@ -522,7 +531,7 @@ test("V031: a count of others is reported as a count, never as agreement", () =>
 test("V031: distance is reported as approximate, not as a measurement of the problem", () => {
   // The distance is between two reported positions, each with its own
   // accuracy. Printing "42 m" flat would present a precision neither has.
-  const view = toCandidateView(candidate({ candidate: { distance_metres: 42 } }));
+  const view = toCandidateView(candidate({ candidate: { distance_metres: 42 } }), translate);
 
   assert.match(view.distanceLabel ?? "", /about|approx|~/i);
 });
@@ -530,7 +539,7 @@ test("V031: distance is reported as approximate, not as a measurement of the pro
 test("V031: an absent distance is omitted rather than shown as zero", () => {
   // Zero metres would read as "the same spot", which is the opposite of
   // "we do not know".
-  const view = toCandidateView(candidate({ candidate: { distance_metres: null } }));
+  const view = toCandidateView(candidate({ candidate: { distance_metres: null } }), translate);
 
   assert.equal(view.distanceLabel, undefined);
 });
@@ -539,7 +548,7 @@ test("V031: rejecting is offered as an equal choice, not as a warned-against one
   // If the reject button is hedged with warnings the citizen learns that
   // disagreeing is the difficult path, and the question stops being a real
   // question.
-  const view = toCandidateView(candidate());
+  const view = toCandidateView(candidate(), translate);
 
   assert.ok(view.confirmLabel.length > 0);
   assert.ok(view.rejectLabel.length > 0);
@@ -547,7 +556,7 @@ test("V031: rejecting is offered as an equal choice, not as a warned-against one
 });
 
 test("V031: the consequence of each choice is stated plainly", () => {
-  const view = toCandidateView(candidate());
+  const view = toCandidateView(candidate(), translate);
 
   assert.match(view.confirmConsequence, /added to|joins|same/i);
   assert.match(view.rejectConsequence, /separate|own|new/i);
@@ -557,13 +566,13 @@ test("V031: a candidate reached through a merge alias says so", () => {
   // The reference the citizen was shown may have been retired by a merge. A
   // screen naming a different reference than the one they saw, with nothing
   // explaining it, looks like the system lost their report.
-  const view = toCandidateView(candidate({ resolved_through_alias: true }));
+  const view = toCandidateView(candidate({ resolved_through_alias: true }), translate);
 
   assert.match(view.aliasNote ?? "", /merged|combined/i);
 });
 
 test("V031: nothing on the screen claims the match is verified", () => {
-  const view = toCandidateView(candidate());
+  const view = toCandidateView(candidate(), translate);
   const everything = [
     view.question,
     view.summary,
@@ -576,8 +585,8 @@ test("V031: nothing on the screen claims the match is verified", () => {
 });
 
 test("V031: previews are listed, and a candidate with none is not an error", () => {
-  const withPreview = toCandidateView(candidate());
-  const without = toCandidateView(candidate({ candidate: { preview_derivatives: [] } }));
+  const withPreview = toCandidateView(candidate(), translate);
+  const without = toCandidateView(candidate({ candidate: { preview_derivatives: [] } }), translate);
 
   assert.equal(withPreview.previewReferences.length, 1);
   assert.equal(without.previewReferences.length, 0);
@@ -619,6 +628,7 @@ test("V031: a coarse position is rendered as numbers, not as an object", () => {
   // every test still green.
   const view = toCandidateView(
     candidate({ candidate: { coarse_location: { lon: 75.906, lat: 17.66 } } }),
+    translate,
   );
 
   assert.doesNotMatch(view.summary, /\[object Object\]/);
@@ -631,6 +641,7 @@ test("V031: a coarse position keeps the precision the server published", () => {
   // would take it for the reported location.
   const view = toCandidateView(
     candidate({ candidate: { coarse_location: { lon: 75.9061234, lat: 17.6598765 } } }),
+    translate,
   );
 
   assert.match(view.summary, /17\.660, 75\.906/);

@@ -77,6 +77,17 @@
           </div>
         </section>
 
+        <!--
+          V044. Said on the screen somebody reports from, before they report,
+          rather than in a policy page nobody opens. Carried as a localised
+          key with the English text inline as the pre-script fallback, so a
+          reader whose scripts have not run still sees it.
+        -->
+        <p class="disclosure" role="note" data-i18n="demo.simulated_notice">
+          Identity here is simulated, and every department and recipient is simulated. Nothing you
+          send from this page reaches a real government system.
+        </p>
+
         <section id="login-panel" class="panel" aria-labelledby="login-heading" hidden>
           <h2 id="login-heading" tabindex="-1" data-i18n="login.heading">
             Choose a demonstration account
@@ -587,8 +598,25 @@
           </ul>
 
           <div class="button-row">
-            <button type="button" id="candidate-confirm" class="button"></button>
-            <button type="button" id="candidate-reject" class="button"></button>
+            <!--
+              V045. These were empty in the markup and named only once the
+              script had run. The panel is hidden until then, so a reader never
+              met an unnamed button — but a button with no fallback is one
+              missing sentence away from being unnamed, and the audit cannot
+              tell the two apart. The text here is replaced by the localised
+              label the view builds.
+            -->
+            <button
+              type="button"
+              id="candidate-confirm"
+              class="button"
+              data-i18n="candidate.confirm"
+            >
+              Yes, it is the same problem
+            </button>
+            <button type="button" id="candidate-reject" class="button" data-i18n="candidate.reject">
+              No, it is a different problem
+            </button>
           </div>
           <p id="candidate-result" class="notice" role="status" hidden></p>
           <button

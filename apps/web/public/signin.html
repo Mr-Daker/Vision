@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="signin.css" />
   </head>
   <body>
+    <a class="skip-link" href="#signin-main">Skip to sign in</a>
     <div class="bg">
       <video class="bg-video" autoplay muted loop playsinline>
         <source src="assets/hero.mp4" type="video/mp4" />
@@ -51,7 +52,7 @@
         </button>
       </header>
 
-      <main class="hero auth">
+      <main class="hero auth" id="signin-main">
         <a class="auth-close" href="index.html" aria-label="Close and return to the home page">
           <svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true">
             <path
@@ -61,13 +62,13 @@
           <span>Close</span>
         </a>
 
-        <h1 class="auth-title anim" style="--d: 0.08s">
-          <span class="headline-line" style="--d: 0.12s">Choose An Account</span>
+        <h1 class="auth-title anim d-008">
+          <span class="headline-line d-012">Choose An Account</span>
         </h1>
 
-        <p class="auth-sub anim" style="--d: 0.2s">Identity is simulated for this demonstration.</p>
+        <p class="auth-sub anim d-02">Identity is simulated for this demonstration.</p>
 
-        <div class="auth-card anim" style="--d: 0.3s">
+        <div class="auth-card anim d-03">
           <p class="auth-notice" role="note">
             This does not verify a real person or a DigiLocker credential. Nothing here checks an
             identity document, and no government system is contacted.
@@ -80,19 +81,19 @@
           <p class="field-error" id="form-error" role="alert" hidden></p>
         </div>
 
-        <p class="auth-note anim" style="--d: 0.42s">
+        <p class="auth-note anim d-042">
           Signing in creates a session for a simulated participant so you can send a report and
           follow it. <a class="auth-link" href="app.html">Continue without signing in</a>
         </p>
       </main>
 
       <footer class="stats auth-stats">
-        <div class="stat anim" style="--d: 0.5s">
+        <div class="stat anim d-05">
           <span class="stat-icon" aria-hidden="true">#</span>
           <span class="stat-value" data-target="2" data-suffix="" data-decimals="0">2</span>
           <span class="stat-label">Interface Languages</span>
         </div>
-        <div class="stat anim" style="--d: 0.58s">
+        <div class="stat anim d-058">
           <span class="stat-icon" aria-hidden="true">%</span>
           <span class="stat-value" data-target="100" data-suffix="%" data-decimals="0">100%</span>
           <span class="stat-label">Simulated Identity</span>

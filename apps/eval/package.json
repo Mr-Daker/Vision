@@ -1,0 +1,17 @@
+{
+  "name": "@vision/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Held-out evaluation harness (V046). The only place permitted to unseal the V011 holdout.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@vision/adapters": "0.0.0",
+    "@vision/config-packs": "0.0.0",
+    "@vision/contracts": "0.0.0",
+    "@vision/domain": "0.0.0",
+    "@vision/fixtures": "0.0.0"
+  }
+}

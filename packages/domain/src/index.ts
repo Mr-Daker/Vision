@@ -18,3 +18,14 @@ export * from "./trust-signals.ts";
 export * from "./match-proposal.ts";
 export * from "./confirmation-policy.ts";
 export * from "./triage-order.ts";
+export * from "./ageing-policy.ts";
+
+export * from "./metric-semantics.ts";
+export * from "./summary-projection.ts";
+export * from "./context-import.ts";
+export * from "./project-match.ts";
+export * from "./prioritization.ts";
+export * from "./outcome-attribution.ts";
+export * from "./privacy-audit.ts";
+export * from "./usability-study.ts";
+export * from "./evaluation.ts";

@@ -1,0 +1,117 @@
+{
+  "version": "demo-context.v1",
+  "notice": "SYNTHETIC context data invented for demonstration. Every figure below was authored by the team. None of it describes a real place, no external dataset was ingested to produce it, and none of it may be quoted as a statistic about anywhere.",
+  "source": {
+    "source_record_id": "a0400000-0000-4000-8000-000000000040",
+    "source_name": "Demo District A synthetic context register",
+    "source_url_or_location": "packages/config-packs/src/packs/demo-district-a/context.json",
+    "retrieved_at": "2026-09-17T00:00:00Z",
+    "source_effective_at": "2026-01-01T00:00:00Z",
+    "licence_or_permission_status": "synthetic",
+    "demo_status": "team_created_synthetic"
+  },
+  "datasets": [
+    {
+      "dataset_id": "demo-district-a.population",
+      "kind": "population",
+      "unit": "persons",
+      "label": "Resident population (synthetic)",
+      "max_age_days": 400,
+      "rows": [
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA",
+          "value": 41200,
+          "unit": "persons",
+          "vintage": "2026-01-01T00:00:00Z"
+        },
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B1",
+          "value": 18600,
+          "unit": "persons",
+          "vintage": "2026-01-01T00:00:00Z"
+        },
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B2",
+          "value": "not surveyed",
+          "unit": "persons",
+          "vintage": "2026-01-01T00:00:00Z",
+          "note": "Deliberately absent. A ward with no population figure must read as unknown on every screen, never as zero people."
+        }
+      ]
+    },
+    {
+      "dataset_id": "demo-district-a.enrolment",
+      "kind": "enrolment",
+      "unit": "students",
+      "label": "School enrolment (synthetic)",
+      "max_age_days": 550,
+      "rows": [
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B1",
+          "value": 3120,
+          "unit": "students",
+          "vintage": "2025-06-01T00:00:00Z"
+        },
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B2",
+          "value": 2480,
+          "unit": "students",
+          "vintage": "2025-06-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "dataset_id": "demo-district-a.water-access",
+      "kind": "access",
+      "unit": "percent_of_households",
+      "label": "Households with a piped water connection (synthetic)",
+      "max_age_days": 365,
+      "rows": [
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B1",
+          "value": 71.4,
+          "unit": "percent_of_households",
+          "vintage": "2023-04-01T00:00:00Z",
+          "note": "Deliberately old. It is past this dataset's currency window and every screen showing it must say how old it is, while still showing it — it remains the most recent figure available."
+        },
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B2",
+          "value": 64.9,
+          "unit": "percent_of_households",
+          "vintage": "2023-04-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "dataset_id": "demo-district-a.sanctioned-investment",
+      "kind": "investment",
+      "unit": "inr",
+      "label": "Sanctioned infrastructure investment (synthetic)",
+      "max_age_days": 730,
+      "rows": [
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA-B1",
+          "value": 4250000,
+          "unit": "inr",
+          "vintage": "2026-04-01T00:00:00Z"
+        },
+        {
+          "subject_kind": "jurisdiction",
+          "subject_id": "DDA",
+          "value": "NA",
+          "unit": "inr",
+          "vintage": "2026-04-01T00:00:00Z",
+          "note": "No district-level figure was authored. An absent investment figure never means nothing was invested."
+        }
+      ]
+    }
+  ]
+}

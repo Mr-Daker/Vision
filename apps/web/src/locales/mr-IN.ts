@@ -95,6 +95,8 @@ export const mrIN: LocalePack = {
     "receipt.received_at": "मिळाल्याची वेळ",
     "receipt.saved_note":
       "ही तक्रार प्रात्यक्षिक सर्व्हरवर साठवली आहे. हे पान बंद केले तरी ती राहील.",
+    "demo.simulated_notice":
+      "इथली ओळख अनुरूपित आहे, आणि प्रत्येक विभाग व प्राप्तकर्ता अनुरूपित आहे. या पानावरून पाठवलेले काहीही खऱ्या शासकीय प्रणालीपर्यंत पोहोचत नाही.",
     "receipt.not_a_promise":
       "तक्रार मिळाल्याची ही नोंद आहे. ही शासनाची अधिकृत पावती नाही, आणि दुरुस्तीचे वचनही नाही.",
     "receipt.replayed": "हा संदर्भ आधीच तयार झाला होता — तुमची आधीची तक्रार दुप्पट झाली नाही.",
@@ -200,6 +202,21 @@ export const mrIN: LocalePack = {
     "resolution.saved_confirmed": "तुमची पुष्टी नोंदवली गेली.",
     "resolution.saved_disputed": "तुमची असहमती नोंदवली गेली आणि आता या दाव्यावर आक्षेप आहे.",
     "resolution.saved_reopened": "हा प्रश्न पुन्हा उघडला गेला आणि आता बंद म्हणून मोजला जात नाही.",
+    "candidate.question": "तुम्ही नोंदवत असलेली हीच समस्या आहे का?",
+    "candidate.summary": "{reference}, पहिली नोंद {date}",
+    "candidate.summary_near": "{reference}, पहिली नोंद {date}, {place} जवळ",
+    "candidate.participants_one": "1 व्यक्तीने ही नोंदवली आहे",
+    "candidate.participants_many": "{count} व्यक्तींनी ही नोंदवली आहे",
+    "candidate.distance_label": "तुम्ही नोंदवलेल्या ठिकाणापासून सुमारे {metres} मी",
+    "candidate.opened_label": "पहिली नोंद {date}",
+    "candidate.confirm": "होय, हीच ती समस्या आहे",
+    "candidate.reject": "नाही, ही वेगळी समस्या आहे",
+    "candidate.confirm_consequence":
+      "तुमची तक्रार हिच्यात जोडली जाईल. तुमची नोंद तुमचीच राहते, आणि ती एकदाच मोजली जाते.",
+    "candidate.reject_consequence":
+      "तुमची तक्रार वेगळी राहील आणि तिला स्वतःचा संदर्भ मिळेल. तुम्ही पाठवलेले काहीही हटवले जात नाही.",
+    "candidate.alias_note":
+      "ही तक्रार दुसऱ्या तक्रारीशी जोडली गेली होती, त्यामुळे इथे दिसणारा संदर्भ तुम्ही आधी पाहिलेल्या संदर्भापेक्षा वेगळा असू शकतो. काहीही काढून टाकलेले नाही.",
     "candidate.heading": "हीच समस्या आहे का?",
     "candidate.existing": "आधीचा अहवाल",
     "candidate.opened": "पहिल्यांदा कळवले",

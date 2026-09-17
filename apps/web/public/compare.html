@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision — comparing candidates</title>
+    <meta
+      name="description"
+      content="Why one report sits above another under this deployment's configured factors, what that ordering assumes, and what recorded outcomes around a sanctioned project do not prove."
+    />
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/reviewer.css" />
+    <link rel="stylesheet" href="/staff.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+    <link rel="stylesheet" href="/compare.css" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <script type="module" src="/js/app/compare-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#compare-main">Skip to the comparison</a>
+    <header class="reviewer-header">
+      <a class="reviewer-brand" href="/">
+        <img src="/assets/logo.png" alt="" width="480" height="271" />
+        <span>Vision comparison</span>
+      </a>
+      <nav aria-label="Workspace navigation">
+        <a href="/dashboard.html">District dashboard</a>
+        <a href="/supervisor.html">Oversight queues</a>
+        <button type="button" id="compare-signout" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="compare-main">
+      <div class="page-intro">
+        <p class="eyebrow">Private comparison workspace</p>
+        <h1>Why this sits above that</h1>
+        <p>
+          Reports ordered by the factors this deployment configured, shown as position ranges across
+          several plausible weightings. Nothing here measures how serious a problem is, nothing
+          costs anything, and nothing on this page shows that money caused any outcome.
+        </p>
+      </div>
+
+      <p id="compare-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+      <p id="compare-live" class="visually-hidden" aria-live="polite"></p>
+
+      <section id="compare-login" class="login-panel" aria-labelledby="compare-login-heading">
+        <p class="eyebrow">Access required</p>
+        <h2 id="compare-login-heading" tabindex="-1">Choose a supervisor account</h2>
+        <p class="disclosure">Simulated demonstration identity — not a real identity check</p>
+        <div id="compare-login-choices" class="login-choices" aria-live="polite"></div>
+      </section>
+
+      <section id="compare-workspace" aria-labelledby="compare-workspace-heading" hidden>
+        <div class="workspace-heading-row">
+          <div>
+            <p id="compare-policy" class="eyebrow"></p>
+            <h2 id="compare-workspace-heading" tabindex="-1">Candidates</h2>
+          </div>
+          <button type="button" id="refresh-compare" class="secondary-button">Refresh</button>
+        </div>
+
+        <p id="compare-scope" class="queue-note"></p>
+
+        <!--
+          The scenario selector changes which weighting's position is
+          highlighted. It never changes the policy: the version above stays
+          fixed and is re-stated on every render, so comparing scenarios cannot
+          be mistaken for comparing policies.
+        -->
+        <div class="queue-controls">
+          <label>
+            Scenario
+            <select id="scenario-select"></select>
+          </label>
+          <label>
+            Compare
+            <select id="left-select"></select>
+          </label>
+          <label>
+            With
+            <select id="right-select"></select>
+          </label>
+        </div>
+
+        <h3 class="dashboard-section-heading">Why one sits above the other</h3>
+        <div id="separation" class="dashboard-banners"></div>
+        <div class="dashboard-table-scroll">
+          <table id="separation-table" class="dashboard-table">
+            <caption class="visually-hidden">
+              Factor by factor, what separates the two selected candidates. A factor one of them has
+              no value for accounts for none of the difference, which is not the same as the two
+              being equal on it.
+            </caption>
+            <thead id="separation-head"></thead>
+            <tbody id="separation-body"></tbody>
+          </table>
+        </div>
+
+        <h3 class="dashboard-section-heading">Candidates</h3>
+        <div id="candidate-list" class="review-list staff-list"></div>
+
+        <h3 class="dashboard-section-heading">What this ordering assumes</h3>
+        <p class="queue-note">
+          The ones with no source behind them are listed first, because a list that opens with what
+          is well supported invites a reader to stop there.
+        </p>
+        <div id="assumptions" class="assumption-list"></div>
+
+        <h3 class="dashboard-section-heading">What this page is not</h3>
+        <ul id="compare-disclosures" class="compare-disclosures"></ul>
+      </section>
+    </main>
+
+    <footer>
+      Every report, project, department and figure shown here is part of a simulation, and the
+      identity that signed in is simulated too. No ordering on this page is a spending decision, and
+      no outcome recorded beside a project is evidence that the money caused it.
+    </footer>
+  </body>
+</html>

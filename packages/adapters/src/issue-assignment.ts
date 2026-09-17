@@ -31,6 +31,7 @@ import { randomUUID } from "node:crypto";
 import { resolveActiveRoot, type AliasEdge, type MatchProposal } from "@vision/domain";
 
 import type { Queryable } from "./outbox.ts";
+import { appendIssueEvent } from "./issue-lifecycle.ts";
 import { unionParticipationOnMerge } from "./participation-counts.ts";
 
 /** A serialization failure is retried this many times before giving up. */
@@ -268,6 +269,41 @@ const runAssignment = async (tx: Queryable, input: AssignmentInput): Promise<Ass
         now,
       ],
     );
+    // The `created` state, said in the ledger rather than only in a column.
+    //
+    // Opening an issue wrote the row and recorded the decision in the matching
+    // tables, and nothing else. An event-driven reader therefore could not
+    // learn that a report existed at all: V038's projection had to find new
+    // issues by their absence from its own table, and V037's reconstruction of
+    // status at a past horizon — which reads `status_event` and nothing else —
+    // answered UNKNOWN for every issue that had not moved since.
+    //
+    // Inside this transaction, so the row and the event commit together. An
+    // issue with no creation event is the bug; an event for an issue that was
+    // rolled back would be worse.
+    //
+    // Stamped at `opened_at`, not at now. The two differ whenever a problem
+    // was observed before it was filed, and the analytics prelude bounds
+    // issues by `opened_at` and events by `occurred_at` against the same
+    // horizon — so an event stamped later would put an issue in scope with a
+    // ledger that says nothing about it, which is the UNKNOWN this exists to
+    // remove. `recorded_at` stays now, which is what keeps knowledge-time
+    // honest.
+    await appendIssueEvent(tx, {
+      issueId,
+      eventType: "issue_created",
+      actorType: "system_worker",
+      occurredAt: input.observedAt,
+      payload: {
+        match_id: matchId,
+        submission_id: input.submissionId,
+        public_reference: publicReference,
+        category: input.category,
+        jurisdiction_id: input.jurisdictionId ?? null,
+        matcher_version: input.proposal.matcherVersion,
+        taxonomy_version: input.proposal.taxonomyVersion,
+      },
+    });
     await linkEvidence(tx, input, issueId, matchId, now);
     return { status: "created", issueId, publicReference, attemptNumber };
   }

@@ -6,7 +6,8 @@ export type ReviewItemKind =
   | "ambiguous_match"
   | "correction_request"
   | "uncertain_classification"
-  | "disputed_resolution";
+  | "disputed_resolution"
+  | "project_link_proposal";
 
 export type ReviewAction =
   | "accept_evidence"
@@ -21,7 +22,9 @@ export type ReviewAction =
   | "accept_classification"
   | "reject_classification"
   | "return_disputed_work"
-  | "confirm_disputed_resolution";
+  | "confirm_disputed_resolution"
+  | "confirm_project_link"
+  | "reject_project_link";
 
 export type ReviewerQueueItem = {
   readonly kind: ReviewItemKind;
@@ -50,6 +53,7 @@ const KINDS = new Set<ReviewItemKind>([
   "correction_request",
   "uncertain_classification",
   "disputed_resolution",
+  "project_link_proposal",
 ]);
 
 const ACTIONS = new Set<ReviewAction>([
@@ -66,6 +70,8 @@ const ACTIONS = new Set<ReviewAction>([
   "reject_classification",
   "return_disputed_work",
   "confirm_disputed_resolution",
+  "confirm_project_link",
+  "reject_project_link",
 ]);
 
 const record = (value: unknown): Record<string, unknown> | undefined =>
@@ -147,6 +153,7 @@ export const KIND_LABELS: Readonly<Record<ReviewItemKind, string>> = {
   // disagreement between a department and the people who live with the
   // problem, and the label says so.
   disputed_resolution: "Disputed repair claim",
+  project_link_proposal: "Possible sanctioned project",
 };
 
 export const ACTION_LABELS: Readonly<Record<ReviewAction, string>> = {
@@ -167,6 +174,11 @@ export const ACTION_LABELS: Readonly<Record<ReviewAction, string>> = {
   // Offered only where the category policy grants it. The label says whose
   // decision it overrides, because that is what makes it a serious act.
   confirm_disputed_resolution: "Resolve the dispute in favour of the claim",
+  // Neither label says anything about funding. Confirming means this report
+  // concerns that project; rejecting means it does not — and rejecting says
+  // nothing at all about whether the asset has been paid for.
+  confirm_project_link: "This report concerns that project",
+  reject_project_link: "This report does not concern that project",
 };
 
 export const shortReference = (value: string): string =>

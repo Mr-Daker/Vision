@@ -59,7 +59,7 @@ export type DemoPrincipal = {
   readonly credential_state: "active" | "revoked" | "expired";
   readonly label: string;
   /** Which application login surface may offer this fixture. */
-  readonly account_type: "citizen" | "reviewer" | "department_staff";
+  readonly account_type: "citizen" | "reviewer" | "department_staff" | "supervisor";
 };
 
 /**
@@ -101,6 +101,14 @@ export const DEMO_PRINCIPALS: readonly DemoPrincipal[] = [
     account_type: "department_staff",
   },
   {
+    credential: "demo-supervisor-one",
+    provider_subject_reference: "demo-subject-0007",
+    issuer: "vision-simulated-demo-issuer",
+    credential_state: "active",
+    label: "Demo supervisor 1",
+    account_type: "supervisor",
+  },
+  {
     credential: "demo-revoked-one",
     provider_subject_reference: "demo-subject-0005",
     issuer: "vision-simulated-demo-issuer",
@@ -136,6 +144,10 @@ export const demoReviewerPrincipals = (): readonly DemoPrincipal[] =>
 /** Principals accepted only by the private department-staff surface (V034). */
 export const demoDepartmentStaffPrincipals = (): readonly DemoPrincipal[] =>
   DEMO_PRINCIPALS.filter((principal) => principal.account_type === "department_staff");
+
+/** Principals accepted only by the private supervisor surface (V036). */
+export const demoSupervisorPrincipals = (): readonly DemoPrincipal[] =>
+  DEMO_PRINCIPALS.filter((principal) => principal.account_type === "supervisor");
 
 export class SimulatedIdentityAdapter implements IdentityProviderAdapter {
   readonly descriptor: AdapterDescriptor = {

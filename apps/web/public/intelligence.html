@@ -55,8 +55,17 @@
 
     <nav class="pi-breadcrumb" id="breadcrumb" aria-label="Hierarchy"></nav>
 
-    <main class="pi-main">
-      <section class="pi-stage" id="stage" aria-label="Issue hierarchy">
+    <main class="pi-main" id="intelligence-main">
+      <!--
+        V045. The page had no heading at all: every landmark carried an
+        aria-label and nothing else. Landmark labels do not appear in the
+        heading list a screen-reader user navigates by, so the page was
+        reachable only by walking it. The headings are visually hidden because
+        the visual design already names these areas.
+      -->
+      <h1 class="visually-hidden">Public intelligence landscape</h1>
+      <section class="pi-stage" id="stage" aria-labelledby="stage-heading">
+        <h2 id="stage-heading" class="visually-hidden">Issue hierarchy</h2>
         <p class="pi-loading" id="stage-loading">Building public intelligence landscape…</p>
         <p class="pi-status" id="stage-status" role="status" hidden></p>
 
@@ -74,7 +83,9 @@
         </div>
       </section>
 
-      <aside class="pi-rail" id="rail" aria-label="Selected area summary"></aside>
+      <aside class="pi-rail" id="rail" aria-labelledby="rail-heading">
+        <h2 id="rail-heading" class="visually-hidden">Selected area summary</h2>
+      </aside>
     </main>
 
     <section class="pi-filters" aria-label="Filters">

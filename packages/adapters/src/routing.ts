@@ -22,11 +22,20 @@
  * is not delivery, not internal acceptance, and above all not a government
  * acknowledgment — those are V034's three separate facts. `isGovernmentAcknowledgment`
  * is a literal `false` here so no caller can read it as one.
+ *
+ * A decision here is also a **lifecycle move**, which it was not originally.
+ * Recording the decision and leaving `current_status` at `created` meant
+ * `routing_review` and `routed_internal` were states nothing in the running
+ * product could reach — only the demo seeds produced them, and the event
+ * ledger never mentioned either, so V037's reconstruction of status at a past
+ * horizon had nothing to read. The move goes through `advanceIssueStatus`, so
+ * it is still `canTransitionIssue` that decides whether it is allowed.
  */
 
 import { randomUUID } from "node:crypto";
 
 import type { Queryable } from "./outbox.ts";
+import { advanceIssueStatus } from "./issue-lifecycle.ts";
 
 export class RoutingError extends Error {
   constructor(message: string) {
@@ -34,6 +43,46 @@ export class RoutingError extends Error {
     this.name = "RoutingError";
   }
 }
+
+/**
+ * Runs `work` so that everything it writes commits or fails together.
+ *
+ * Needed because `resolveRouting` now performs two writes that must not come
+ * apart — the decision row and the lifecycle move — and its callers differ in
+ * whether they already own a transaction. The matching pipeline calls it in
+ * autocommit; the review queue calls it from inside its own `begin`, where
+ * issuing another `begin` would make the inner `commit` commit the caller's
+ * work and leave a later failure unrollbackable.
+ *
+ * The probe is the one `assignSubmissionToIssueInTransaction` already relies
+ * on: `savepoint` outside a transaction block raises 25P01. Asking the
+ * database is the only answer that cannot be wrong, and a parameter saying
+ * "trust me, I am in a transaction" is exactly the assertion this codebase
+ * refuses everywhere else.
+ */
+const atomically = async <T>(tx: Queryable, work: () => Promise<T>): Promise<T> => {
+  const probe = `routing_${randomUUID().replace(/-/g, "")}`;
+  let ownsTransaction = false;
+  try {
+    await tx.query(`savepoint ${probe}`);
+    await tx.query(`release savepoint ${probe}`);
+  } catch (error) {
+    if ((error as { code?: string }).code !== "25P01") throw error;
+    ownsTransaction = true;
+  }
+
+  if (!ownsTransaction) return work();
+
+  await tx.query("begin");
+  try {
+    const result = await work();
+    await tx.query("commit");
+    return result;
+  } catch (error) {
+    await tx.query("rollback").catch(() => undefined);
+    throw error;
+  }
+};
 
 export type RoutingOutcome =
   "routed" | "unknown_owner_review" | "ambiguous_owner_review" | "no_directory_entry";
@@ -279,27 +328,74 @@ export const resolveRouting = async (
         }
       | undefined,
   ): Promise<RoutingResult> => {
-    await tx.query(
-      `insert into routing_decision
+    const routingId = randomUUID();
+    await atomically(tx, async () => {
+      await tx.query(
+        `insert into routing_decision
          (routing_id, issue_id, directory_version, category, jurisdiction_id,
           responsibility_id, department_id, department_label, recipient_mode,
           outcome, reason, jurisdiction_resolution_id)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-      [
-        randomUUID(),
-        options.issueId,
-        options.directoryVersion,
-        category,
-        jurisdictionId ?? null,
-        recipient?.responsibilityId ?? null,
-        recipient?.departmentId ?? null,
-        recipient?.departmentLabel ?? null,
-        recipient?.recipientMode ?? "none",
-        outcome,
-        reason,
-        options.jurisdictionResolutionId ?? null,
-      ],
-    );
+        [
+          routingId,
+          options.issueId,
+          options.directoryVersion,
+          category,
+          jurisdictionId ?? null,
+          recipient?.responsibilityId ?? null,
+          recipient?.departmentId ?? null,
+          recipient?.departmentLabel ?? null,
+          recipient?.recipientMode ?? "none",
+          outcome,
+          reason,
+          options.jurisdictionResolutionId ?? null,
+        ],
+      );
+
+      // The decision is also a move, which V033 recorded and did not make.
+      //
+      // Leaving `current_status` at `created` meant `routing_review` and
+      // `routed_internal` were states no running code could reach: only the
+      // demo seeds ever produced one, the ledger never mentioned either, and
+      // V037's reconstruction of status at a past horizon — which reads
+      // `status_event` and nothing else — therefore had nothing to read.
+      //
+      // Guarded, not asserted. `advanceIssueStatus` puts every move through
+      // `canTransitionIssue`, and the UPDATE is conditioned on the issue still
+      // being in `created`, so:
+      //
+      //  * a re-route of an issue that has already moved on is a no-op and
+      //    still records its decision row — a re-route is history either way;
+      //  * an issue sitting in `routing_review` is *not* released by a later
+      //    directory entry appearing. `canTransitionIssue` requires a reviewer
+      //    to leave that state, and a deterministic lookup is not the person
+      //    who was asked to decide.
+      await advanceIssueStatus(tx, {
+        issueId: options.issueId,
+        from: "created",
+        to: outcome === "routed" ? "routed_internal" : "routing_review",
+        context: {
+          actor: "system_worker",
+          hasActiveOutgoingAlias: false,
+          routingDirectoryVersion: options.directoryVersion,
+        },
+        eventType: outcome === "routed" ? "routed_internal" : "routing_review",
+        actorType: "system_worker",
+        payload: {
+          routing_id: routingId,
+          directory_version: options.directoryVersion,
+          category,
+          outcome,
+          jurisdiction_id: jurisdictionId ?? null,
+          department_id: recipient?.departmentId ?? null,
+          recipient_mode: recipient?.recipientMode ?? "none",
+          reason,
+          // Said in the event too, because a stream is read by things that
+          // never saw the disclosure on the screen.
+          is_government_acknowledgment: false,
+        },
+      });
+    });
 
     const base: RoutingBase = {
       issueId: options.issueId,

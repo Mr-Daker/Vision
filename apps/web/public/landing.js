@@ -207,10 +207,14 @@
     Array.prototype.forEach.call(targets, function (el, index) {
       // A short stagger within each group, so a row of cards arrives in
       // sequence rather than all at once.
+      // Carried as a class rather than a style property: the Content Security
+      // Policy is `style-src 'self'`, and this engine refuses an element style
+      // write under it, so every delay set here was blocked and logged while
+      // the stagger silently never ran (found by the V045 pass).
       var group = el.closest(".cards, .facts");
       if (group) {
         var position = Array.prototype.indexOf.call(group.children, el);
-        if (position > 0) el.style.setProperty("--rd", position * 0.08 + "s");
+        if (position > 0 && position <= 6) el.classList.add("rd-" + position);
       }
       void index;
       observer.observe(el);

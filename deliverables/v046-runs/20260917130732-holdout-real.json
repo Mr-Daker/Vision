@@ -1,0 +1,335 @@
+{
+  "runId": "20260917130732",
+  "reason": "V046 scored held-out evaluation run",
+  "split": "holdout",
+  "providerMode": "real",
+  "startedAt": "2026-09-17T13:07:33.351Z",
+  "finishedAt": "2026-09-17T13:10:26.819Z",
+  "verdict": {
+    "permitted": false,
+    "reasons": [
+      "the reviewed corpus and the deployment pack declare the same taxonomy version while using different category identifiers, so a classification figure would compare a model's answer against a list the reviewer never chose from",
+      "4 of 8 corpus reports were withheld from every label-dependent figure, so the measured subset is not the corpus",
+      "every mr-IN row was withheld, so this run carries no per-language result for mr-IN — which is a result V046 explicitly requires",
+      "candidate recall rests on 1 reviewed duplicate pair(s); one pair is an example, not a recall measurement",
+      "the incorrect-merge figure rests on 1 reviewed distinct pair(s), which cannot distinguish a system that never merges wrongly from one that has not been given the chance",
+      "no figure in this run has a 95% interval narrower than 20 percentage points, so none may be written as a rate"
+    ]
+  },
+  "scores": [
+    {
+      "reportId": "hold-0001",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "match",
+        "value": "structure.roof"
+      },
+      "proposedDefect": {
+        "kind": "match",
+        "value": "collapsed_section"
+      },
+      "appliedCategory": {
+        "kind": "match",
+        "value": "structure.roof"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: routed to 'demo-dept-education-works'. From the reviewed label: routed to 'demo-dept-education-works'"
+    },
+    {
+      "reportId": "hold-0002",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0003",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0004",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "match",
+        "value": "sanitation.toilet"
+      },
+      "proposedDefect": {
+        "kind": "match",
+        "value": "no_water_supply"
+      },
+      "appliedCategory": {
+        "kind": "match",
+        "value": "sanitation.toilet"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: routed to 'demo-dept-water-sanitation'. From the reviewed label: routed to 'demo-dept-water-sanitation'"
+    },
+    {
+      "reportId": "hold-0005",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    },
+    {
+      "reportId": "hold-0006",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'category_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'defect_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "appliedCategory": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'category_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "certaintyBand": "low",
+      "systemAbstained": true,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "end to end: the corpus names no expected custodian for this report. From the reviewed label: no routing was produced for this report"
+    },
+    {
+      "reportId": "hold-0007",
+      "language": "en-IN",
+      "authority": {
+        "usable": true
+      },
+      "proposedCategory": {
+        "kind": "match",
+        "value": "electrical.lighting"
+      },
+      "proposedDefect": {
+        "kind": "unscorable",
+        "reason": "the corpus records 'defect_id' as an unresolved label on this report, so there is nothing to compare against"
+      },
+      "appliedCategory": {
+        "kind": "match",
+        "value": "electrical.lighting"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "correct",
+      "routingFromReviewedLabel": "correct",
+      "routingDetail": "end to end: left for operational review (no_directory_entry). From the reviewed label: left for operational review (no_directory_entry)"
+    },
+    {
+      "reportId": "hold-0008",
+      "language": "mr-IN",
+      "authority": {
+        "usable": false,
+        "reasonCode": "pending_native_review",
+        "reason": "the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+      },
+      "certaintyBand": "high",
+      "systemAbstained": false,
+      "routingEndToEnd": "unscorable",
+      "routingFromReviewedLabel": "unscorable",
+      "routingDetail": "withheld — the label is a team draft awaiting a native-speaker reviewer; V011 §4 forbids it backing a measurement"
+    }
+  ],
+  "duplicatePairs": [
+    {
+      "relationId": "dup-hold-001",
+      "retrieved": true,
+      "merged": true,
+      "detail": "both reports were attached to one issue"
+    }
+  ],
+  "distinctPairs": [
+    {
+      "relationId": "dist-hold-001",
+      "retrieved": true,
+      "merged": false,
+      "detail": "1 candidate(s) were retrieved for the later report and it was still opened separately (assignment: created)"
+    }
+  ],
+  "calls": [
+    {
+      "operation": "classification",
+      "subject": "hold-0001",
+      "status": 200,
+      "latencyMs": 2959.149875,
+      "promptTokens": 234,
+      "outputTokens": 29,
+      "totalTokens": 411,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0002",
+      "status": 200,
+      "latencyMs": 3046.626167,
+      "promptTokens": 232,
+      "outputTokens": 29,
+      "totalTokens": 414,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0003",
+      "status": 200,
+      "latencyMs": 2883.005166,
+      "promptTokens": 232,
+      "outputTokens": 28,
+      "totalTokens": 462,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0004",
+      "status": 200,
+      "latencyMs": 3003.749209,
+      "promptTokens": 228,
+      "outputTokens": 32,
+      "totalTokens": 486,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0005",
+      "status": 200,
+      "latencyMs": 2513.751667,
+      "promptTokens": 232,
+      "outputTokens": 30,
+      "totalTokens": 457,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0006",
+      "status": 200,
+      "latencyMs": 2905.511208,
+      "promptTokens": 227,
+      "outputTokens": 26,
+      "totalTokens": 447,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0007",
+      "status": 200,
+      "latencyMs": 5362.416625,
+      "promptTokens": 227,
+      "outputTokens": 26,
+      "totalTokens": 663,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "classification",
+      "subject": "hold-0008",
+      "status": 200,
+      "latencyMs": 5150.450958,
+      "promptTokens": 229,
+      "outputTokens": 30,
+      "totalTokens": 470,
+      "modelVersion": "gemini-3.6-flash",
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0001",
+      "status": 200,
+      "latencyMs": 578.861917,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0002",
+      "status": 200,
+      "latencyMs": 548.276667,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0003",
+      "status": 200,
+      "latencyMs": 639.365709,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0004",
+      "status": 200,
+      "latencyMs": 525.307959,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0005",
+      "status": 200,
+      "latencyMs": 712.277042,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0006",
+      "status": 200,
+      "latencyMs": 874.966667,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0007",
+      "status": 200,
+      "latencyMs": 675.078375,
+      "statementFindings": []
+    },
+    {
+      "operation": "embedding",
+      "subject": "hold-0008",
+      "status": 200,
+      "latencyMs": 581.5485,
+      "statementFindings": []
+    }
+  ]
+}

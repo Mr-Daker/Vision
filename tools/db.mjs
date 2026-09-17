@@ -314,6 +314,18 @@ const commandSeedV035 = async () => {
   }
 };
 
+/** The V036 ageing demonstration issues. Additive and safe to re-run. */
+const commandSeedV036 = async () => {
+  const { seedV036Demo } = await import("./seed-v036-demo.mjs");
+  const client = await connect();
+  try {
+    const summary = await seedV036Demo(client);
+    console.log(`seed:v036 OK — ${JSON.stringify(summary)}`);
+  } finally {
+    await client.end();
+  }
+};
+
 const command = process.argv[2] ?? "status";
 const commands = {
   status: commandStatus,
@@ -322,12 +334,13 @@ const commands = {
   reset: commandReset,
   seed: commandSeed,
   "seed:v035": commandSeedV035,
+  "seed:v036": commandSeedV036,
 };
 
 const handler = commands[command];
 if (handler === undefined) {
   console.error(`unknown command: ${command}`);
-  console.error("usage: node tools/db.mjs [status|migrate|verify|seed|seed:v035|reset]");
+  console.error("usage: node tools/db.mjs [status|migrate|verify|seed|seed:v035|seed:v036|reset]");
   process.exit(64);
 }
 

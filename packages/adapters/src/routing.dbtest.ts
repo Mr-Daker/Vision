@@ -515,3 +515,125 @@ test("V033: a seeded entry is written as simulated, whatever the pack says", asy
   const result = await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
   assert.equal(result.outcome === "routed" ? result.recipientMode : undefined, "simulated");
 });
+
+// ---------------------------------------------------------------------------
+// The route is also a lifecycle move, not only a recorded decision
+// ---------------------------------------------------------------------------
+
+const ledger = async (issueId: string): Promise<readonly [string, number][]> => {
+  const { rows } = await client.query(
+    `select event_type, aggregate_version from status_event
+      where aggregate_type = 'canonical_issue' and aggregate_id = $1
+      order by aggregate_version asc`,
+    [issueId],
+  );
+  return rows.map((row) => [String(row["event_type"]), Number(row["aggregate_version"])]);
+};
+
+const statusOf = async (issueId: string): Promise<string> => {
+  const { rows } = await client.query(
+    "select current_status from canonical_issue where issue_id = $1",
+    [issueId],
+  );
+  return String(rows[0]?.["current_status"]);
+};
+
+test("V033: a routed issue moves to routed_internal and the ledger says so", async () => {
+  // V033 recorded the decision and left `current_status` at `created`, so
+  // `routed_internal` was a state no running code could reach and V037's
+  // historical reconstruction had nothing to read.
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  await addDirectoryEntry({ category });
+  const issueId = await newIssue(category, jurisdictionId);
+
+  const result = await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  assert.equal(result.outcome, "routed");
+  assert.equal(await statusOf(issueId), "routed_internal");
+  assert.deepEqual(await ledger(issueId), [["routed_internal", 1]]);
+});
+
+test("V033: a review outcome moves the issue to routing_review, not to an owner", async () => {
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  const issueId = await newIssue(category, jurisdictionId);
+
+  const result = await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  assert.equal(result.outcome, "no_directory_entry");
+  assert.equal(await statusOf(issueId), "routing_review");
+  assert.deepEqual(await ledger(issueId), [["routing_review", 1]]);
+});
+
+test("V033: the routing event records the directory version the decision used", async () => {
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  await addDirectoryEntry({ category, departmentId: "payload-dept" });
+  const issueId = await newIssue(category, jurisdictionId);
+
+  await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  const { rows } = await client.query(
+    `select payload from status_event
+      where aggregate_type = 'canonical_issue' and aggregate_id = $1`,
+    [issueId],
+  );
+  const payload = rows[0]?.["payload"] as Record<string, unknown>;
+  assert.equal(payload["directory_version"], DIRECTORY);
+  assert.equal(payload["category"], category);
+  assert.equal(payload["department_id"], "payload-dept");
+  assert.equal(payload["outcome"], "routed");
+  // A route is never an acknowledgment, and the stream is read by things that
+  // never saw the label on the screen.
+  assert.equal(payload["is_government_acknowledgment"], false);
+});
+
+test("V033: re-routing records a second decision but does not re-enter the state", async () => {
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  await addDirectoryEntry({ category });
+  const issueId = await newIssue(category, jurisdictionId);
+
+  await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+  await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  const decisions = await client.query(
+    "select count(*)::int as n from routing_decision where issue_id = $1",
+    [issueId],
+  );
+  assert.equal(decisions.rows[0]?.["n"], 2, "a re-route is still history");
+  assert.deepEqual(
+    await ledger(issueId),
+    [["routed_internal", 1]],
+    "the issue was already there; a repeated route is not a second transition",
+  );
+});
+
+test("V033: an issue waiting in routing_review is not released without a reviewer", async () => {
+  // `canTransitionIssue` requires a reviewer to leave `routing_review`. A
+  // later directory entry appearing is not that reviewer, and a deterministic
+  // lookup must not quietly make the decision a person was asked to make.
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  const issueId = await newIssue(category, jurisdictionId);
+  await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+  assert.equal(await statusOf(issueId), "routing_review");
+
+  await addDirectoryEntry({ category });
+  const second = await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  assert.equal(second.outcome, "routed", "the directory now has an answer");
+  assert.equal(await statusOf(issueId), "routing_review", "but a person still has to release it");
+  assert.deepEqual(await ledger(issueId), [["routing_review", 1]]);
+});
+
+test("V033: an issue past routing is left where it is", async () => {
+  const category = `r33-${randomUUID().slice(0, 6)}`;
+  await addDirectoryEntry({ category });
+  const issueId = await newIssue(category, jurisdictionId);
+  await client.query(
+    "update canonical_issue set current_status = 'resolution_claimed' where issue_id = $1",
+    [issueId],
+  );
+
+  await resolveRouting(client, { issueId, directoryVersion: DIRECTORY });
+
+  assert.equal(await statusOf(issueId), "resolution_claimed");
+  assert.deepEqual(await ledger(issueId), []);
+});

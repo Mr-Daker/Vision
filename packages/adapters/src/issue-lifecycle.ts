@@ -36,6 +36,22 @@ export const appendIssueEvent = async (
     readonly actorType: string;
     readonly actorId?: string | undefined;
     readonly payload: Readonly<Record<string, unknown>>;
+    /**
+     * When the thing this event describes actually happened.
+     *
+     * Defaults to now, which is right for a transition a caller is making as
+     * it writes. It is wrong for a fact that is being recorded after the
+     * moment it describes — an issue's opening, which carries the observation
+     * time the citizen reported, is the case this exists for. `recorded_at`
+     * is always now either way, so a backdated event still enters V037's
+     * knowledge-time bound on the day it arrived and cannot leak into a
+     * snapshot published before it existed.
+     *
+     * An event time *after* now is clamped to now rather than stored: it
+     * would otherwise be an event this system has already recorded that a
+     * snapshot taken today cannot see, which is a shape no reader expects.
+     */
+    readonly occurredAt?: string | undefined;
   },
 ): Promise<string> => {
   const eventId = randomUUID();
@@ -49,7 +65,8 @@ export const appendIssueEvent = async (
        (event_id, aggregate_type, aggregate_id, aggregate_version, event_type,
         actor_type, actor_pseudonym, correlation_id, occurred_at,
         payload_schema_version, payload)
-     values ($1,'canonical_issue',$2,$3,$4,$5,$6,$7, now(),'1.0.0',$8::jsonb)`,
+     values ($1,'canonical_issue',$2,$3,$4,$5,$6,$7,
+             least(coalesce($9::timestamptz, now()), now()),'1.0.0',$8::jsonb)`,
     [
       eventId,
       options.issueId,
@@ -59,6 +76,7 @@ export const appendIssueEvent = async (
       options.actorId ?? null,
       randomUUID(),
       JSON.stringify(options.payload),
+      options.occurredAt ?? null,
     ],
   );
   return eventId;

@@ -48,6 +48,7 @@ import {
 } from "@vision/domain";
 
 import type { Queryable } from "./outbox.ts";
+import { ProjectLinkError, recordProjectLinkDecision } from "./project-links.ts";
 import { resolveDispute, respondToClaim } from "./resolution.ts";
 import { resolveRouting } from "./routing.ts";
 
@@ -74,7 +75,15 @@ export type ReviewItemKind =
    * reviewer is deciding between a department's claim and the people who live
    * with the problem.
    */
-  | "disputed_resolution";
+  | "disputed_resolution"
+  /**
+   * The matcher found something in the sanctioned-project register (V041).
+   *
+   * Reaches a reviewer whether one candidate was found or several, because a
+   * link between a citizen's report and a public spending record is a claim
+   * with a name against it, and the name has to be a person's.
+   */
+  | "project_link_proposal";
 
 export type ReviewAction =
   | "accept_evidence"
@@ -98,7 +107,15 @@ export type ReviewAction =
    * An absent flag is not permission — a safety category is exactly where a
    * reviewer overruling residents would be least defensible.
    */
-  | "confirm_disputed_resolution";
+  | "confirm_disputed_resolution"
+  /** Confirm that this report concerns this sanctioned project (V041). */
+  | "confirm_project_link"
+  /**
+   * Reject the pairing. Kept on the record rather than deleted: that somebody
+   * looked and said no is a finding, and a deleted row would let the matcher
+   * propose the same pairing next week with nothing recording the answer.
+   */
+  | "reject_project_link";
 
 export type ReviewItem = {
   readonly kind: ReviewItemKind;
@@ -119,6 +136,7 @@ export type ReviewItem = {
     readonly matchId?: string;
     readonly correctionRequestId?: string;
     readonly canonicalIssueId?: string;
+    readonly projectLinkId?: string;
   };
 };
 
@@ -165,6 +183,10 @@ const ACTION_PERMISSION: Readonly<Record<ReviewAction, Action>> = {
   // power held in the issue's own jurisdiction.
   return_disputed_work: "issue.transition",
   confirm_disputed_resolution: "issue.transition",
+  // Deciding whether a report concerns a project is a matching judgement about
+  // evidence, not a lifecycle transition: the issue does not move.
+  confirm_project_link: "match.review",
+  reject_project_link: "match.review",
 };
 
 /**
@@ -358,6 +380,30 @@ export const listReviewQueue = async (
     [limit + 1, options.jurisdictionId],
   );
 
+  // V041 proposed project links. The subject is the issue, and the reviewer is
+  // deciding whether it concerns a particular piece of public spending. Both
+  // matcher outcomes reach a person: one candidate because a link must carry a
+  // name, and several because the matcher refused to pick between them.
+  const projectLinks = await tx.query(
+    `select l.project_link_id, l.issue_id, l.project_id, l.match_status, l.match_method,
+            l.match_basis, l.proposed_at, i.public_reference,
+            p.project_name, p.amount, p.amount_unit,
+            (select submission_id
+               from evidence_item e
+               join issue_evidence_link el
+                      on el.evidence_id = e.evidence_id and el.effective_to is null
+              where el.canonical_issue_id = i.issue_id
+              order by e.ingested_at asc limit 1) as submission_id
+       from project_link l
+       join canonical_issue i on i.issue_id = l.issue_id
+       join sanctioned_project p on p.project_id = l.project_id
+      where l.match_status in ('proposed','ambiguous')
+        and i.jurisdiction_id = $2::uuid
+      order by l.proposed_at asc
+      limit $1`,
+    [limit + 1, options.jurisdictionId],
+  );
+
   // V035 disputed resolutions. The subject is the issue, and the reviewer is
   // choosing between a department's claim and the people living with the
   // problem — so the citizen's own words travel with the row.
@@ -484,6 +530,39 @@ export const listReviewQueue = async (
       candidateIssueIds: [] as readonly string[],
       decisionTarget: { evidenceId: String(row["evidence_id"]) },
     })),
+    ...projectLinks.rows.map((row) => {
+      const basis = (row["match_basis"] ?? {}) as Record<string, unknown>;
+      const ambiguous = String(row["match_status"]) === "ambiguous";
+      const amount =
+        row["amount"] === null || row["amount"] === undefined
+          ? "no amount recorded"
+          : `${String(row["amount"])} ${String(row["amount_unit"])}`;
+      return {
+        kind: "project_link_proposal" as const,
+        targetId: String(row["project_link_id"]),
+        submissionId:
+          row["submission_id"] === null
+            ? String(row["public_reference"])
+            : String(row["submission_id"]),
+        // The absence note travels on every row, including this one. A reviewer
+        // looking at a weak candidate is at the same risk of reading the gaps
+        // around it as absence of funding.
+        reason: ambiguous
+          ? `the register holds more than one project this report could concern, and nothing separates them: '${String(row["project_name"])}' (${amount}). ${String(basis["absence_note"] ?? "")}`
+          : `the register holds one project this report may concern: '${String(row["project_name"])}' (${amount}), matched on ${String(row["match_method"] ?? "no method recorded")}. ${String(basis["absence_note"] ?? "")}`,
+        permittedActions: [
+          "confirm_project_link",
+          "reject_project_link",
+        ] as readonly ReviewAction[],
+        waitingSince: new Date(String(row["proposed_at"])).toISOString(),
+        citizenNote: undefined,
+        candidateIssueIds: [] as readonly string[],
+        decisionTarget: {
+          projectLinkId: String(row["project_link_id"]),
+          canonicalIssueId: String(row["issue_id"]),
+        },
+      };
+    }),
     ...disputes.rows.map((row) => {
       const category = String(row["category"]);
       const rule = options.confirmationPolicy?.rules[category] ?? DEFAULT_CONFIRMATION_RULE;
@@ -553,6 +632,8 @@ export type ReviewDecisionInput = {
   readonly matchId?: string;
   readonly correctionRequestId?: string;
   readonly canonicalIssueId?: string;
+  /** The proposed link being decided (V041 actions only). */
+  readonly projectLinkId?: string;
   /**
    * The jurisdiction being claimed into (`claim_jurisdiction` only).
    *
@@ -663,6 +744,70 @@ const recordDecision = async (
 };
 
 /**
+ * A reviewer's answer to a proposed project link (V041).
+ *
+ * Both outcomes are recorded. A rejection is not a deletion: that somebody
+ * looked at this pairing and said no is a finding, and removing the row would
+ * let the matcher propose the same pairing next week with nothing on record
+ * saying the question was already settled.
+ *
+ * The decision names the issue in `review_decision` and the link in its state
+ * payloads, so "who decided this report concerns this public spending, and
+ * why" is answerable from the audit table alone.
+ */
+const applyProjectLinkDecision = async (
+  tx: Queryable,
+  input: ReviewDecisionInput,
+): Promise<ReviewDecisionResult> => {
+  const projectLinkId = input.projectLinkId;
+  if (projectLinkId === undefined) {
+    throw new ReviewError(`${input.action} requires the proposed link being decided`);
+  }
+  const jurisdictionId = await jurisdictionOf(tx, input);
+  requirePermission(input.principal, input.action, jurisdictionId);
+  const reviewerId = input.principal.staffId;
+  if (reviewerId === undefined) {
+    throw new ReviewError("a review decision must be attributable to a staff identity");
+  }
+
+  const before = await tx.query(
+    `select match_status, project_id, issue_id from project_link where project_link_id = $1`,
+    [projectLinkId],
+  );
+  const prior = before.rows[0];
+  if (prior === undefined) throw new ReviewError("no such proposed link");
+
+  const decision = input.action === "confirm_project_link" ? "confirmed" : "rejected";
+  const priorState = {
+    match_status: String(prior["match_status"]),
+    project_id: prior["project_id"] === null ? null : String(prior["project_id"]),
+    project_link_id: projectLinkId,
+  };
+  const resultingState = { ...priorState, match_status: decision };
+
+  await tx.query("begin");
+  try {
+    await recordProjectLinkDecision(tx, {
+      projectLinkId,
+      decision,
+      reviewerId: String(reviewerId),
+      reason: input.reason,
+      asOf: new Date(),
+    });
+    const result = await recordDecision(tx, input, priorState, resultingState);
+    await tx.query("commit");
+    return result;
+  } catch (error) {
+    await tx.query("rollback").catch(() => undefined);
+    // Surfaced as a review conflict rather than a server fault: "this link is
+    // no longer awaiting a decision" is something the reviewer can act on, and
+    // a 500 would tell them only that something broke.
+    if (error instanceof ProjectLinkError) throw new ReviewError(error.message);
+    throw error;
+  }
+};
+
+/**
  * Applies one reviewer decision.
  *
  * The reason is validated before anything is read, so a decision that cannot
@@ -689,6 +834,12 @@ export const decideReview = async (
   // would commit the outer one, so a later failure could not be rolled back.
   if (input.action === "return_disputed_work" || input.action === "confirm_disputed_resolution") {
     return applyDisputeDecision(tx, input);
+  }
+  // V041, for the same reason: `recordProjectLinkDecision` opens no
+  // transaction of its own, but the audit row and the link update belong
+  // together and this keeps the two V041 actions in one readable place.
+  if (input.action === "confirm_project_link" || input.action === "reject_project_link") {
+    return applyProjectLinkDecision(tx, input);
   }
 
   await tx.query("begin");
@@ -1179,6 +1330,8 @@ const applyDecision = async (
     // handler is a compile error instead of a silent no-op.
     case "return_disputed_work":
     case "confirm_disputed_resolution":
+    case "confirm_project_link":
+    case "reject_project_link":
       throw new ReviewError(
         `${input.action} is applied outside the shared review transaction and must not reach applyDecision`,
       );

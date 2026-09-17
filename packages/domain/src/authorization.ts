@@ -117,6 +117,7 @@ export type Action =
   | "match.review"
   | "assignment.write"
   | "resolution.claim"
+  | "ageing.override"
   | "resolution.confirm"
   | "identity_mapping.read"
   | "audit.read"
@@ -167,6 +168,10 @@ const ROLE_ACTIONS: Readonly<Record<Role, readonly Action[]>> = {
     "issue.read_private",
     "evidence.read_redacted",
     "assignment.write",
+    // V036. A supervisor may shorten the clock on one issue, with a reason.
+    // Nobody else may: department staff overriding their own deadline is not
+    // an oversight mechanism, and a reviewer's remit is evidence and matching.
+    "ageing.override",
   ],
   administrator: ["issue.read_public", "configuration.write", "audit.read"],
 };
@@ -179,6 +184,7 @@ const EXCEPTIONAL: readonly Action[] = ["evidence.read_original"];
 
 const JURISDICTION_SCOPED: readonly Action[] = [
   "issue.read_private",
+  "ageing.override",
   "issue.transition",
   "assignment.write",
   "resolution.claim",

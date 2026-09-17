@@ -19,6 +19,7 @@ import {
   FilesystemObjectStoreAdapter,
   demoCitizenPrincipals,
   demoDepartmentStaffPrincipals,
+  demoSupervisorPrincipals,
   demoReviewerPrincipals,
   SubmissionService,
   type TransactionalClient,
@@ -46,7 +47,14 @@ import { createSubmissionRoutes } from "./submission-routes.ts";
 import { createCitizenRoutes } from "./citizen-routes.ts";
 import { createReviewerRoutes } from "./reviewer-routes.ts";
 import { createStaffRoutes } from "./staff-routes.ts";
-import { resolveConfirmationPolicy, resolveTaxonomy } from "./pack-composition.ts";
+import { createSupervisorRoutes } from "./supervisor-routes.ts";
+import { createDashboardRoutes } from "./dashboard-routes.ts";
+import {
+  resolveAgeingPolicy,
+  resolveConfirmationPolicy,
+  resolveTaxonomy,
+  resolveRecommendationPolicy,
+} from "./pack-composition.ts";
 
 export type EnvironmentLike = Readonly<Record<string, string | undefined>>;
 
@@ -365,6 +373,44 @@ export const buildAppWithDatabase = (
     },
   });
 
+  const supervisorRoutes = createSupervisorRoutes({
+    client,
+    identityAdapter: new SimulatedIdentityAdapter(demoSupervisorPrincipals()),
+    identityService: base.dependencies.identityService,
+    sessionService: base.dependencies.sessionService,
+    staffGrants: new PostgresStaffGrantRepository(client),
+    jurisdictionProfileId: profileId,
+    jurisdictionInternalCodes: loadJurisdictionProfile(profileId).nodes.map(
+      (node) => node.internal_code,
+    ),
+    // V036: how long this deployment said it would tolerate a wait. Loaded,
+    // never defaulted.
+    ageingPolicy: resolveAgeingPolicy(profileId),
+    config: {
+      ...base.dependencies.config,
+      // A supervisor may keep the citizen, staff and reviewer tabs open at the
+      // same time without any of them overwriting another's session.
+      sessionCookieName: env["SUPERVISOR_SESSION_COOKIE_NAME"] ?? "vision_supervisor_session",
+      csrfCookieName: env["SUPERVISOR_CSRF_COOKIE_NAME"] ?? "vision_supervisor_csrf",
+    },
+  });
+
+  // V039. Rides the supervisor session rather than adding a sixth role: the
+  // dashboard needs exactly what a supervisor already has, and nothing more.
+  const dashboardRoutes = createDashboardRoutes({
+    client,
+    sessionService: base.dependencies.sessionService,
+    staffGrants: new PostgresStaffGrantRepository(client),
+    trackedCategories: resolveTaxonomy(profileId).categoryIds,
+    jurisdictionProfileId: profileId,
+    recommendationPolicy: resolveRecommendationPolicy(profileId),
+    config: {
+      ...base.dependencies.config,
+      sessionCookieName: env["SUPERVISOR_SESSION_COOKIE_NAME"] ?? "vision_supervisor_session",
+      csrfCookieName: env["SUPERVISOR_CSRF_COOKIE_NAME"] ?? "vision_supervisor_csrf",
+    },
+  });
+
   // Order matters: API routes first, then files. `/v1/...` never reaches the
   // file handler, so a mistyped endpoint returns a JSON 404 rather than HTML.
   const serveFiles = webRoot === undefined ? undefined : createStaticFileHandler({ root: webRoot });
@@ -376,6 +422,8 @@ export const buildAppWithDatabase = (
     (await citizenRoutes(request, response)) ||
     (await reviewerRoutes(request, response)) ||
     (await staffRoutes(request, response)) ||
+    (await supervisorRoutes(request, response)) ||
+    (await dashboardRoutes(request, response)) ||
     (serveFiles === undefined ? false : await serveFiles(request, response));
 
   const dependencies: ApiDependencies = { ...base.dependencies, extraRoutes };
