@@ -1,0 +1,19 @@
+# VOICE data pipeline dependencies.
+#
+# Deliberately small. pandas + numpy do the shaping, pyarrow writes Parquet,
+# requests talks to data.gov.in. Polars and DuckDB were considered and are not
+# needed at this scale: the heavy step is vectorised NumPy generation streamed
+# through ParquetWriter, which neither would speed up.
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14.0
+requests>=2.28
+
+# BigQuery layer (pipelines/voice_bq). Credentials come from Application
+# Default Credentials or the Cloud Run service account — never a key file.
+google-cloud-bigquery>=3.20
+google-cloud-storage>=2.16
+db-dtypes>=1.2
+# Local validation only: runs the same analysis SQL over the Parquet so the
+# evaluation is real before a cloud project exists. Not used in production.
+duckdb>=1.0
