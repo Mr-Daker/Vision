@@ -16,7 +16,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from . import local
+from . import local, splits
 from .evaluation import ClassificationResult, RankingResult, score_classification, score_ranking
 
 #: Run in order; later files depend on the views earlier ones create.
@@ -42,6 +42,7 @@ VIEW_NAMES = {
 class AnalyticsRun:
     tables: dict[str, pd.DataFrame]
     labels: pd.DataFrame
+    split: pd.DataFrame
 
 
 def run_local() -> AnalyticsRun:
@@ -73,7 +74,7 @@ def run_local() -> AnalyticsRun:
         """
     ).fetchdf()
 
-    return AnalyticsRun(tables=tables, labels=labels)
+    return AnalyticsRun(tables=tables, labels=labels, split=splits.load())
 
 
 #: Which planted scenarios each analysis is actually designed to detect.
@@ -98,14 +99,45 @@ TARGET_SCENARIOS = {
 }
 
 
+def _restrict(
+    predictions: pd.DataFrame,
+    split_frame: pd.DataFrame,
+    split: str,
+) -> pd.DataFrame:
+    """Narrows a prediction table to the universe a given split may be scored on.
+
+    Every cell — planted or not — belongs to exactly one split, so the two
+    universes are comparable samples of the same country. Cells from the other
+    split are removed entirely rather than counted as negatives: a development
+    cell carrying Scenario A is a genuine positive, and scoring it as a false
+    positive on the hidden run would manufacture errors that say nothing about
+    held-out performance.
+    """
+    if split == "all":
+        return predictions
+    mine = split_frame[split_frame["split"] == split][["district_key", "sector"]]
+    return predictions.merge(mine, on=["district_key", "sector"], how="inner")
+
+
 def _label_for(labels: pd.DataFrame, scenarios: tuple[str, ...]) -> pd.DataFrame:
     frame = labels.copy()
     frame["target"] = frame["ground_truth_scenario"].isin(scenarios)
     return frame
 
 
-def evaluate(run: AnalyticsRun) -> tuple[list[ClassificationResult], list[RankingResult]]:
-    tables, labels = run.tables, run.labels
+def evaluate(
+    run: AnalyticsRun, split: str = "hidden"
+) -> tuple[list[ClassificationResult], list[RankingResult]]:
+    """Scores the frozen analyses on one split.
+
+    `split="hidden"` is the held-out result and should be run once. `"development"`
+    reproduces what the thresholds were chosen on. `"all"` is the pre-split view
+    and is kept only for comparison.
+    """
+    labels = run.labels
+    tables = {
+        key: _restrict(frame, run.split, split) for key, frame in run.tables.items()
+    }
 
     unmet = tables["unmet_need"]
     investment = tables["investment"].copy()

@@ -31,7 +31,11 @@ def main(argv: list[str] | None = None) -> int:
         ("evaluate", "run the analyses locally and score them against planted scenarios"),
     ):
         sub.add_parser(name, help=help_text)
-    sub.add_parser("report", help="write the evaluation report to deliverables/")
+    sub.add_parser("report", help="write the held-out evaluation report to deliverables/")
+    sub.add_parser("split", help="show the development / hidden scenario split")
+    frozen = sub.add_parser("freeze", help="record a SHA-256 freeze of the analysis SQL")
+    frozen.add_argument("--reason", required=True, help="why the rules are being re-frozen")
+    frozen.add_argument("--force", action="store_true", help="overwrite an existing freeze")
 
     args = parser.parse_args(argv)
     started = time.time()
@@ -77,17 +81,43 @@ def main(argv: list[str] | None = None) -> int:
         for name in create_views():
             print(f"  built    {name}")
 
+    elif args.command == "split":
+        from . import splits
+
+        split = splits.build()
+        print(splits.summarise(split).to_string())
+        print(f"\n  written to {splits.SPLIT_PATH}")
+
+    elif args.command == "freeze":
+        from . import freeze as fz
+
+        record = fz.freeze(args.reason, force=args.force)
+        print(f"  frozen at {record['frozen_at']}")
+        for name, digest in record["digests"].items():
+            print(f"    {name:26s} {digest[:16]}...")
+
     elif args.command in ("evaluate", "report"):
         from . import analytics as an
+        from . import freeze as fz
         from .report import write_report
 
         print("analytics:evaluate (local DuckDB over pipeline Parquet)")
         run = an.run_local()
-        classifications, rankings = an.evaluate(run)
+
+        # Development first, so the generalisation gap is visible rather than
+        # a hidden figure being read in isolation.
+        print("\n  DEVELOPMENT split (thresholds were chosen on these cells)")
+        dev_class, dev_rank = an.evaluate(run, "development")
+        an.report(dev_class, dev_rank)
+
+        print("\n  HIDDEN split (held out; scored once against frozen rules)")
+        classifications, rankings = an.evaluate(run, "hidden")
         an.report(classifications, rankings)
+
         print(f"\n  {an.leakage_statement()}")
+        print(f"  {fz.statement()}")
         if args.command == "report":
-            path = write_report(run, classifications, rankings)
+            path = write_report(run, classifications, rankings, split="hidden")
             print(f"\n  report written to {path}")
 
     print(f"\ndone in {time.time() - started:.1f}s")

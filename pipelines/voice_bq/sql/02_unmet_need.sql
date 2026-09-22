@@ -79,10 +79,6 @@ SELECT
   -- place on the strength of a handful of events.
   (s.reports_6m >= 10) AS sufficient_evidence,
 
-  -- The rule, stated rather than learned. Thresholds are deliberately round
-  -- numbers a policymaker can challenge: top quartile of demand within the
-  -- sector, and an infrastructure indicator meaningfully worse than typical.
-  --
   -- Investment is deliberately NOT a condition here. This view answers "is
   -- there corroborated need?" and nothing else; whether that need is already
   -- funded is Analysis 2's question. An earlier version gated need on low
@@ -94,27 +90,30 @@ SELECT
   -- investment_coverage_signal is still computed and still reported — it is
   -- informative context, and Analysis 2 consumes it — it just does not decide
   -- whether need exists.
-  -- Threshold reasoning, and an honest note about how it was set.
+  -- FROZEN THRESHOLDS — selected on the development split only.
   --
-  -- There are 2,508 district-sector cells nationally. A shortlist a ministry
-  -- can actually work through in a quarter is tens of cells; the top quartile
-  -- is 627 of them, which is a phone book rather than a shortlist. The top
-  -- ventile is the defensible shortlist size, and that is the primary reason
-  -- for 0.95.
+  -- Selection rule, stated before the sweep was read: take the highest dev-set
+  -- F1 among settings where the infrastructure condition actually binds, which
+  -- means a deficit threshold above the national median of 0.30. The
+  -- constraint is not cosmetic. The unconstrained dev optimum was
+  -- demand>=0.97 with deficit>=0.30 (F1 0.530), but at the median the
+  -- infrastructure term filters almost nothing, and this analysis claims
+  -- citizen demand "corroborated by infrastructure indicators". A rule that
+  -- does not mean what it says would score slightly better and be worth less.
   --
-  -- It is not a blind choice. A sensitivity analysis over the demand and
-  -- deficit thresholds was run against the planted scenarios before this
-  -- value was fixed, and the full curve is published in the evaluation
-  -- report so the choice can be challenged rather than taken on trust. A
-  -- reader should discount these figures accordingly.
+  -- Chosen: demand>=0.97, deficit>=0.40 — dev F1 0.512.
+  -- The surface is flat here (0.95/0.30 scores 0.523), so the choice is not
+  -- knife-edge and small perturbations do not change the conclusion.
+  --
+  -- The hidden 30% of planted cells took no part in this and is scored once.
   (
     s.reports_6m >= 10
-    AND s.citizen_demand_signal         >= 0.95
+    AND s.citizen_demand_signal         >= 0.97
     AND s.infrastructure_deficit_signal >= 0.40
   ) AS potential_unmet_need,
 
   -- Why this row looks the way it does, in the order a reader would ask.
-  CASE WHEN s.citizen_demand_signal >= 0.75 THEN 'HIGH_CITIZEN_DEMAND,' ELSE '' END ||
+  CASE WHEN s.citizen_demand_signal >= 0.97 THEN 'HIGH_CITIZEN_DEMAND,' ELSE '' END ||
   CASE WHEN s.infrastructure_deficit_signal >= 0.40 THEN 'INFRASTRUCTURE_DEFICIT_CORROBORATES,' ELSE '' END ||
   CASE WHEN s.investment_coverage_signal <= 0.40 THEN 'LOW_INVESTMENT_PER_CAPITA,' ELSE '' END ||
   CASE WHEN s.population_exposure_signal >= 0.75 THEN 'LARGE_POPULATION_EXPOSED,' ELSE '' END ||

@@ -1,0 +1,28 @@
+{
+  "current": {
+    "frozen_at": "2026-09-22T14:25:46Z",
+    "reason": "Thresholds selected on the development split only (113 of 162 planted cells). Unmet-need demand>=0.97/deficit>=0.40 chosen as highest dev F1 among settings where the infrastructure condition binds above the national median. Execution gap, emerging hotspot and silent need were NOT re-tuned: their values predate the split and are disclosed as such.",
+    "digests": {
+      "01_features.sql": "332a8c8f3891acad7e9f5f514c75b13fa6eb62516ab629c402dd6e25db8a98c6",
+      "02_unmet_need.sql": "e36a657fbbd0e2cdf11e45793182adee4f317a988ff742a679a79c2df2b40a36",
+      "03_investment_gap.sql": "5718628b10042a66a38d4b36560171cc928260bd8575847bdae2461a0b931643",
+      "04_execution_gap.sql": "0f3c8bdbd270e4f674c25af9751303388860a81418ca3a1bc5fde926303c7c6d",
+      "05_emerging_hotspot.sql": "6f7f56adc349ab83483a206de90c1f8c8eb0e2922f06e68e1959aa1405cedb2a",
+      "06_silent_need.sql": "2786929b304583ad804c7336f747d91543a43924e68d85b7888cf5cbc711b1d0"
+    }
+  },
+  "history": [
+    {
+      "frozen_at": "2026-09-22T14:25:46Z",
+      "reason": "Thresholds selected on the development split only (113 of 162 planted cells). Unmet-need demand>=0.97/deficit>=0.40 chosen as highest dev F1 among settings where the infrastructure condition binds above the national median. Execution gap, emerging hotspot and silent need were NOT re-tuned: their values predate the split and are disclosed as such.",
+      "digests": {
+        "01_features.sql": "332a8c8f3891acad7e9f5f514c75b13fa6eb62516ab629c402dd6e25db8a98c6",
+        "02_unmet_need.sql": "e36a657fbbd0e2cdf11e45793182adee4f317a988ff742a679a79c2df2b40a36",
+        "03_investment_gap.sql": "5718628b10042a66a38d4b36560171cc928260bd8575847bdae2461a0b931643",
+        "04_execution_gap.sql": "0f3c8bdbd270e4f674c25af9751303388860a81418ca3a1bc5fde926303c7c6d",
+        "05_emerging_hotspot.sql": "6f7f56adc349ab83483a206de90c1f8c8eb0e2922f06e68e1959aa1405cedb2a",
+        "06_silent_need.sql": "2786929b304583ad804c7336f747d91543a43924e68d85b7888cf5cbc711b1d0"
+      }
+    }
+  ]
+}
