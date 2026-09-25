@@ -1,0 +1,133 @@
+{
+  "version": "demo-budgets.v1",
+  "note": "Operating budgets (V049). Every entry says where its number came from — 'chosen' with the reasoning, or 'measured' with what measured it and when — because a limit whose origin nobody recorded is indistinguishable from a limit somebody guessed. These are demonstration-scale budgets against a local container; a deployed instance must re-measure and revise them (V006 §5).",
+  "budgets": [
+    {
+      "name": "outbox_lag_seconds",
+      "limit": 300,
+      "unit": "seconds",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "five minutes is longer than any single stage takes and short enough that a stuck relay is noticed before a demonstration shows a report that never moved; measured processing is about 3 ms, so anything at this scale is a stoppage rather than slowness",
+      "when_exceeded": "open the runbook's 'the queue has stopped moving' section: check whether a relay is running at all before looking at any individual task, because the common cause is nothing consuming rather than something failing"
+    },
+    {
+      "name": "queue_age_seconds",
+      "limit": 120,
+      "unit": "seconds",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "a task that is ready to run and has waited two minutes is waiting on a consumer, not on its own schedule; kept lower than the lag threshold so the cause is distinguishable from the symptom",
+      "when_exceeded": "check claimed_by and claimed_at on the oldest ready task: a claim that never expired points at a worker that died holding a lease, which the runbook's replay section covers"
+    },
+    {
+      "name": "stage_failures",
+      "limit": 0,
+      "unit": "terminal failures",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "a terminal failure is work this system has given up on, so the acceptable number is none; retryable failures are ordinary and are counted separately rather than alerted on",
+      "when_exceeded": "read the failure reason and the stage's own record before re-enqueuing anything: a terminal failure that is replayed without its cause being fixed becomes a terminal failure again, and the second one is harder to see"
+    },
+    {
+      "name": "database_saturation_percent",
+      "limit": 80,
+      "unit": "percent of max_connections",
+      "direction": "at_most",
+      "source_kind": "measured",
+      "measured_by": "npm run perf:measure, which opened connections until the container refused",
+      "measured_on": "2026-09-18",
+      "when_exceeded": "reduce instance counts before pool sizes (V006 §5): a service that cannot get a connection fails every request, while a service with fewer instances fails none"
+    },
+    {
+      "name": "summary_lag_events",
+      "limit": 50,
+      "unit": "unapplied events",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "the projection is applied incrementally and a handful of unapplied events is ordinary between passes; fifty is the point at which a dashboard figure is describing a different afternoon from the records",
+      "when_exceeded": "run npm run summaries:rebuild, then npm run integrity:check to confirm the projection and the records agree; the dashboard's own banner already shows caution while this is true, so nobody is reading a figure that claims to be current"
+    },
+    {
+      "name": "model_calls_per_hour",
+      "limit": 200,
+      "unit": "provider calls",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "every cached row is one paid call; two hundred an hour is far above demonstration traffic and far below a runaway retry loop, which is the failure this exists to catch rather than ordinary use",
+      "when_exceeded": "check the cache key before the provider: a changed prompt version or model name makes every previous answer a miss, which is correct behaviour and an expensive surprise (V046 measured the free tier's daily quota being exhausted by three evaluation runs)"
+    },
+    {
+      "name": "untraceable_events",
+      "limit": 0,
+      "unit": "events without a correlation id",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "a correlation id is what turns a report of a failure into a diagnosis; the column is NOT NULL, so this is a check that the guarantee is still true rather than a limit anybody expects to approach",
+      "when_exceeded": "stop and look at the schema: reaching this means the NOT NULL constraint is gone, and every event recorded since is one nobody can follow through the system"
+    },
+    {
+      "name": "receipt_latency_p95_ms",
+      "limit": 1500,
+      "unit": "ms",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "a citizen standing in the street with one bar of signal should see their receipt before they assume the report was lost; 1.5 s is the point at which people start pressing the button again, and a second submission is a second record of one problem",
+      "when_exceeded": "stop accepting new demonstration load and look at the submission path before the queue, because a receipt that is late is a receipt a person will duplicate"
+    },
+    {
+      "name": "candidate_query_p95_ms",
+      "limit": 400,
+      "unit": "ms",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "retrieval runs inside the matching stage's lease and shares it with an embedding call and a transaction; 400 ms keeps it a small part of a stage sized at 180 s, so a slow query is visible long before it threatens the lease",
+      "when_exceeded": "check the spatial index is being used before adding one, then reduce the time window in the matching pack rather than the radius, because the window costs rows and the radius costs accuracy"
+    },
+    {
+      "name": "dashboard_read_p95_ms",
+      "limit": 2000,
+      "unit": "ms",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "the dashboard is read by an operator at a desk, not by a person in the street, and it reads the whole district including its freshness and reconciliation state; two seconds is a page that feels slow rather than broken",
+      "when_exceeded": "read from the summary projection rather than widening it, and if the projection itself is slow, rebuild before tuning — a drifted projection does more work than a fresh one"
+    },
+    {
+      "name": "processing_delay_p95_ms",
+      "limit": 5000,
+      "unit": "ms",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "the matching stage without a provider call is database work only; five seconds leaves room for a serialization retry and still puts an issue in front of a department inside one poll interval",
+      "when_exceeded": "look at serialization failures first: a retry is a whole unit of work re-run, so a rising retry rate multiplies this figure rather than adding to it"
+    },
+    {
+      "name": "workload_connections_min",
+      "limit": 36,
+      "unit": "connections",
+      "direction": "at_least",
+      "source_kind": "chosen",
+      "reasoning": "V006 §5's gate: instance_max_connections must exceed the superuser reservation plus six for administration plus 36 for the workload, so that every service can set both max_instances and pool_max without the sum exceeding what the instance will give",
+      "when_exceeded": "instance counts drop before pool sizes, because a service that cannot get a connection fails every request while a service with fewer instances fails none"
+    },
+    {
+      "name": "storage_bytes_per_issue_max",
+      "limit": 65536,
+      "unit": "bytes",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "an issue carries its submission, its evidence rows, its links, its participation, its events and its projected fact; 64 KiB per issue is a ceiling chosen to make growth visible rather than to be tight, and it is the figure V049 re-measures",
+      "when_exceeded": "measure which table grew before changing retention, because the answer decides whether this is evidence, events or the projection — and only one of those may be deleted"
+    },
+    {
+      "name": "ai_calls_per_report_max",
+      "limit": 2,
+      "unit": "calls",
+      "direction": "at_most",
+      "source_kind": "chosen",
+      "reasoning": "one classification and one embedding. Anything above two means the cache missed or a retry ran, and both are worth seeing because both are paid",
+      "when_exceeded": "check the AI cache key before the provider: a changed prompt version or model name makes every previous answer a miss, which is correct behaviour and an expensive surprise"
+    }
+  ]
+}

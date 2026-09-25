@@ -68,7 +68,10 @@ npm run bigquery:validate   # parity, leakage, partitioning, GEOGRAPHY
 ```
 
 `bigquery:load` is idempotent — staging uses `WRITE_TRUNCATE` and final tables
-use `CREATE OR REPLACE`, so a re-run replaces rather than appends.
+use `CREATE OR REPLACE`, so a re-run replaces rather than appends. Raw staging
+tables live only in the restricted `voice_eval` dataset, because some source
+files carry planted labels. The loader removes them in `finally` after success
+or failure; validation checks both datasets for leftover staging tables.
 
 ## 5. The IAM boundary that matters
 
@@ -91,6 +94,10 @@ bq add-iam-policy-binding \
   --role="roles/bigquery.dataViewer" \
   "${VOICE_PROJECT}:voice_analytics"
 
+# If this bq subcommand says it requires allowlisting, set the same dataset
+# access entry through the BigQuery dataset Access pane or datasets.patch API.
+# Do not replace it with a project-wide dataViewer grant.
+
 # Needed to run queries at all; does not grant data access.
 gcloud projects add-iam-policy-binding "$VOICE_PROJECT" \
   --member="serviceAccount:${ANALYTICS_SA}" \
@@ -112,6 +119,11 @@ bq --project_id="$VOICE_PROJECT" query --use_legacy_sql=false \
 The evaluation runner is a separate identity (or a human with
 `bigquery.dataViewer` on both datasets). It is the only thing permitted to join
 predictions to labels.
+
+For `vision-new-india`, the dataset access entries were set with the
+BigQuery API because this `bq` installation rejected the binding subcommand.
+The analytics identity was verified to read `voice_analytics` and receive 403
+from `voice_eval`. The old `vision-508301` datasets were left untouched.
 
 ## 6. Optional — Cloud Storage staging
 

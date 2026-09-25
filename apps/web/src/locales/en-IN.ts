@@ -16,7 +16,7 @@ export const enIN: LocalePack = {
     "app.skip_to_form": "Skip to the report form",
     "login.heading": "Choose a demonstration account",
     "login.choose": "Continue as {label}",
-    "login.signed_in_as": "Signed in as {label}",
+    "login.signed_in_as": "Signed in with a demo account — not a real identity check",
     "login.sign_out": "Sign out",
 
     "location.heading": "Where is the problem?",
@@ -45,10 +45,14 @@ export const enIN: LocalePack = {
       "This location was captured {minutes} minutes ago. If you have moved since then, capture it again.",
     "location.refresh": "Capture the location again",
     "location.clear": "Clear this location",
+    "location.map_hint":
+      "Tap or click the map to set this location, then check the coordinates below.",
+    "location.map_unavailable":
+      "A map is not available right now. Enter the coordinates below instead.",
 
-    "photo.heading": "Add a photo (optional)",
+    "photo.heading": "Add a photo",
     "photo.choose": "Choose a photo",
-    "photo.hint": "A JPEG or PNG image, up to {megabytes} MB.",
+    "photo.hint": "Required to send a report. JPEG or PNG, up to {megabytes} MB.",
     "photo.selected": "Selected: {name} ({kilobytes} KB)",
     "photo.uploading": "Uploading… {percent}%",
     "photo.uploaded": "Photo uploaded and saved.",
@@ -93,7 +97,7 @@ export const enIN: LocalePack = {
     "receipt.not_a_promise":
       "This is a record that the report was received. It is not an official government acknowledgement, and it is not a promise that the problem will be repaired.",
     "receipt.replayed":
-      "This reference was already created — your earlier report was not duplicated.",
+      "This reference was already created. Your earlier report was not duplicated.",
     "receipt.report_another": "Report another problem",
 
     "draft.saved": "Saved on this device {time}.",
@@ -107,18 +111,27 @@ export const enIN: LocalePack = {
     "draft.expires": "This draft is deleted automatically after {hours} hours.",
 
     "error.offline": "You appear to be offline. Nothing was sent.",
-    "error.session_expired": "Your session ended. Please sign in again — your draft is kept.",
+    "error.session_expired": "Your session ended. Please sign in again; your draft is kept.",
     "error.rate_limited": "Too many requests. Please try again in {seconds} seconds.",
     "error.validation": "Please fix the highlighted fields.",
     "error.server": "The server could not accept the report. Nothing was saved.",
-    "error.no_observation":
-      "Add a description, a photo or a recording, so there is something to look at besides a location.",
+    "error.photo_required": "Add and upload a photo before sending your report.",
     "error.upload_incomplete": "Finish or remove the photo upload before sending.",
     "error.duplicate_tap": "Your report is already being sent.",
     "tracking.heading": "Your reports",
     "tracking.none": "You have not sent a report from this device yet.",
     "tracking.refresh": "Refresh your reports",
     "tracking.evidence_count": "{count} item(s) of evidence",
+    "tracking.status_received": "Received; not yet grouped with an issue",
+    "tracking.status_created": "Issue created; not yet routed",
+    "tracking.status_routing_review": "Routing needs a person's review",
+    "tracking.status_routed_internal": "Routed internally to demo staff",
+    "tracking.status_agency_ack_received": "Demo staff acknowledged the issue",
+    "tracking.status_work_planned": "Work planned by demo staff",
+    "tracking.status_resolution_claimed": "Repair claimed; awaiting confirmation",
+    "tracking.status_resolution_confirmed": "Repair confirmed",
+    "tracking.status_resolution_disputed": "Repair claim disputed",
+    "tracking.status_reopened": "Issue reopened",
     "tracking.no_issue_yet": "Not yet grouped with an issue",
     "tracking.receipt_reference": "Receipt reference: {reference}",
     "tracking.open_receipt": "Open saved receipt",

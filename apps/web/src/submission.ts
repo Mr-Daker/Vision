@@ -56,11 +56,8 @@ export type FormBlock = { readonly field: string; readonly errorKey: StringKey }
 /**
  * What still stops this report being sent.
  *
- * A location is required, and so is *something observable* — a description, a
- * photo or a recording. That second rule is the server's
- * (`no_observation`, [V018](../../../docs/foundation/V018-submission-acceptance-and-receipt.md)),
- * mirrored here so the citizen is told before they send rather than meeting it
- * as a rejected request. Which of the three they provide is up to them.
+ * The citizen photo-first flow requires a location and a finalized photo.
+ * Text and voice may add context, but neither silently replaces the photo.
  *
  * There is deliberately **no category, department or severity** to complete:
  * that is decided after review, and asking a citizen to classify
@@ -72,11 +69,9 @@ export const findBlocks = (form: CaptureForm): readonly FormBlock[] => {
     blocks.push({ field: "location", errorKey: "error.validation" });
   }
 
-  const hasText = form.description.text.trim().length > 0;
   const hasPhoto = isAttachable(form.photo);
-  const hasVoice = form.description.voice !== undefined && isAttachable(form.description.voice);
-  if (!hasText && !hasPhoto && !hasVoice) {
-    blocks.push({ field: "observation", errorKey: "error.no_observation" });
+  if (!hasPhoto && !blocksSubmission(form.photo)) {
+    blocks.push({ field: "photo", errorKey: "error.photo_required" });
   }
   if (blocksSubmission(form.photo)) {
     blocks.push({ field: "photo", errorKey: "error.upload_incomplete" });
@@ -97,6 +92,9 @@ export const buildRequestBody = (form: CaptureForm): SubmissionRequestBody => {
   const location = form.location;
   if (location === undefined) {
     throw new Error("buildRequestBody requires a location; call canSubmit first");
+  }
+  if (!isAttachable(form.photo)) {
+    throw new Error("buildRequestBody requires an uploaded photo; call canSubmit first");
   }
 
   const evidence: { object_reference: string; media_type: "photo" | "voice" }[] = [];

@@ -439,6 +439,9 @@ export type CellIssueRow = {
   readonly ageHours: number;
   readonly countedParticipants: number;
   readonly activeEvidenceLinks: number;
+  /** Undefined only when the issue has no representative location yet (V0xx). */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 /**
@@ -474,7 +477,9 @@ export const readCellIssues = async (
               as age_hours,
             coalesce(f.counted_participants, 0) as counted_participants,
             coalesce(f.active_evidence_links, 0) as active_evidence_links,
-            f.state
+            f.state,
+            ST_X(c.representative_location::geometry) as lon,
+            ST_Y(c.representative_location::geometry) as lat
        from canonical_issue c
        left join summary_issue_fact f
          on f.summary_name = $5 and f.issue_id = c.issue_id
@@ -501,6 +506,7 @@ export const readCellIssues = async (
     ageHours: Number(row["age_hours"]),
     countedParticipants: Number(row["counted_participants"]),
     activeEvidenceLinks: Number(row["active_evidence_links"]),
+    ...(row["lon"] === null ? {} : { longitude: Number(row["lon"]), latitude: Number(row["lat"]) }),
   }));
 };
 

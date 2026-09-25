@@ -492,6 +492,18 @@ button[aria-busy="true"] {
   font-size: 0.82rem;
 }
 
+/* Hidden until the loader confirms a key is configured and there is at
+   least one geolocated row to show (V0xx Google Maps integration) — a
+   deployment or a filtered list without either renders the queue exactly as
+   it did before this feature. Shared by dashboard/staff/reviewer/supervisor. */
+.issue-overview-map {
+  height: 14rem;
+  margin: 0.9rem 0;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
 .private-original {
   margin: 0.15rem 0 0.9rem;
 }

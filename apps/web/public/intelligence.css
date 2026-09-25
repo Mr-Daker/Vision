@@ -1040,11 +1040,16 @@ body::after {
   text-align: right;
 }
 
-.detail-figure {
-  margin-bottom: 0.7rem;
+/* The whole location view now, so it is given the height the graticule used
+   to take rather than the smaller one it had as a companion. Hidden until
+   the Maps loader confirms a key is configured, leaving the coordinates
+   readout as the complete view on a deployment without one. */
+.detail-map {
+  height: 16rem;
+  margin-bottom: 0.5rem;
   overflow: hidden;
+  border: 1px solid var(--pi-line);
   border-radius: 0.6rem;
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .detail-caveat {
@@ -1085,74 +1090,6 @@ body::after {
   border-color: transparent;
   background: #ffffff;
   color: #000000;
-}
-
-/* The citizen app's instrument, reused. Only the palette is restated here. */
-.sp-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.sp-grid {
-  stroke: #ffffff;
-  stroke-width: 0.5;
-  opacity: 0.18;
-}
-
-.sp-grid-label {
-  fill: #ffffff;
-  font-family: var(--font-display);
-  font-size: 7px;
-  opacity: 0.45;
-}
-
-.sp-grid-label-v {
-  writing-mode: vertical-rl;
-}
-
-.sp-accuracy {
-  fill: rgba(255, 255, 255, 0.08);
-  stroke: #ffffff;
-  stroke-width: 0.75;
-  opacity: 0.5;
-}
-
-.sp-pulse {
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 1;
-  transform-origin: center;
-  animation: sp-pulse 3.2s ease-out infinite;
-}
-
-.sp-cross {
-  stroke: #ffffff;
-  stroke-width: 0.75;
-  opacity: 0.55;
-}
-
-.sp-pin {
-  fill: #ffffff;
-}
-
-.sp-nearby {
-  fill: none;
-  stroke: var(--pi-sev-high);
-  stroke-width: 1.25;
-  opacity: 0.8;
-}
-
-@keyframes sp-pulse {
-  0% {
-    opacity: 0.55;
-    transform: scale(0.6);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(1.5);
-  }
 }
 
 /* ── Focus visibility ────────────────────────────────────── */

@@ -28,6 +28,7 @@ import {
   INTERNAL_ONLY_NOTE,
   listSupervisorQueues,
   newCsrfToken,
+  readDurability,
   recordAgeingOverride,
   StaffGrantError,
   SupervisorError,
@@ -42,7 +43,13 @@ import {
   newCorrelationId,
 } from "@vision/contracts";
 import {
+  concernsFrom,
   derivePrincipal,
+  durabilityFigure,
+  DURABILITY_LIMITS,
+  DURABILITY_SIGNALS,
+  RANKING_REFUSAL,
+  SIGNAL_MEANING,
   UnauthenticatedError,
   type AgeingPolicyPack,
   type Principal,
@@ -295,6 +302,75 @@ export const createSupervisorRoutes = (deps: SupervisorRouteDependencies) => {
       return true;
     }
 
+    // ---- GET /v1/supervisor/durability : did the resolutions last? ----
+    //
+    // Read-only, and scoped to the wards this session holds a grant for, like
+    // every other supervisor read. What it deliberately does not return is the
+    // staff member who filed each claim: the unit of this measurement is the
+    // department within a ward (V050a).
+    if (method === "GET" && path === "/v1/supervisor/durability") {
+      const principal = await requireSupervisor(request, response, correlationId, false);
+      if (principal === undefined) return true;
+      const jurisdictionId = url.searchParams.get("jurisdiction_id");
+      if (jurisdictionId === null || jurisdictionId.length === 0) {
+        sendError(response, "validation_failed", "jurisdiction_id is required", correlationId);
+        return true;
+      }
+      if (!principal.jurisdictionScope.includes(jurisdictionId)) {
+        sendError(
+          response,
+          "forbidden",
+          "this session holds no grant for that jurisdiction",
+          correlationId,
+        );
+        return true;
+      }
+
+      const days = Number(url.searchParams.get("days") ?? "120");
+      const reading = await readDurability(deps.client, {
+        asOf: now(),
+        days: Number.isFinite(days) && days > 0 ? days : 120,
+        jurisdictionIds: [jurisdictionId],
+      });
+      const concerns = DURABILITY_SIGNALS.flatMap((signal) =>
+        concernsFrom({ observations: reading.observations, signal }),
+      );
+
+      sendJson(
+        response,
+        200,
+        {
+          jurisdiction_id: jurisdictionId,
+          window_days: reading.window.days,
+          as_of: reading.window.asOf,
+          total_claims: reading.totalClaims,
+          signals: DURABILITY_SIGNALS.map((signal) => ({
+            signal,
+            observed: SIGNAL_MEANING[signal].observed,
+            units: reading.observations.map((observation) => ({
+              label: observation.unit.label,
+              department_id: observation.unit.departmentId,
+              figure: durabilityFigure(observation, signal),
+            })),
+          })),
+          concerns: concerns.map((concern) => ({
+            unit: concern.unit.label,
+            signal: concern.signal,
+            figure: concern.figure,
+            baseline: concern.baseline,
+            observed: concern.observed,
+            alternatives: concern.alternatives,
+            next_step: concern.nextStep,
+          })),
+          // Both travel with the figures rather than under them.
+          ranking_note: RANKING_REFUSAL,
+          limits: DURABILITY_LIMITS,
+        },
+        correlationId,
+      );
+      return true;
+    }
+
     if (method === "GET" && path === "/v1/supervisor/queues") {
       const principal = await requireSupervisor(request, response, correlationId, false);
       if (principal === undefined) return true;
@@ -332,6 +408,8 @@ export const createSupervisorRoutes = (deps: SupervisorRouteDependencies) => {
               opened_at: issue.openedAt,
               department_since: issue.departmentSince ?? null,
               queues: issue.queues,
+              latitude: issue.latitude ?? null,
+              longitude: issue.longitude ?? null,
               // Two clocks, always together. Reporting only the department one
               // would let a re-route hide how long the person has waited.
               department_age_days: issue.assessment?.departmentAgeDays ?? null,

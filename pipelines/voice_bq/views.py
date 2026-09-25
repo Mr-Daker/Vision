@@ -94,7 +94,11 @@ SELECT
   dm.district_name,
   dm.latitude,
   dm.longitude,
-  dm.location,
+  -- BigQuery does not allow GEOGRAPHY expressions in GROUP BY. The point is
+  -- deterministic from the grouped coordinates, so rebuild it after grouping
+  -- rather than grouping on dm.location (which DuckDB accepts but BigQuery
+  -- correctly refuses).
+  ST_GEOGPOINT(dm.longitude, dm.latitude) AS location,
   d.population,
   d.households,
   d.population_density,
@@ -113,7 +117,7 @@ LEFT JOIN `{d}.district_demographics` AS d USING (district_key)
 LEFT JOIN `{d}.district_infrastructure` AS i USING (district_key)
 GROUP BY
   dm.country_code, dm.state_code, dm.state_name, dm.district_code, dm.district_key,
-  dm.district_name, dm.latitude, dm.longitude, dm.location,
+  dm.district_name, dm.latitude, dm.longitude,
   d.population, d.households, d.population_density, d.literacy_rate,
   d.rural_population_pct, d.urban_population_pct
 """,

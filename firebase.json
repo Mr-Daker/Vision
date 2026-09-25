@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "apps/web/public",
+    "ignore": ["firebase.json", ".firebaserc", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/v1/**",
+        "run": {
+          "serviceId": "vision-api",
+          "region": "asia-south1"
+        }
+      }
+    ]
+  }
+}

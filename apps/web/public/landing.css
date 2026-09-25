@@ -1084,6 +1084,37 @@ body.menu-open {
   line-height: 1.6;
 }
 
+/* A card that is itself a link, for the "Beyond the report" section. Built
+   entirely from .card's own rules — same padding, radius, background,
+   border and hover lift — plus what an <a> needs that an <article> did not:
+   no underline, a block layout, and the arrow line that says where it goes. */
+.card-link {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.card-arrow {
+  display: block;
+  margin-top: 14px;
+  color: #c8c8c8;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.card-link:hover .card-arrow,
+.card-link:focus-visible .card-arrow {
+  color: #ffffff;
+}
+
+.card-link:focus-visible {
+  outline: 3px solid #9ec5ff;
+  outline-offset: 3px;
+}
+
 /* ── About facts ──────────────────────────────────────────── */
 
 .facts {

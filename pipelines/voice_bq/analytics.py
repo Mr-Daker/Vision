@@ -284,6 +284,9 @@ def leakage_statement() -> str:
         "No ground-truth column reached the analytics. The five analysis files are executed "
         "through local.run_file, which raises PermissionError if a query names an evaluation "
         "table; labels are read only after every analysis has produced its output, and joined "
-        "in Python. In BigQuery the same separation is enforced by dataset permissions: the "
-        "analytics service account has no read grant on voice_eval."
+        "in Python. BigQuery stores labels in the separate voice_eval dataset, and the query "
+        "guard refuses to bind it into an analysis. A live IAM-denial claim requires running "
+        "under a dedicated analytics identity that has voice_analytics access and no "
+        "voice_eval access; personal ADC commonly has project-level access to both and is not "
+        "evidence of that production permission boundary."
     )

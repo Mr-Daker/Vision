@@ -9,7 +9,7 @@
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>Vision — report a public infrastructure problem</title>
+    <title>Vision: report a public infrastructure problem</title>
     <link rel="stylesheet" href="/theme.css" />
     <link rel="stylesheet" href="/app.css" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -22,7 +22,7 @@
     >
 
     <header class="app-header">
-      <a class="brand" href="/" aria-label="Vision — home">
+      <a class="brand" href="/" aria-label="Vision home">
         <img class="brand-mark" src="/assets/logo.png" alt="" width="480" height="271" />
         <span data-i18n="app.name">Vision</span>
       </a>
@@ -150,6 +150,12 @@
             </button>
 
             <div id="manual-fields" class="manual-fields" hidden>
+              <div class="manual-map-wrap">
+                <p id="manual-map-hint" class="muted" data-i18n="location.map_hint">
+                  Tap or click the map to set this location, then check the coordinates below.
+                </p>
+                <div id="manual-map" class="manual-map" hidden></div>
+              </div>
               <div class="field">
                 <label for="manual-lat" data-i18n="location.latitude">Latitude</label>
                 <input
@@ -184,7 +190,7 @@
           </fieldset>
 
           <fieldset class="field-group">
-            <legend data-i18n="photo.heading">Add a photo (optional)</legend>
+            <legend data-i18n="photo.heading">Add a photo</legend>
             <div class="field">
               <!-- The input is visually hidden and its label is the control you
                  see and click. Order matters: the label follows the input so
@@ -194,6 +200,7 @@
                 type="file"
                 id="photo-input"
                 accept="image/jpeg,image/png"
+                required
                 aria-describedby="photo-hint photo-state"
               />
               <label for="photo-input" data-i18n="photo.choose">Choose a photo</label>
@@ -647,7 +654,7 @@
           <h2 class="rail-label" id="rail-location-label" data-i18n="rail.location_label">
             Location Evidence
           </h2>
-          <div class="rail-figure" id="rail-location-figure" hidden></div>
+          <div class="rail-figure rail-figure-map" id="rail-location-figure" hidden></div>
           <p class="rail-empty" id="rail-location-empty" data-i18n="rail.location_empty">
             Waiting for location
           </p>

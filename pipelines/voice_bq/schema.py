@@ -158,7 +158,11 @@ FROM {staging}
     TableSpec(
         name="public_projects",
         staging="_staging_public_projects",
-        partition_by="DATE(sanction_date)",
+        # The SELECT below materialises `sanction_date` as a DATE. BigQuery
+        # accepts a DATE column directly as a partition expression; wrapping
+        # that output alias in DATE(...) is not a supported CTAS partition
+        # expression and makes the first real deployment fail after staging.
+        partition_by="sanction_date",
         cluster_by=("district_key", "sector", "project_status"),
         description=(
             "SYNTHETIC project records. Scheme names are real central programmes; every "

@@ -33,8 +33,26 @@ coverage/
 !.vscode/settings.json.example
 *.swp
 
+# Local AI-assistant configuration is not part of the project
+.claude/
+.chatgpt/
+.chagpt/
+
 # Browser build output (npm run build:web)
 apps/web/public/js/
 
 # Local dev artefacts
 .local/
+
+# ── VOICE data foundation (pipelines/voice_data) ─────────────────────────
+# Generated datasets are reproducible from a seed, so the pipeline and its
+# metadata are tracked and the bulk outputs are not. `npm run data:all`
+# rebuilds everything below from data/raw.
+.venv/
+data/raw/
+data/processed/
+data/synthetic/
+data/master/*.parquet
+data/master/district_sector_master.csv
+# Kept: data/master/district_master.csv (small, real district codes) and
+# everything under data/metadata/ (provenance, dictionary, limitations).

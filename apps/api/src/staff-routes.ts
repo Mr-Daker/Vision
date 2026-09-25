@@ -165,6 +165,8 @@ const inboxPayload = (inbox: Awaited<ReturnType<typeof listDepartmentInbox>>) =>
     required_confirmations: item.requiredConfirmations ?? null,
     is_verified_resolution: item.currentStatus === "resolution_confirmed",
     ordering_basis: item.orderingBasis,
+    latitude: item.latitude ?? null,
+    longitude: item.longitude ?? null,
   })),
 });
 

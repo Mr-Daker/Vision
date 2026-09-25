@@ -48,6 +48,9 @@ export type StaffInboxItem = {
   readonly requiredConfirmations?: number;
   /** True only for a standing confirmed resolution. Never for a claim. */
   readonly isVerifiedResolution: boolean;
+  /** Absent only when the issue has no representative location yet (V0xx). */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type StaffInboxView = {
@@ -65,6 +68,9 @@ const record = (value: unknown): Record<string, unknown> | undefined =>
 
 const optionalString = (value: unknown): string | undefined =>
   typeof value === "string" ? value : undefined;
+
+const optionalNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
 export const toStaffWorkspaces = (value: unknown): readonly StaffWorkspace[] | undefined => {
   if (!Array.isArray(value)) return undefined;
@@ -194,6 +200,12 @@ export const toStaffInboxView = (payload: unknown): StaffInboxView | undefined =
       // reading the name.
       isVerifiedResolution: item["is_verified_resolution"] === true,
       orderingBasis: item["ordering_basis"] as string[],
+      ...(optionalNumber(item["latitude"]) === undefined
+        ? {}
+        : { latitude: Number(item["latitude"]) }),
+      ...(optionalNumber(item["longitude"]) === undefined
+        ? {}
+        : { longitude: Number(item["longitude"]) }),
     });
   }
 
@@ -256,9 +268,9 @@ export const resolutionStageOf = (item: StaffInboxItem): ResolutionStage => {
 export const resolutionStageLabel = (stage: ResolutionStage): string => {
   switch (stage) {
     case "claimable":
-      return "Work planned — a completion claim can be recorded";
+      return "Work planned: a completion claim can be recorded";
     case "awaiting_confirmation":
-      return "Claimed, awaiting confirmation — not a verified resolution";
+      return "Claimed, awaiting confirmation. Not a verified resolution.";
     case "disputed":
       return "A participant disputes this claim; a reviewer decides what happens next";
     case "confirmed":

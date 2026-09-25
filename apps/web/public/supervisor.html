@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>Vision — supervisor oversight</title>
+    <title>Vision: supervisor oversight</title>
     <meta
       name="description"
       content="Private oversight workspace for waiting, disputed and reopened issues in the Vision demonstration."
@@ -62,7 +62,7 @@
       <section id="supervisor-login" class="login-panel" aria-labelledby="supervisor-login-heading">
         <p class="eyebrow">Access required</p>
         <h2 id="supervisor-login-heading" tabindex="-1">Choose a supervisor account</h2>
-        <p class="disclosure">Simulated demonstration identity — not a real identity check</p>
+        <p class="disclosure">Simulated demonstration identity: not a real identity check</p>
         <p>
           This demonstration does not contact DigiLocker or a government staff directory. The
           supervisor role and its jurisdictions are stored and enforced by the server.
@@ -136,7 +136,34 @@
           <p id="delivery-note"></p>
         </aside>
 
+        <div id="supervisor-map" class="issue-overview-map" hidden></div>
         <div id="supervisor-list" class="review-list staff-list"></div>
+
+        <!--
+          Resolution durability (V050a). Did the work last? The panel sits
+          below the queues deliberately: a supervisor's first question is what
+          is waiting, and this is the second one.
+        -->
+        <section class="durability-panel" aria-labelledby="durability-heading">
+          <div class="workspace-heading-row">
+            <div>
+              <p class="eyebrow">Resolution durability</p>
+              <h3 id="durability-heading" tabindex="-1">Did the work last?</h3>
+            </div>
+            <button type="button" id="refresh-durability" class="secondary-button">Refresh</button>
+          </div>
+          <p id="durability-preamble" class="queue-note"></p>
+          <div id="durability-concerns"></div>
+          <div id="durability-signals"></div>
+          <aside class="triage-disclosure" aria-labelledby="durability-ranking-heading">
+            <strong id="durability-ranking-heading">No ward is ranked against another</strong>
+            <p id="durability-ranking-note"></p>
+          </aside>
+          <details class="durability-limits">
+            <summary>What these figures do not establish</summary>
+            <ul id="durability-limits"></ul>
+          </details>
+        </section>
       </section>
     </main>
 

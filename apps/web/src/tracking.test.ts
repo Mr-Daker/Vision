@@ -22,6 +22,7 @@ import {
   type ReportPayload,
   type ResolutionPayload,
   normalizeReceiptReference,
+  reportStatusKey,
   toCandidateView,
   toCategoryOptions,
   toDetailView,
@@ -113,6 +114,27 @@ test("V030: an ungrouped report is shown as received, not as progress", () => {
   assert.equal(row?.hasIssue, false);
   assert.equal(row?.reference, undefined);
   assert.match(row?.statusLabel ?? "", /received|not yet/i);
+  assert.equal(reportStatusKey(row?.issueStatus), "tracking.status_received");
+});
+
+test("citizen history maps every known lifecycle state to a translatable label", () => {
+  const statuses = [
+    "created",
+    "routing_review",
+    "routed_internal",
+    "agency_ack_received",
+    "work_planned",
+    "resolution_claimed",
+    "resolution_confirmed",
+    "resolution_disputed",
+    "reopened",
+  ];
+  for (const status of statuses) {
+    const key = reportStatusKey(status);
+    assert.ok(key);
+    assert.ok(enIN.strings[key].length > 0);
+  }
+  assert.equal(reportStatusKey("unknown_future_status"), undefined);
 });
 
 test("V030: report rows keep the server's order", () => {

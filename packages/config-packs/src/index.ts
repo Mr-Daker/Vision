@@ -1089,3 +1089,122 @@ export const loadPrioritizationPolicy = (
     weightings,
   };
 };
+
+// ---------------------------------------------------------------------------
+// Operating budgets (V049)
+// ---------------------------------------------------------------------------
+
+/**
+ * The budgets a deployment runs against.
+ *
+ * Data rather than code for the reason V026 gave about retrieval bounds: a
+ * limit in code is a limit nobody can change without a deployment and nobody
+ * records when they do. Each entry must say where its number came from, and the
+ * loader refuses one that does not — an unlabelled limit is indistinguishable
+ * from a guess.
+ */
+export const loadOperatingBudgets = (profileId: string, override?: unknown): OperatingBudgets => {
+  const parsed = (override ?? readPackFile(profileId, "budgets.json")) as Record<string, unknown>;
+  if (typeof parsed["version"] !== "string" || parsed["version"].trim().length === 0) {
+    throw new ConfigPackError("operating budgets must declare a version");
+  }
+  const note = parsed["note"];
+  if (typeof note !== "string" || note.trim().length === 0) {
+    throw new ConfigPackError("operating budgets must carry a note saying what they are");
+  }
+  const raw = parsed["budgets"];
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new ConfigPackError("operating budgets must declare at least one budget");
+  }
+
+  const budgets = raw.map((entry, index) => {
+    const record = entry as Record<string, unknown>;
+    const name = record["name"];
+    if (typeof name !== "string" || name.trim().length === 0) {
+      throw new ConfigPackError(`budget ${String(index)} has no name`);
+    }
+    const limit = record["limit"];
+    if (typeof limit !== "number" || !Number.isFinite(limit) || limit < 0) {
+      throw new ConfigPackError(`budget '${name}' must declare a limit of zero or more`);
+    }
+    const unit = record["unit"];
+    if (typeof unit !== "string" || unit.trim().length === 0) {
+      throw new ConfigPackError(`budget '${name}' must declare a unit`);
+    }
+    const direction = record["direction"] as "at_most" | "at_least";
+    if (direction !== "at_most" && direction !== "at_least") {
+      throw new ConfigPackError(
+        `budget '${name}' must declare direction 'at_most' or 'at_least'; without it a floor is checked as a ceiling`,
+      );
+    }
+    if (limit === 0 && direction !== "at_most") {
+      // A ceiling of zero is a real budget: the acceptable number of terminal
+      // failures is none. A floor of zero is not a budget at all — it is
+      // satisfied by everything, including a system that has stopped.
+      throw new ConfigPackError(
+        `budget '${name}' is a floor of zero, which every possible value meets, including the ones that mean the system has stopped`,
+      );
+    }
+    const whenExceeded = record["when_exceeded"];
+    if (typeof whenExceeded !== "string" || whenExceeded.trim().length < 20) {
+      throw new ConfigPackError(
+        `budget '${name}' must say what happens when it is exceeded; a limit with no consequence is a wish`,
+      );
+    }
+    const kind = record["source_kind"];
+    if (kind === "chosen") {
+      const reasoning = record["reasoning"];
+      if (typeof reasoning !== "string" || reasoning.trim().length < 20) {
+        throw new ConfigPackError(
+          `budget '${name}' is a chosen number and records no reasoning, which is the unlabelled default V026 refused to leave in code`,
+        );
+      }
+      return {
+        name,
+        limit,
+        unit,
+        direction,
+        source: { kind: "chosen" as const, reasoning },
+        whenExceeded,
+      };
+    }
+    if (kind === "measured") {
+      const by = record["measured_by"];
+      const on = record["measured_on"];
+      if (typeof by !== "string" || by.trim().length === 0) {
+        throw new ConfigPackError(`budget '${name}' is measured and does not say by what`);
+      }
+      if (typeof on !== "string" || on.trim().length === 0) {
+        throw new ConfigPackError(`budget '${name}' is measured and does not say when`);
+      }
+      return {
+        name,
+        limit,
+        unit,
+        direction,
+        source: { kind: "measured" as const, by, on },
+        whenExceeded,
+      };
+    }
+    throw new ConfigPackError(
+      `budget '${name}' must declare source_kind 'chosen' or 'measured'; there is no third kind`,
+    );
+  });
+
+  return { version: parsed["version"], note, budgets };
+};
+
+export type OperatingBudgets = {
+  readonly version: string;
+  readonly note: string;
+  readonly budgets: readonly {
+    readonly name: string;
+    readonly limit: number;
+    readonly unit: string;
+    readonly direction: "at_most" | "at_least";
+    readonly source:
+      | { readonly kind: "chosen"; readonly reasoning: string }
+      | { readonly kind: "measured"; readonly by: string; readonly on: string };
+    readonly whenExceeded: string;
+  }[];
+};

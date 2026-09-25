@@ -184,7 +184,7 @@ test("every unknown reason has words a reader can act on", () => {
     "not_additive",
   ] as const) {
     const text = measureText({ value: null, unknownReason: reason }, "count");
-    assert.match(text, /Not known — .{10,}/, `${reason} needs an explanation`);
+    assert.match(text, /Not known: .{10,}/, `${reason} needs an explanation`);
   }
 });
 

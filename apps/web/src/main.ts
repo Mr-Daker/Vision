@@ -20,6 +20,7 @@ import { DRAFT_TTL_HOURS, DraftStore, restoreFormState } from "./drafts.ts";
 import { renderEvidenceRail, type PipelineStage } from "./evidence-rail.ts";
 import {
   toReportRows,
+  reportStatusKey,
   toDiscoveryView,
   toDetailView,
   toResolutionView,
@@ -57,6 +58,7 @@ import {
   validateCoordinates,
   type LocationReading,
 } from "./location.ts";
+import { DARK_MAP_STYLE, loadMaps, systemPrefersDark } from "./maps-loader.ts";
 import {
   ACCEPTED_AUDIO_TYPES,
   MAX_UPLOAD_BYTES,
@@ -211,6 +213,7 @@ const applyStaticText = (): void => {
   el("receipt-saved-note").textContent = t("receipt.saved_note");
   el("receipt-caveat").textContent = t("receipt.not_a_promise");
   el("footer-disclosure").textContent = t("receipt.not_a_promise");
+  if (state.signedIn) el("signed-in-as").textContent = t("login.signed_in_as");
 
   const notice = el("translation-notice");
   notice.hidden = !state.translator.disclosesTranslationStatus;
@@ -328,9 +331,12 @@ const renderReview = (): void => {
       t("review.location"),
       state.location === undefined
         ? t("review.none")
-        : `${t(describeLocation(state.location).headingKey)} — ${state.location.lat.toFixed(5)}, ${state.location.lon.toFixed(5)}`,
+        : `${t(describeLocation(state.location).headingKey)} · ${state.location.lat.toFixed(5)}, ${state.location.lon.toFixed(5)}`,
     ],
-    [t("review.photo"), state.photo.phase === "accepted" ? t("photo.uploaded") : t("review.none")],
+    [
+      t("review.photo"),
+      state.photo.phase === "accepted" ? t("photo.uploaded") : t("error.photo_required"),
+    ],
     [
       t("review.description"),
       el<HTMLTextAreaElement>("description").value.trim().length > 0
@@ -534,6 +540,109 @@ const revealManualEntry = (): void => {
   fields.hidden = false;
   toggle.setAttribute("aria-expanded", "true");
   el<HTMLInputElement>("manual-lat").focus();
+  void initManualMapPicker();
+};
+
+// ---------------------------------------------------------------------------
+// Manual location map picker (V0xx Google Maps integration)
+//
+// This never replaces `#manual-lat`/`#manual-lon`: the map only writes into
+// those two fields, and `applyManualLocation` above still reads only them.
+// A deployment with no Maps key configured renders exactly what shipped
+// before this feature — the plain coordinate inputs, nothing missing.
+// ---------------------------------------------------------------------------
+
+const MANUAL_MAP_DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 22.9734, lng: 78.6569 };
+const MANUAL_MAP_DEFAULT_ZOOM = 4;
+const MANUAL_MAP_PINNED_ZOOM = 16;
+
+let manualMap: google.maps.Map | undefined;
+let manualMarker: google.maps.Marker | undefined;
+let manualMapInitStarted = false;
+
+const setManualCoordinateFields = (lat: number, lon: number): void => {
+  el<HTMLInputElement>("manual-lat").value = lat.toFixed(6);
+  el<HTMLInputElement>("manual-lon").value = lon.toFixed(6);
+};
+
+const placeManualMarker = (position: google.maps.LatLngLiteral): void => {
+  if (manualMap === undefined) return;
+  if (manualMarker === undefined) {
+    manualMarker = new google.maps.Marker({ map: manualMap, position, draggable: true });
+    manualMarker.addListener("dragend", () => {
+      const next = manualMarker?.getPosition();
+      if (next === null || next === undefined) return;
+      setManualCoordinateFields(next.lat(), next.lng());
+    });
+  } else {
+    manualMarker.setPosition(position);
+  }
+};
+
+const initManualMapPicker = async (): Promise<void> => {
+  if (manualMapInitStarted) return;
+  manualMapInitStarted = true;
+
+  const result = await loadMaps();
+  const hint = el("manual-map-hint");
+  if (!result.enabled) {
+    hint.textContent = t("location.map_unavailable");
+    return;
+  }
+
+  const container = el("manual-map");
+  container.hidden = false;
+
+  const latInput = el<HTMLInputElement>("manual-lat");
+  const lonInput = el<HTMLInputElement>("manual-lon");
+  const existingLat = Number(latInput.value.trim());
+  const existingLon = Number(lonInput.value.trim());
+  const hasExisting =
+    latInput.value.trim().length > 0 &&
+    lonInput.value.trim().length > 0 &&
+    validateCoordinates(existingLat, existingLon).length === 0;
+  const center = hasExisting ? { lat: existingLat, lng: existingLon } : MANUAL_MAP_DEFAULT_CENTER;
+
+  manualMap = new result.maps.Map(container, {
+    center,
+    zoom: hasExisting ? MANUAL_MAP_PINNED_ZOOM : MANUAL_MAP_DEFAULT_ZOOM,
+    streetViewControl: false,
+    fullscreenControl: false,
+    mapTypeControl: false,
+    styles: systemPrefersDark() ? [...DARK_MAP_STYLE] : null,
+  });
+
+  // This map is built once and can sit open for as long as the form does, so
+  // — unlike the maps that are rebuilt on every render elsewhere — it needs
+  // its own listener to follow a system theme change instead of freezing at
+  // whichever theme was active when the picker first opened.
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", (event) =>
+      manualMap?.setOptions({ styles: event.matches ? [...DARK_MAP_STYLE] : null }),
+    );
+
+  if (hasExisting) placeManualMarker(center);
+
+  manualMap.addListener("click", (event: google.maps.MapMouseEvent) => {
+    const position = event.latLng;
+    if (position === null) return;
+    const point = { lat: position.lat(), lng: position.lng() };
+    placeManualMarker(point);
+    setManualCoordinateFields(point.lat, point.lng);
+  });
+
+  // Typed coordinates move the pin too, so the map never shows a place the
+  // fields disagree with.
+  const syncMarkerFromFields = (): void => {
+    const lat = Number(latInput.value.trim());
+    const lon = Number(lonInput.value.trim());
+    if (validateCoordinates(lat, lon).length > 0) return;
+    manualMap?.panTo({ lat, lng: lon });
+    placeManualMarker({ lat, lng: lon });
+  };
+  latInput.addEventListener("change", syncMarkerFromFields);
+  lonInput.addEventListener("change", syncMarkerFromFields);
 };
 
 const applyManualLocation = (): void => {
@@ -768,7 +877,7 @@ const renderSignedIn = (label: string): void => {
   el("report-form").hidden = false;
   el("sign-out").hidden = false;
   const line = el("signed-in-as");
-  line.textContent = t("login.signed_in_as", { label });
+  line.textContent = t("login.signed_in_as");
   line.hidden = false;
   // The standalone provider disclosure and this line render the same sentence
   // once somebody is signed in, and the same sentence twice reads as a defect
@@ -813,7 +922,7 @@ const signIn = async (credential: string, label: string): Promise<void> => {
   // citizen does not have to reload the page to reach tracking or lookup.
   void loadMyReports();
   el<HTMLElement>("location-heading").scrollIntoView({ block: "nearest" });
-  announce(t("login.signed_in_as", { label }));
+  announce(t("login.signed_in_as"));
 };
 
 const signOut = async (): Promise<void> => {
@@ -976,7 +1085,10 @@ const wire = (): void => {
     const expanded = !fields.hidden;
     fields.hidden = expanded;
     el("toggle-manual").setAttribute("aria-expanded", String(!expanded));
-    if (!expanded) el<HTMLInputElement>("manual-lat").focus();
+    if (!expanded) {
+      el<HTMLInputElement>("manual-lat").focus();
+      void initManualMapPicker();
+    }
   });
   el("apply-manual").addEventListener("click", applyManualLocation);
 
@@ -1110,7 +1222,9 @@ const renderMyReports = (rows: readonly ReportRow[]): void => {
     reference.textContent = row.hasIssue ? (row.reference ?? "") : t("tracking.no_issue_yet");
     const status = document.createElement("p");
     status.className = "disclosure";
-    status.textContent = row.statusLabel;
+    const statusKey = reportStatusKey(row.issueStatus);
+    status.textContent = statusKey === undefined ? row.statusLabel : t(statusKey);
+    if (statusKey === undefined) status.lang = "en";
     const evidence = document.createElement("p");
     evidence.className = "disclosure";
     evidence.textContent = t("tracking.evidence_count", {
@@ -1267,7 +1381,7 @@ const renderDiscoveryMap = (rows: readonly DiscoveryRow[], radiusMetres: number)
           category: marker.category,
         }),
       );
-      button.title = `${marker.reference} — ${marker.category}`;
+      button.title = `${marker.reference} · ${marker.category}`;
       button.addEventListener("click", () => void openDetail(marker.reference));
       return button;
     }),
@@ -1311,7 +1425,7 @@ const renderDiscovery = (view: DiscoveryView, append: boolean): void => {
   for (const [index, issue] of displayedDiscoveryRows.entries()) {
     const item = document.createElement("li");
     const heading = document.createElement("p");
-    heading.textContent = `${String(index + 1)}. ${issue.reference} — ${issue.category}`;
+    heading.textContent = `${String(index + 1)}. ${issue.reference} · ${issue.category}`;
     const participants = document.createElement("p");
     participants.className = "disclosure";
     participants.textContent = issue.participantsLabel;
@@ -1394,7 +1508,7 @@ const renderDetail = (view: DetailView): void => {
   history.replaceChildren();
   for (const entry of view.infrastructureHistory) {
     const item = document.createElement("li");
-    item.textContent = `${entry.at} — ${entry.what}`;
+    item.textContent = `${entry.at} · ${entry.what}`;
     history.append(item);
   }
 
@@ -1489,7 +1603,7 @@ const renderResolution = (view: ResolutionView): void => {
   for (const entry of view.history) {
     const item = document.createElement("li");
     const line = document.createElement("p");
-    line.textContent = `${entry.at} — ${entry.what}`;
+    line.textContent = `${entry.at} · ${entry.what}`;
     item.append(line);
     if (entry.comment !== undefined) {
       const quote = document.createElement("p");

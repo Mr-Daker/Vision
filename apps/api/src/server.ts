@@ -42,7 +42,12 @@ import {
 
 import { buildCapabilityMetadata } from "./capability-metadata.ts";
 import { createStaticFileHandler } from "./static-files.ts";
-import { createRequestHandler, type ApiConfig, type ApiDependencies } from "./app.ts";
+import {
+  createRequestHandler,
+  type ApiConfig,
+  type ApiDependencies,
+  type MapsConfig,
+} from "./app.ts";
 import { createSubmissionRoutes } from "./submission-routes.ts";
 import { createCitizenRoutes } from "./citizen-routes.ts";
 import { createReviewerRoutes } from "./reviewer-routes.ts";
@@ -149,6 +154,12 @@ export const buildApp = (
     sessionTtlSeconds,
   };
 
+  const mapsApiKey = env["GOOGLE_MAPS_API_KEY"];
+  const mapsConfig: MapsConfig = {
+    enabled: mapsApiKey !== undefined && mapsApiKey.length > 0,
+    apiKey: mapsApiKey !== undefined && mapsApiKey.length > 0 ? mapsApiKey : null,
+  };
+
   const dependencies: ApiDependencies = {
     identityAdapter,
     identityService,
@@ -161,6 +172,7 @@ export const buildApp = (
       ],
     }),
     config,
+    mapsConfig,
   };
 
   return { dependencies, handler: createRequestHandler(dependencies) };

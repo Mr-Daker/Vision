@@ -29,6 +29,9 @@ before(async () => {
   const root = join(sandbox, "public");
   await mkdir(root, { recursive: true });
   await writeFile(join(root, "index.html"), "<h1>interface</h1>");
+  // A map-bearing page (V0xx Google Maps integration), so the path-aware CSP
+  // branch below has something real to request.
+  await writeFile(join(root, "app.html"), "<h1>report</h1>");
   // A WebP, because the brand mark is one and an image the allowlist does not
   // know about is served as a 404 that looks like a missing file.
   await writeFile(join(root, "logo.webp"), Buffer.from("RIFF....WEBPVP8 ", "binary"));
@@ -160,6 +163,31 @@ test("V019: every served response carries the restrictive headers", async () => 
   // narrowly: it is a same-origin handle to bytes already in the page and
   // reaches no network, but the list must not grow past these three.
   assert.match(csp, /img-src 'self' data: blob:;/);
+});
+
+// V0xx Google Maps integration: `'unsafe-inline'` is confirmed necessary for
+// the Maps JavaScript API's own control chrome (it sets inline `style`
+// attributes; there is no nonce for that), so it is scoped to only the pages
+// that load the library rather than the whole app. This is the test that
+// keeps that scoping honest: every page NOT in this list must still pass
+// the strict assertions above.
+test("V0xx: only the map-bearing pages get a relaxed style-src", async () => {
+  const response = await fetch(`${baseUrl}/app.html`);
+  const csp = response.headers.get("content-security-policy") ?? "";
+
+  assert.match(csp, /style-src 'self' 'unsafe-inline' https:\/\/fonts\.googleapis\.com/);
+  assert.match(csp, /font-src 'self' https:\/\/fonts\.gstatic\.com/);
+  assert.match(csp, /script-src 'self' https:\/\/maps\.googleapis\.com/);
+  assert.match(csp, /connect-src 'self' https:\/\/maps\.googleapis\.com/);
+  assert.match(
+    csp,
+    /img-src 'self' data: blob: https:\/\/maps\.googleapis\.com https:\/\/maps\.gstatic\.com/,
+  );
+  // Still refused: nothing here grants a wildcard or reaches beyond Google's
+  // own map infrastructure and this origin.
+  assert.doesNotMatch(csp, /unsafe-eval|\*/);
+  assert.match(csp, /object-src 'none'/);
+  assert.match(csp, /frame-ancestors 'none'/);
 });
 
 // Node's HTTP server suppresses a body on a HEAD response by itself, so the

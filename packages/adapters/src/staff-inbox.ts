@@ -97,6 +97,9 @@ export type InboxItem = {
    * so a reader can see that a person decided it and which decision it was.
    */
   readonly orderingBasis: readonly string[];
+  /** Undefined only when the issue has no representative location yet (V0xx). */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type DepartmentInbox = {
@@ -204,6 +207,8 @@ export const listDepartmentInbox = async (
         i.issue_id, i.public_reference, i.category, i.current_status, i.opened_at,
         extract(epoch from (now() - i.opened_at)) / 86400.0 as age_days,
         r.department_id,
+        ST_X(i.representative_location::geometry) as lon,
+        ST_Y(i.representative_location::geometry) as lat,
         (select count(*)::int from issue_participation p
           where p.canonical_issue_id = i.issue_id and p.counted = true) as counted,
         (select count(*)::int from issue_evidence_link link
@@ -350,6 +355,9 @@ export const listDepartmentInbox = async (
           : (options.confirmationPolicy.rules[String(row["category"])] ?? DEFAULT_CONFIRMATION_RULE)
               .requiredConfirmations,
       orderingBasis: [] as readonly string[],
+      ...(row["lat"] === null
+        ? {}
+        : { latitude: Number(row["lat"]), longitude: Number(row["lon"]) }),
     };
   });
 

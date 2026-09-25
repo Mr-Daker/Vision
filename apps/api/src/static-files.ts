@@ -52,6 +52,40 @@ export type StaticFileOptions = {
 };
 
 /**
+ * The only pages that embed a Google Map (V0xx Google Maps integration):
+ * the citizen location picker, the issue-detail spatial context view, and
+ * the ops spatial-overview screens. Every other page keeps the CSP this app
+ * shipped with, including the `style-src 'self'` guarantee a test pins.
+ */
+const MAPS_ENABLED_PAGES: ReadonlySet<string> = new Set([
+  "/app.html",
+  "/intelligence.html",
+  "/dashboard.html",
+  "/staff.html",
+  "/reviewer.html",
+  "/supervisor.html",
+]);
+
+const BASE_CSP =
+  "default-src 'self'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
+/**
+ * The Maps JavaScript API sets inline `style` attributes on its own control
+ * chrome (zoom buttons, attribution), loads a Google Fonts stylesheet for
+ * them, and that stylesheet in turn loads `.woff2` files from
+ * fonts.gstatic.com — confirmed by loading it against the base policy above,
+ * which blocked all three. There is no CSP nonce for a JS-set `style`
+ * attribute, only `'unsafe-inline'`, so this relaxation is scoped to only
+ * the pages that actually load the library rather than widened for the
+ * whole app.
+ */
+const MAPS_CSP =
+  "default-src 'self'; img-src 'self' data: blob: https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://maps.googleapis.com; connect-src 'self' https://maps.googleapis.com; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
+const cspFor = (requestedPath: string): string =>
+  MAPS_ENABLED_PAGES.has(requestedPath) ? MAPS_CSP : BASE_CSP;
+
+/**
  * Returns a handler that serves a file and reports whether it did, so the API
  * router can fall through to its own 404 for unknown API paths.
  */
@@ -133,8 +167,7 @@ export const createStaticFileHandler = (options: StaticFileOptions) => {
       // allow. The alternative was a base64 `data:` URL, which would mean
       // holding a second copy of an image up to 8 MB in memory on the cheap
       // phone this interface is built for.
-      "content-security-policy":
-        "default-src 'self'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content-security-policy": cspFor(requested),
       "x-content-type-options": "nosniff",
       "referrer-policy": "no-referrer",
     });

@@ -222,7 +222,7 @@ export const measureText = (measure: MetricValue, unit: string): string => {
       measure.unknownReason === null
         ? "the server did not say why"
         : UNKNOWN_REASON_TEXT[measure.unknownReason];
-    return `Not known — ${reason}`;
+    return `Not known: ${reason}`;
   }
   if (unit === "percent") return `${String(measure.value)}%`;
   if (unit === "hours") return `${String(measure.value)} hours`;
@@ -247,8 +247,8 @@ export type EvidenceAvailability =
 
 export const EVIDENCE_LABELS: Readonly<Record<EvidenceAvailability, string>> = {
   approved_derivative: "Redacted copy",
-  withheld_pending_redaction: "Held — no redacted copy has been approved yet",
-  text_held_not_displayed: "Written description — read it in the review queue, not here",
+  withheld_pending_redaction: "Held: no redacted copy has been approved yet",
+  text_held_not_displayed: "Written description: read it in the review queue, not here",
   erased: "Erased at the reporter's request",
 };
 

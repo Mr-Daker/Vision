@@ -6,7 +6,7 @@
     "rewriteRelativeImportExtensions": true,
     "sourceMap": true,
     "declaration": false,
-    "types": [],
+    "types": ["google.maps"],
     "rootDir": "src",
     "outDir": "public/js/app"
   },

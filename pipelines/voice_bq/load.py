@@ -92,11 +92,20 @@ def _frame_for(name: str) -> pd.DataFrame:
         )
     if path.suffix == ".parquet":
         frame = pd.read_parquet(path)
-        for column, dtype in codes.items():
-            if column in frame.columns:
-                frame[column] = frame[column].astype(dtype)
-        return frame
-    return pd.read_csv(path, dtype=codes, low_memory=False)
+    else:
+        frame = pd.read_csv(path, dtype=codes, low_memory=False)
+
+    # Pandas leaves an all-null CSV identifier column as object dtype even
+    # when `dtype=str` was requested. PyArrow/BigQuery can then infer INTEGER
+    # solely because there were no values from which to infer STRING. Use the
+    # nullable string extension dtype after every read so identifier schemas
+    # remain stable when a future dataset starts populating block/locality
+    # codes, while preserving missing values as NULL rather than the text
+    # "nan".
+    for column in codes:
+        if column in frame.columns:
+            frame[column] = frame[column].astype("string")
+    return frame
 
 
 def _upload(
@@ -145,35 +154,39 @@ def run(drop_staging: bool = True) -> dict[str, int]:
     for dataset_id in created:
         print(f"  created dataset {dataset_id}")
 
-    # ── Stage ─────────────────────────────────────────────────────────────
-    # Everything stages into the analytics dataset, including the sources the
-    # label tables are built from. The labels only ever *land* in voice_eval,
-    # and staging is dropped at the end, so no label outlives the load in the
-    # analytics dataset.
     counts: dict[str, int] = {}
-    for staging, source in STAGING_SOURCES.items():
-        frame = _frame_for(source)
-        rows = _upload(client, config, frame, f"{config.analytics}.{staging}")
-        counts[staging] = rows
-        print(f"  staged {staging:38s} {rows:>9,} rows")
+    try:
+        # ── Stage ─────────────────────────────────────────────────────────
+        # Stage every raw source in the restricted evaluation dataset. Several
+        # sources contain planted labels, so staging them in voice_analytics
+        # would expose labels to its reader even briefly during a load.
+        for staging, source in STAGING_SOURCES.items():
+            frame = _frame_for(source)
+            rows = _upload(client, config, frame, f"{config.evaluation}.{staging}")
+            counts[staging] = rows
+            print(f"  staged {staging:38s} {rows:>9,} rows")
 
-    # ── Build ─────────────────────────────────────────────────────────────
-    for spec in schema.ANALYTICS_TABLES:
-        run_query(client, spec.create_sql(config.analytics), label=spec.name)
-        print(f"  built  {config.analytics_dataset}.{spec.name}")
+        # ── Build ─────────────────────────────────────────────────────────
+        for spec in schema.ANALYTICS_TABLES:
+            sql = spec.create_sql(config.analytics).replace(
+                f"`{config.analytics}.{spec.staging}`",
+                f"`{config.evaluation}.{spec.staging}`",
+            )
+            run_query(client, sql, label=spec.name)
+            print(f"  built  {config.analytics_dataset}.{spec.name}")
 
-    for spec in schema.EVAL_TABLES:
-        sql = spec.create_sql(config.evaluation).replace(
-            f"`{config.evaluation}.{spec.staging}`",
-            f"`{config.analytics}.{spec.staging}`",
-        )
-        run_query(client, sql, label=spec.name)
-        print(f"  built  {config.eval_dataset}.{spec.name}")
-
-    # ── Clean up ──────────────────────────────────────────────────────────
-    if drop_staging:
-        for staging in schema.staging_tables():
-            client.delete_table(f"{config.analytics}.{staging}", not_found_ok=True)
-        print(f"  dropped {len(schema.staging_tables())} staging tables")
+        for spec in schema.EVAL_TABLES:
+            run_query(client, spec.create_sql(config.evaluation), label=spec.name)
+            print(f"  built  {config.eval_dataset}.{spec.name}")
+    finally:
+        # ── Clean up ──────────────────────────────────────────────────────
+        # This deliberately runs after success *and* after any exception.
+        # Final analytics tables may be incomplete after a failed build (and
+        # validation will say so), but raw staging stays inaccessible to the
+        # analytics identity even while the load is running.
+        if drop_staging:
+            for staging in schema.staging_tables():
+                client.delete_table(f"{config.evaluation}.{staging}", not_found_ok=True)
+            print(f"  dropped {len(schema.staging_tables())} staging tables")
 
     return counts

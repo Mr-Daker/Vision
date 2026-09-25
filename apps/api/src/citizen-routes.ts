@@ -560,6 +560,16 @@ export const createCitizenRoutes = (deps: CitizenRouteDependencies) => {
         sendError(response, "unauthenticated", "no active session", correlationId);
         return true;
       }
+      // The double-submit token, as on every other state-changing route here.
+      // V047's cross-site sweep found this endpoint answering 200 without it:
+      // the `SameSite=Strict` cookie meant no browser would have carried the
+      // session across origins, so nothing was exploitable — but this is the
+      // one operation on the surface that cannot be undone, and it was the one
+      // resting on a single control.
+      if (!deps.csrfMatches(request)) {
+        sendError(response, "forbidden", "missing or mismatched CSRF token", correlationId);
+        return true;
+      }
       const body = await readJsonBody(request);
       const reasonCode = String(body?.["reason_code"] ?? "participant_request");
       try {

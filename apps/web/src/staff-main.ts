@@ -14,6 +14,7 @@ import {
   type StaffInboxView,
   type StaffWorkspace,
 } from "./staff-view.ts";
+import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new StaffApiClient();
 let session: StaffSessionPayload | undefined;
@@ -477,9 +478,23 @@ const renderInbox = (): void => {
         ? "No routed issues are waiting in this responsibility scope."
         : "No issues match this filter.";
     list.append(empty);
+    void renderIssueOverviewMap(el("staff-map"), []);
     return;
   }
   for (const item of items) list.append(staffCard(item));
+
+  const points: IssueMapPoint[] = items
+    .filter(
+      (item): item is StaffInboxItem & { latitude: number; longitude: number } =>
+        item.latitude !== undefined && item.longitude !== undefined,
+    )
+    .map((item) => ({
+      key: item.issueId,
+      lat: item.latitude,
+      lon: item.longitude,
+      label: `${item.publicReference} · ${categoryLabel(item.category)}`,
+    }));
+  void renderIssueOverviewMap(el("staff-map"), points);
 };
 
 const loadInbox = async (): Promise<void> => {

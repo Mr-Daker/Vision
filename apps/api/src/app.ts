@@ -42,12 +42,25 @@ export type ApiConfig = {
   readonly sessionTtlSeconds: number;
 };
 
+/**
+ * Google Maps JS API keys are not secrets: they ship inside the page source
+ * of every browser that loads a map, and the only real protection is the
+ * HTTP-referrer restriction set on the key in Google Cloud Console (V0xx
+ * Google Maps integration). Serving it from a public endpoint is therefore
+ * no different from any other client-visible config.
+ */
+export type MapsConfig = {
+  readonly enabled: boolean;
+  readonly apiKey: string | null;
+};
+
 export type ApiDependencies = {
   readonly identityAdapter: IdentityProviderAdapter;
   readonly identityService: IdentityService;
   readonly sessionService: SessionService;
   readonly capabilities: CapabilityMetadataDocument;
   readonly config: ApiConfig;
+  readonly mapsConfig: MapsConfig;
   /**
    * Additional routers, tried before the 404. Upload and submission routes
    * (V016/V018) live here because they need a database, which the session
@@ -188,6 +201,19 @@ export const createRequestHandler = (deps: ApiDependencies) => {
 
     if (method === "GET" && path === "/v1/health") {
       sendJson(response, 200, { status: "ok" }, correlationId);
+      return;
+    }
+
+    // GET /v1/maps-config — public; the API key ships in the page source of
+    // every browser that loads a map, so there is nothing to protect by
+    // hiding this response.
+    if (method === "GET" && path === "/v1/maps-config") {
+      sendJson(
+        response,
+        200,
+        { enabled: deps.mapsConfig.enabled, api_key: deps.mapsConfig.apiKey },
+        correlationId,
+      );
       return;
     }
 

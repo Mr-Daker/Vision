@@ -90,6 +90,9 @@ export type SupervisorIssue = {
       }
     | undefined;
   readonly queues: readonly SupervisorQueueId[];
+  /** Undefined only when the issue has no representative location yet (V0xx). */
+  readonly latitude: number | undefined;
+  readonly longitude: number | undefined;
 };
 
 export type SupervisorQueues = {
@@ -171,6 +174,9 @@ type RawIssue = {
   readonly assignedStaffId: string | undefined;
   readonly openedAtMs: number;
   readonly departmentSinceMs: number | undefined;
+  /** Undefined only when the issue has no representative location yet (V0xx). */
+  readonly latitude: number | undefined;
+  readonly longitude: number | undefined;
 };
 
 const loadIssues = async (
@@ -183,7 +189,9 @@ const loadIssues = async (
             r.department_id, r.decided_at as department_since,
             (select a.assigned_staff_id from assignment a
               where a.issue_id = i.issue_id and a.valid_to is null
-              order by a.valid_from desc limit 1) as assigned_staff_id
+              order by a.valid_from desc limit 1) as assigned_staff_id,
+            ST_X(i.representative_location::geometry) as lon,
+            ST_Y(i.representative_location::geometry) as lat
        from canonical_issue i
        left join lateral (
          select department_id, decided_at from routing_decision
@@ -191,6 +199,18 @@ const loadIssues = async (
           order by decided_at desc limit 1
        ) r on true
       where i.jurisdiction_id = $1
+        -- A confirmed resolution is in no queue: queuesFor excludes it
+        -- unconditionally, so it is excluded here too, before the limit
+        -- rather than after it.
+        --
+        -- This is not an optimisation. The limit is applied to the oldest
+        -- issues in the ward, so a ward with any history filled all hundred
+        -- rows with finished work and the queue view went blind: a real issue
+        -- opened two days ago was simply not in the result. Found when a
+        -- seeded completion history pushed a V036 tests own issue off the
+        -- end. Excluding what cannot be in a queue leaves the output
+        -- identical and makes the limit mean what it says.
+        and i.current_status <> 'resolution_confirmed'
         -- A merged-away issue is not anybody's backlog; its data belongs to
         -- the surviving root, which appears here in its own right.
         and not exists (
@@ -212,6 +232,8 @@ const loadIssues = async (
     openedAtMs: Date.parse(String(row["opened_at"])),
     departmentSinceMs:
       row["department_since"] === null ? undefined : Date.parse(String(row["department_since"])),
+    latitude: row["lat"] === null ? undefined : Number(row["lat"]),
+    longitude: row["lon"] === null ? undefined : Number(row["lon"]),
   }));
 };
 
@@ -431,6 +453,8 @@ export const listSupervisorQueues = async (
             },
           }),
       queues: queuesFor(issue, assessment),
+      latitude: issue.latitude,
+      longitude: issue.longitude,
     };
   });
 

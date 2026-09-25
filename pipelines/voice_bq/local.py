@@ -124,10 +124,27 @@ def connect() -> duckdb.DuckDBPyConnection:
 
 
 def bind(sql: str, bindings: dict[str, str] | None = None) -> str:
-    """Replaces `{table}` placeholders with DuckDB relation names."""
-    bound = sql
-    for name, relation in (bindings or TABLE_BINDINGS).items():
-        bound = bound.replace(f"{{{name}}}", relation)
+    """Replace table placeholders, keeping generated suffixes inside quoting.
+
+    Analysis outputs intentionally use forms such as
+    ``{analytics_features}_unmet_need``.  Appending that suffix after a
+    fully-qualified BigQuery relation would produce invalid SQL like
+    ```project.dataset.analytics_features`_unmet_need``.  Treat the suffix as
+    part of the identifier so the same frozen SQL binds correctly in both
+    engines.
+    """
+    mapping = bindings or TABLE_BINDINGS
+
+    def replace_identifier(match: re.Match[str]) -> str:
+        name, suffix = match.group(1), match.group(2) or ""
+        relation = mapping.get(name)
+        if relation is None:
+            return match.group(0)
+        if suffix and relation.startswith("`") and relation.endswith("`"):
+            return f"{relation[:-1]}{suffix}`"
+        return f"{relation}{suffix}"
+
+    bound = re.sub(r"\{([a-z_]+)\}(_[a-z_]+)?", replace_identifier, sql)
     for bigquery_fn, duckdb_fn in GEO_SHIMS.items():
         bound = bound.replace(bigquery_fn, duckdb_fn)
     leftover = re.findall(r"\{([a-z_]+)\}", bound)

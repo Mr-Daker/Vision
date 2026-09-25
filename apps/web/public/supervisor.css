@@ -109,3 +109,73 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Resolution durability (V050a) ─────────────────────────────
+   A second question below the queues, not a second screen. The
+   concern card carries its own alternatives inline: a caveat in a
+   collapsed section is a caveat nobody reads, and these figures
+   are about people's work. */
+.durability-panel {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.durability-concern {
+  margin: 0 0 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.durability-concern h4,
+.durability-signal h4 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.durability-figure {
+  margin: 0.15rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.durability-observed {
+  margin: 0.5rem 0;
+  color: var(--ink-muted);
+}
+
+.durability-alternatives-heading {
+  margin: 0.75rem 0 0.25rem;
+  font-weight: 500;
+}
+
+.durability-alternatives,
+.durability-units {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--ink-muted);
+}
+
+.durability-alternatives li,
+.durability-units li {
+  margin: 0.2rem 0;
+}
+
+.durability-next {
+  margin: 0.75rem 0 0;
+}
+
+.durability-signal {
+  margin: 0 0 1.25rem;
+}
+
+.durability-limits {
+  margin-top: 1.25rem;
+  color: var(--ink-muted);
+}
+
+.durability-limits summary {
+  cursor: pointer;
+  padding: 0.35rem 0;
+}

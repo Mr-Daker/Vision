@@ -35,6 +35,9 @@ export type ReviewerQueueItem = {
   readonly waitingSince: string;
   readonly citizenNote?: string;
   readonly candidateIssueIds: readonly string[];
+  /** Present only for a kind whose row is geolocated (V0xx); see the adapter. */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type ReviewerQueueView = {
@@ -76,6 +79,9 @@ const ACTIONS = new Set<ReviewAction>([
 
 const record = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+
+const optionalNumber = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
 /** Invalid private data fails closed instead of becoming an actionable card. */
 export const toReviewerQueueView = (payload: unknown): ReviewerQueueView | undefined => {
@@ -130,6 +136,12 @@ export const toReviewerQueueView = (payload: unknown): ReviewerQueueView | undef
       permittedActions: permitted as ReviewAction[],
       candidateIssueIds: candidates as string[],
       ...(typeof item["citizen_note"] === "string" ? { citizenNote: item["citizen_note"] } : {}),
+      ...(optionalNumber(item["latitude"]) === undefined
+        ? {}
+        : { latitude: Number(item["latitude"]) }),
+      ...(optionalNumber(item["longitude"]) === undefined
+        ? {}
+        : { longitude: Number(item["longitude"]) }),
     });
   }
 

@@ -129,7 +129,7 @@ export const STABILITY_LABELS: Readonly<Record<PlacementView["stability"], strin
   robust: "Barely moves between weightings",
   sensitive: "Moves noticeably between weightings",
   unstable: "Moves across much of the list between weightings",
-  not_ranked: "Not placed — too few factors had data",
+  not_ranked: "Not placed: too few factors had data",
 };
 
 /** The position this candidate takes under one named weighting. */
@@ -186,7 +186,7 @@ export const factorComparison = (
       separates: comparable && Math.abs(weightedDifference) >= 0.01,
       explanation: comparable
         ? leftFactor.explanation
-        : "one of the two has no value for this factor, so it accounts for none of the difference between them — which is not the same as the two being equal on it",
+        : "one of the two has no value for this factor, so it accounts for none of the difference between them. That is not the same as the two being equal on it.",
     };
   });
   return [...differences].sort(
@@ -275,7 +275,7 @@ export const projectSummary = (project: LinkedProjectView): string => {
     project.completedAt === null
       ? `sanctioned ${(project.sanctionedAt ?? "").slice(0, 10)}, no recorded completion`
       : `${(project.sanctionedAt ?? "").slice(0, 10)} to ${project.completedAt.slice(0, 10)}`;
-  return `${project.projectName} — ${amount}, ${dates}, link ${project.status}`;
+  return `${project.projectName} · ${amount}, ${dates}, link ${project.status}`;
 };
 
 /**

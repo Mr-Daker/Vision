@@ -343,6 +343,8 @@ export const createReviewerRoutes = (deps: ReviewerRouteDependencies) => {
               waiting_since: item.waitingSince,
               citizen_note: item.citizenNote ?? null,
               candidate_issue_ids: item.candidateIssueIds,
+              latitude: item.latitude ?? null,
+              longitude: item.longitude ?? null,
             })),
           },
           correlationId,

@@ -12,7 +12,8 @@
  * straight to `resolved`.
  */
 
-import { buildSpatialPanel, formatCoordinate, type NearbyMarker } from "./spatial-panel.ts";
+import { formatCoordinate, type NearbyMarker } from "./spatial-panel.ts";
+import { renderRailLocationMap } from "./rail-location-map.ts";
 import type { LocationReading } from "./location.ts";
 import type { UploadState } from "./upload.ts";
 import type { StringKey } from "./locales/strings.ts";
@@ -113,15 +114,13 @@ const renderLocationCard = (state: RailState, text: RailText, locale: string): v
 
   if (reading === undefined) {
     setCardState("rail-location", state.locating ? "processing" : "neutral");
-    show("rail-location-figure", false);
+    renderRailLocationMap(undefined);
     show("rail-location-readout", false);
     show("rail-location-empty", true);
     return;
   }
 
-  const panel = buildSpatialPanel(reading, state.nearbyMarkers);
-  const figure = byId("rail-location-figure");
-  if (figure !== undefined) figure.innerHTML = panel.svg;
+  renderRailLocationMap(reading);
 
   setText(
     "rail-location-coords",
@@ -133,7 +132,7 @@ const renderLocationCard = (state: RailState, text: RailText, locale: string): v
   const accuracy = reading.accuracyMetres;
   setText(
     "rail-location-accuracy",
-    panel.accuracyDrawn && accuracy !== undefined
+    reading.source === "device_geolocation" && accuracy !== undefined
       ? `± ${String(Math.round(accuracy))} m`
       : text("rail.accuracy_unstated"),
   );
@@ -155,7 +154,6 @@ const renderLocationCard = (state: RailState, text: RailText, locale: string): v
   );
 
   show("rail-location-empty", false);
-  show("rail-location-figure", true);
   show("rail-location-readout", true);
   // A re-capture is still outstanding work, so the card reports it even though
   // it already has a previous fix to show. Without this, asking for a fresh

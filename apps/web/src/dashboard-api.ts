@@ -22,6 +22,9 @@ export type DashboardIssueRow = {
   readonly ageHours: number;
   readonly countedParticipants: number;
   readonly activeEvidenceLinks: number;
+  /** Absent only when the issue has no representative location yet (V0xx). */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type DashboardIssueDetail = {

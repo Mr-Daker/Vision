@@ -11,6 +11,7 @@ import {
   type ReviewerQueueItem,
   type ReviewerQueueView,
 } from "./reviewer-view.ts";
+import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new ReviewerApiClient();
 let session: ReviewerSession | undefined;
@@ -211,7 +212,7 @@ const reviewCard = (item: ReviewerQueueItem): HTMLElement => {
     const caveat = document.createElement("p");
     caveat.className = "claim-caveat";
     caveat.textContent =
-      "Confirming means this report concerns that project. Rejecting means it does not — it is not a finding about whether this asset has been funded, and no answer here is evidence about public spending.";
+      "Confirming means this report concerns that project. Rejecting means it does not. Neither is a finding about whether this asset has been funded, and no answer here is evidence about public spending.";
     article.append(caveat);
   }
 
@@ -296,9 +297,23 @@ const renderQueue = (): void => {
         ? "No items are waiting in this scope."
         : "No items match this filter.";
     list.append(empty);
+    void renderIssueOverviewMap(el("review-map"), []);
     return;
   }
   for (const item of items) list.append(reviewCard(item));
+
+  const points: IssueMapPoint[] = items
+    .filter(
+      (item): item is ReviewerQueueItem & { latitude: number; longitude: number } =>
+        item.latitude !== undefined && item.longitude !== undefined,
+    )
+    .map((item) => ({
+      key: item.targetId,
+      lat: item.latitude,
+      lon: item.longitude,
+      label: `${item.submissionId} · ${KIND_LABELS[item.kind]}`,
+    }));
+  void renderIssueOverviewMap(el("review-map"), points);
 };
 
 const loadQueue = async (): Promise<void> => {

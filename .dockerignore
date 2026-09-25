@@ -1,0 +1,11 @@
+.git
+.DS_Store
+.env
+.venv
+node_modules
+local-object-store
+.local
+deliverables/v046-runs
+data/raw
+data/processed
+*.log

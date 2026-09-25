@@ -138,6 +138,14 @@ export type ReviewItem = {
     readonly canonicalIssueId?: string;
     readonly projectLinkId?: string;
   };
+  /**
+   * Present only for a kind whose query already joins `canonical_issue`
+   * (project-link proposals, disputed resolutions) — V0xx. Other kinds are
+   * evidence- or submission-scoped and are not geolocated here, so their map
+   * marker is simply absent rather than invented from a different record.
+   */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type ReviewQueue = {
@@ -388,6 +396,8 @@ export const listReviewQueue = async (
     `select l.project_link_id, l.issue_id, l.project_id, l.match_status, l.match_method,
             l.match_basis, l.proposed_at, i.public_reference,
             p.project_name, p.amount, p.amount_unit,
+            ST_X(i.representative_location::geometry) as lon,
+            ST_Y(i.representative_location::geometry) as lat,
             (select submission_id
                from evidence_item e
                join issue_evidence_link el
@@ -414,6 +424,8 @@ export const listReviewQueue = async (
           `select i.issue_id, i.category, i.public_reference,
                   k.claim_id, k.description, k.staff_id,
                   c.decided_at, c.comment, c.responding_participant_id,
+                  ST_X(i.representative_location::geometry) as lon,
+                  ST_Y(i.representative_location::geometry) as lat,
                   (select submission_id
                      from evidence_item e
                      join issue_evidence_link l
@@ -561,6 +573,9 @@ export const listReviewQueue = async (
           projectLinkId: String(row["project_link_id"]),
           canonicalIssueId: String(row["issue_id"]),
         },
+        ...(row["lat"] === null
+          ? {}
+          : { latitude: Number(row["lat"]), longitude: Number(row["lon"]) }),
       };
     }),
     ...disputes.rows.map((row) => {
@@ -588,6 +603,9 @@ export const listReviewQueue = async (
         citizenNote: row["comment"] === null ? undefined : String(row["comment"]),
         candidateIssueIds: [] as readonly string[],
         decisionTarget: { canonicalIssueId: String(row["issue_id"]) },
+        ...(row["lat"] === null
+          ? {}
+          : { latitude: Number(row["lat"]), longitude: Number(row["lon"]) }),
       };
     }),
   ];

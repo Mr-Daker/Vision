@@ -14,6 +14,13 @@
 
 import { SupervisorApiClient } from "./supervisor-api.ts";
 import {
+  figureText,
+  panelPreamble,
+  signalLabel,
+  toDurabilityView,
+  type DurabilityView,
+} from "./durability-view.ts";
+import {
   ALERT_LABELS,
   clockSummary,
   dayLabel,
@@ -25,9 +32,11 @@ import {
   type SupervisorQueueId,
   type SupervisorQueueView,
 } from "./supervisor-view.ts";
+import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new SupervisorApiClient();
 let queues: SupervisorQueueView | undefined;
+let durability: DurabilityView | undefined;
 let filter: SupervisorQueueId | "all" = "all";
 
 const el = <T extends HTMLElement>(id: string): T => {
@@ -250,9 +259,106 @@ const render = (): void => {
         "Nothing in this jurisdiction is waiting past its configured time.",
       ),
     );
+    void renderIssueOverviewMap(el("supervisor-map"), []);
     return;
   }
   for (const row of rows) list.append(issueCard(row));
+
+  const points: IssueMapPoint[] = rows
+    .filter(
+      (row): row is SupervisorIssueRow & { latitude: number; longitude: number } =>
+        row.latitude !== undefined && row.longitude !== undefined,
+    )
+    .map((row) => ({
+      key: row.issueId,
+      lat: row.latitude,
+      lon: row.longitude,
+      label: `${row.publicReference} · ${row.category}`,
+    }));
+  void renderIssueOverviewMap(el("supervisor-map"), points);
+};
+
+/**
+ * Draws the durability panel.
+ *
+ * Every concern renders its alternatives **inline**, in the same block as the
+ * count. On a terminal a caveat three lines down is read; on a screen a
+ * collapsed one is not, and these figures are about people's work.
+ */
+const renderDurability = (): void => {
+  if (durability === undefined) return;
+  el("durability-preamble").textContent = panelPreamble(durability);
+  el("durability-ranking-note").textContent = durability.rankingNote;
+
+  const limits = el("durability-limits");
+  limits.replaceChildren();
+  for (const limit of durability.limits) limits.append(element("li", undefined, limit));
+
+  const concerns = el("durability-concerns");
+  concerns.replaceChildren();
+  if (durability.concerns.length === 0) {
+    concerns.append(
+      element(
+        "p",
+        "queue-empty",
+        durability.totalClaims === 0
+          ? "No completion claim in this window, so there is nothing to measure."
+          : "No ward's figure can be told apart from the rest of the district on this evidence. That is not the same as every ward being fine.",
+      ),
+    );
+  }
+  for (const concern of durability.concerns) {
+    const card = element("article", "durability-concern");
+    card.append(element("h4", undefined, `${concern.unit} · ${signalLabel(concern.signal)}`));
+    card.append(element("p", "durability-figure", `This ward: ${figureText(concern.figure)}`));
+    card.append(
+      element("p", "durability-figure", `Every other ward: ${figureText(concern.baseline)}`),
+    );
+    card.append(element("p", "durability-observed", concern.observed));
+
+    // Not collapsed, not a footnote, not optional.
+    card.append(element("p", "durability-alternatives-heading", "This cannot rule out:"));
+    const alternatives = element("ul", "durability-alternatives");
+    for (const alternative of concern.alternatives) {
+      alternatives.append(element("li", undefined, alternative));
+    }
+    card.append(alternatives);
+    card.append(element("p", "durability-next", concern.nextStep));
+    concerns.append(card);
+  }
+
+  const signals = el("durability-signals");
+  signals.replaceChildren();
+  for (const signal of durability.signals) {
+    const block = element("div", "durability-signal");
+    block.append(element("h4", undefined, signalLabel(signal.signal)));
+    block.append(element("p", "durability-observed", signal.observed));
+    const list = element("ul", "durability-units");
+    for (const unit of signal.units) {
+      list.append(element("li", undefined, `${unit.label}: ${figureText(unit.figure)}`));
+    }
+    block.append(list);
+    signals.append(block);
+  }
+};
+
+const loadDurability = async (): Promise<void> => {
+  const jurisdictionId = selectJurisdiction().value;
+  if (jurisdictionId.length === 0) return;
+  el("refresh-durability").setAttribute("aria-busy", "true");
+  const result = await api.durability(jurisdictionId);
+  el("refresh-durability").removeAttribute("aria-busy");
+  if (!result.ok) {
+    showError(result.message);
+    return;
+  }
+  const view = toDurabilityView(result.value);
+  if (view === undefined) {
+    showError("The durability panel could not be read.");
+    return;
+  }
+  durability = view;
+  renderDurability();
 };
 
 const loadQueues = async (): Promise<void> => {
@@ -273,6 +379,7 @@ const loadQueues = async (): Promise<void> => {
   el("supervisor-error").hidden = true;
   queues = view;
   render();
+  void loadDurability();
 };
 
 const showWorkspace = (
@@ -334,6 +441,7 @@ const start = async (): Promise<void> => {
 };
 
 el("refresh-queues").addEventListener("click", () => void loadQueues());
+el("refresh-durability").addEventListener("click", () => void loadDurability());
 selectJurisdiction().addEventListener("change", () => void loadQueues());
 el<HTMLSelectElement>("queue-filter").addEventListener("change", (event) => {
   filter = (event.target as HTMLSelectElement).value as SupervisorQueueId | "all";

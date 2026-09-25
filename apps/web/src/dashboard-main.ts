@@ -39,6 +39,7 @@ import {
   type DashboardCell,
   type DashboardPayload,
 } from "./dashboard-view.ts";
+import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const auth = new SupervisorApiClient();
 const api = new DashboardApiClient();
@@ -297,7 +298,7 @@ const renderMetrics = (data: DashboardPayload): void => {
         [
           "Denominator",
           metric.definition.denominator.of ??
-            `None — ${metric.definition.denominator.why ?? "this is a count"}`,
+            `None: ${metric.definition.denominator.why ?? "this is a count"}`,
         ],
         ["When it is not known", metric.definition.missingData],
       ] as const) {
@@ -400,10 +401,23 @@ const openCell = async (cell: DashboardCell): Promise<void> => {
   const panel = el("drilldown");
   panel.hidden = false;
   el("drilldown-summary").textContent =
-    `${cell.jurisdictionLabel} · ${categoryLabel(cell.category)} — ${String(result.value.issues.length)} report(s). These are the records the figure you selected counts.`;
+    `${cell.jurisdictionLabel} · ${categoryLabel(cell.category)}: ${String(result.value.issues.length)} report(s). These are the records the figure you selected counts.`;
   el("drilldown-list").replaceChildren(...result.value.issues.map(issueCard));
   el("drilldown-heading").focus();
   announce(`${String(result.value.issues.length)} supporting record(s) listed.`);
+
+  const points: IssueMapPoint[] = result.value.issues
+    .filter(
+      (row): row is DashboardIssueRow & { latitude: number; longitude: number } =>
+        row.latitude !== undefined && row.longitude !== undefined,
+    )
+    .map((row) => ({
+      key: row.publicReference,
+      lat: row.latitude,
+      lon: row.longitude,
+      label: row.publicReference,
+    }));
+  void renderIssueOverviewMap(el("drilldown-map"), points);
 };
 
 // ---------------------------------------------------------------------------

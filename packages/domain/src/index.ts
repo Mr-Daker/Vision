@@ -29,3 +29,8 @@ export * from "./outcome-attribution.ts";
 export * from "./privacy-audit.ts";
 export * from "./usability-study.ts";
 export * from "./evaluation.ts";
+export * from "./abuse-surface.ts";
+export * from "./integrity.ts";
+export * from "./performance.ts";
+export * from "./observability.ts";
+export * from "./resolution-durability.ts";

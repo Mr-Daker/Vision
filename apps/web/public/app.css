@@ -43,6 +43,14 @@
   --warning-bg: #fff8e6;
   --focus: #1f6feb; /* 4.6:1 on --page */
   --radius: 0.5rem;
+
+  /* The native chevron is drawn by the platform and, on a fully-rounded
+     control like `.language-select`, several engines anchor it to the box's
+     un-rounded corner instead of centering it — it renders pinned to the
+     top-right rather than vertically centered. Replaced with one drawn here,
+     positioned explicitly. The data URI is permitted by the CSP's
+     `img-src 'self' data: blob:`; a parsed `style` attribute would not be. */
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%234a5157' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
@@ -62,6 +70,8 @@
     --warning-ink: #f2cf7a; /* 10.5:1 on --warning-bg */
     --warning-bg: #2a2116;
     --focus: #9ec5ff; /* 11.9:1 on --page */
+
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23b4b4b4' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -473,6 +483,15 @@ select:hover {
   border-color: var(--ink-muted);
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+}
+
 textarea {
   min-height: 7rem;
   resize: vertical;
@@ -564,6 +583,26 @@ progress {
   padding: 1.1rem;
   border-radius: 1rem;
   background: var(--surface);
+}
+
+.manual-map-wrap {
+  grid-column: 1 / -1;
+}
+
+.manual-map-wrap > .muted {
+  margin: 0 0 0.6rem;
+}
+
+/* A fixed height so Google Maps has somewhere to lay out tiles before its own
+   script has run. Hidden until the loader confirms a key is configured, so a
+   deployment without one shows the plain coordinate fields with no gap where
+   a map would have been. */
+.manual-map {
+  height: 14rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  overflow: hidden;
 }
 
 /* ── Buttons ──────────────────────────────────────────────── */
@@ -1070,12 +1109,18 @@ progress {
   border-radius: 0.6rem;
 }
 
+.rail-figure-map {
+  height: clamp(13rem, 25vw, 18rem);
+  background: var(--surface);
+}
+
 .rail-figure-photo img {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 13rem;
-  object-fit: cover;
+  max-height: 22rem;
+  object-fit: contain;
+  background: var(--surface);
 }
 
 .rail-figure-count {

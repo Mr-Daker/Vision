@@ -91,7 +91,7 @@ const formWith = (overrides: Loose<CaptureForm> = {}): CaptureForm =>
   merge<CaptureForm>(
     {
       location: deviceReading(),
-      photo: initialUploadState,
+      photo: accepted("2026-09/photo"),
       description: { text: "" },
       interfaceLocale: enIN.code,
       idempotencyKey: "web-test-key",
@@ -345,32 +345,32 @@ test("V019: oversized and wrong-type files are explained before uploading", () =
 // Submission
 // ---------------------------------------------------------------------------
 
-test("V019: a report needs a location and something observable, in any one form", () => {
-  // The second rule is the server's `no_observation` check, mirrored client
-  // side so the citizen is told before sending instead of being rejected.
-  assert.equal(
-    canSubmit(formWith()),
-    false,
-    "a location on its own gives a reviewer nothing to look at",
-  );
+test("V019: the citizen flow requires a location and an uploaded photo", () => {
+  const noPhoto = formWith({ photo: initialUploadState });
+  assert.equal(canSubmit(noPhoto), false);
   assert.deepEqual(
-    findBlocks(formWith()).map((block) => block.field),
-    ["observation"],
+    findBlocks(noPhoto).map((block) => block.field),
+    ["photo"],
   );
 
-  assert.equal(canSubmit(formWith({ description: { text: "street light out" } })), true);
+  assert.equal(canSubmit(formWith()), true);
   assert.equal(canSubmit(formWith({ photo: accepted("2026-09/photo") })), true);
   assert.equal(
-    canSubmit(formWith({ description: { text: "", voice: accepted("2026-09/voice") } })),
-    true,
+    canSubmit(formWith({ photo: initialUploadState, description: { text: "street light out" } })),
+    false,
   );
   assert.equal(
-    canSubmit(formWith({ description: { text: "   " } })),
+    canSubmit(
+      formWith({
+        photo: initialUploadState,
+        description: { text: "", voice: accepted("2026-09/voice") },
+      }),
+    ),
     false,
-    "whitespace is not an observation",
+    "voice does not replace the required photo",
   );
 
-  const noLocation = formWith({ location: undefined, description: { text: "broken" } });
+  const noLocation = formWith({ location: undefined });
   assert.equal(canSubmit(noLocation), false);
   assert.deepEqual(
     findBlocks(noLocation).map((block) => block.field),
@@ -440,6 +440,10 @@ test("V019: only accepted uploads reach the request body", () => {
 
   const empty = buildRequestBody(formWith({ description: { text: "   " } }));
   assert.equal("text" in empty, false, "whitespace is not a description");
+  assert.throws(
+    () => buildRequestBody(formWith({ photo: initialUploadState })),
+    /requires an uploaded photo/,
+  );
 });
 
 test("V019: building a body without a location fails instead of inventing one", () => {

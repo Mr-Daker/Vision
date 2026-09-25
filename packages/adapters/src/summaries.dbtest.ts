@@ -595,7 +595,7 @@ test("a backdated event is projected, because the cursor follows ingestion order
   // Describes a moment two years before anything already projected, and
   // arrives now. An event-time cursor would have moved past it long ago.
   await setStatus(issue, "resolution_claimed");
-  await appendEvent(
+  const lateEventId = await appendEvent(
     issue,
     "resolution_claimed",
     {},
@@ -603,8 +603,18 @@ test("a backdated event is projected, because the cursor follows ingestion order
   );
 
   const pass = await applySummaryEvents(client, { summaryName, asOf });
-  assert.equal(pass.eventsRead, 1, "the late event was read, not left behind the watermark");
-  assert.equal(pass.eventsApplied, 1);
+  assert.ok(pass.eventsRead >= 1, "the pass read at least the late event");
+  assert.ok(pass.eventsApplied >= 1);
+  const applied = await client.query(
+    `select 1 from summary_applied_event
+      where summary_name = $1 and event_id = $2`,
+    [summaryName, lateEventId],
+  );
+  assert.equal(
+    applied.rowCount,
+    1,
+    "the specific late event was read, not left behind the watermark",
+  );
 
   const cells = await cellsFor(summaryName, category);
   assert.equal(cells[0]?.claimed, 1);

@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Vision — Report A Problem, Follow What Happens</title>
+    <title>Vision: Report A Problem, Follow What Happens</title>
     <meta
       name="description"
-      content="Citizens report problems with public infrastructure. Vision groups duplicate reports, routes each one to the department responsible and shows what happened. A demonstration build: departments are simulated."
+      content="Citizens report problems with public infrastructure using a photo, voice note or sentence. Vision groups duplicate reports and lets people follow what happened. Departments are simulated in this demonstration."
     />
 
     <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -26,10 +26,19 @@
         </div>
 
         <header class="header">
-          <a class="logo" href="index.html" aria-label="Vision — home">
+          <a class="logo" href="index.html" aria-label="Vision home">
             <img src="assets/logo.png" alt="" width="480" height="271" />
           </a>
 
+          <!--
+            "Oversight" doesn't sit here. .nav is a fixed 430px pill sized for
+            exactly five links (see landing.css); a sixth pushed "About" wide
+            enough to overlap the Sign in pill beside it. The new section is
+            still reachable — it's a normal scroll-stop for anyone reading the
+            page top to bottom — and its own three cards are the actual links
+            forward. Widening a global header shared by every page for the
+            sake of one shortcut wasn't worth that risk.
+          -->
           <nav class="nav" aria-label="Primary">
             <a class="nav-link is-active" href="index.html" aria-current="page">Home</a>
             <a class="nav-link" href="app.html">Report</a>
@@ -102,7 +111,7 @@
                   /></svg
               ></span>
             </span>
-            <span class="trust-pill">Demonstration build — departments are simulated</span>
+            <span class="trust-pill">Demonstration build: departments are simulated</span>
           </div>
 
           <h1 class="headline anim">
@@ -111,21 +120,54 @@
           </h1>
 
           <p class="subhead anim d-028">
-            Photo, voice or a sentence. Vision groups reports of the same problem, routes each one
-            to the department responsible, and shows you what happened next.
+            Photo, voice or a sentence. Vision groups reports of the same problem, routes them to a
+            simulated department, and shows you what happened next.
           </p>
 
           <a class="cta anim d-04" href="app.html">Report a problem</a>
         </main>
 
-        <!-- Every figure below is measured, not asserted; `data-basis` records
-           where each one comes from. The test count is the one that goes stale
-           fastest — refresh it from `npm run check` and `npm run test:db`
-           whenever it is quoted, because a number that was true last week is
-           still a false claim today. -->
+        <!-- Stable facts about the citizen flow, not test counts or adoption
+           numbers that can become stale or suggest real government usage. -->
         <footer class="stats" id="stats">
           <div class="stat anim d-05">
             <span class="stat-icon" aria-hidden="true">#</span>
+            <span
+              class="stat-value"
+              data-target="3"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="Photo, voice note or typed description"
+              >3</span
+            >
+            <span class="stat-label">Ways to describe it</span>
+          </div>
+          <div class="stat anim d-058">
+            <span class="stat-icon" aria-hidden="true">*</span>
+            <span
+              class="stat-value"
+              data-target="0"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="The citizen form asks for no department, category or severity"
+              >0</span
+            >
+            <span class="stat-label">Categories to choose</span>
+          </div>
+          <div class="stat anim d-066">
+            <span class="stat-icon" aria-hidden="true">%</span>
+            <span
+              class="stat-value"
+              data-target="1"
+              data-suffix=""
+              data-decimals="0"
+              data-basis="Each submitted report receives a receipt reference for tracking"
+              >1</span
+            >
+            <span class="stat-label">Receipt to track</span>
+          </div>
+          <div class="stat anim d-074">
+            <span class="stat-icon" aria-hidden="true">&lt;</span>
             <span
               class="stat-value"
               data-target="2"
@@ -134,43 +176,7 @@
               data-basis="English (en-IN) and Marathi (mr-IN) locale packs"
               >2</span
             >
-            <span class="stat-label">Interface Languages</span>
-          </div>
-          <div class="stat anim d-058">
-            <span class="stat-icon" aria-hidden="true">*</span>
-            <span
-              class="stat-value"
-              data-target="957"
-              data-suffix=""
-              data-decimals="0"
-              data-basis="532 unit plus 425 database tests, all passing"
-              >957</span
-            >
-            <span class="stat-label">Automated Checks</span>
-          </div>
-          <div class="stat anim d-066">
-            <span class="stat-icon" aria-hidden="true">%</span>
-            <span
-              class="stat-value"
-              data-target="100"
-              data-suffix="%"
-              data-decimals="0"
-              data-basis="routing writes provider_mode simulated and refuses a real recipient"
-              >100%</span
-            >
-            <span class="stat-label">Simulated Departments</span>
-          </div>
-          <div class="stat anim d-074">
-            <span class="stat-icon" aria-hidden="true">&lt;</span>
-            <span
-              class="stat-value"
-              data-target="4"
-              data-suffix=""
-              data-decimals="0"
-              data-basis="water_supply, sanitation, structural, electrical in demo-taxonomy.v1"
-              >4</span
-            >
-            <span class="stat-label">Report Categories</span>
+            <span class="stat-label">Interface languages</span>
           </div>
         </footer>
 
@@ -199,7 +205,7 @@
               <h3 class="card-title">Report in your own words</h3>
               <p class="card-body">
                 A photo, a voice note or a sentence. You are never asked to pick a department, a
-                category or a severity — that is decided after review, not by you.
+                category or a severity. That is decided after review, not by you.
               </p>
             </article>
 
@@ -234,6 +240,64 @@
         </div>
       </section>
 
+      <!-- ── Beyond the report ────────────────────────────────────
+           A citizen's report is the half of this system a landing page
+           usually stops at. This section is the other half: what a
+           district does with a thousand of them, and how the answers to
+           that are held to the same no-invented-numbers standard as the
+           citizen-facing side. Each card links to the real workspace —
+           the same simulated demo sign-in used everywhere else in this
+           build, not a mockup. -->
+      <section class="section" id="oversight">
+        <div class="section-inner">
+          <p class="section-eyebrow reveal">Beyond the report</p>
+          <h2 class="section-title reveal">Built for the people who act on it</h2>
+
+          <p class="section-lead reveal">
+            Filing a report is the easy half. What an organisation does with a thousand of them is
+            measured here too: whether a closure actually held, whether one ward is quietly falling
+            behind, which project to fund first. Every answer is checked against a held-out
+            evaluation, a live security exercise, and the system's own performance budgets, never
+            asserted on a slide.
+          </p>
+
+          <div class="cards">
+            <a class="card card-link reveal" href="dashboard.html">
+              <span class="card-glyph" aria-hidden="true">=</span>
+              <h3 class="card-title">District dashboard</h3>
+              <p class="card-body">
+                Every ward and category, built from the same records citizens see. It even shows how
+                many reports the projection has not caught up with yet, rather than hiding that
+                behind a clean number.
+              </p>
+              <span class="card-arrow" aria-hidden="true">Open the dashboard →</span>
+            </a>
+
+            <a class="card card-link reveal" href="compare.html">
+              <span class="card-glyph" aria-hidden="true">~</span>
+              <h3 class="card-title">Comparison view</h3>
+              <p class="card-body">
+                Places an outcome against a project's own timeline and says plainly that a
+                coincidence in time proves nothing. There is no ranking and no invented attribution
+                here either.
+              </p>
+              <span class="card-arrow" aria-hidden="true">Open the comparison view →</span>
+            </a>
+
+            <a class="card card-link reveal" href="supervisor.html">
+              <span class="card-glyph" aria-hidden="true">^</span>
+              <h3 class="card-title">Supervisor oversight</h3>
+              <p class="card-body">
+                Reports waiting longer than a district said it would tolerate, and whether
+                resolutions across a ward actually lasted: reported as counts and intervals, never a
+                score.
+              </p>
+              <span class="card-arrow" aria-hidden="true">Open supervisor oversight →</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <!-- ── About ────────────────────────────────────────────── -->
       <section class="section" id="about">
         <div class="section-inner">
@@ -243,7 +307,7 @@
           <p class="section-lead reveal">
             Vision is a citizen reporting platform for public infrastructure, built for the
             Code&nbsp;for&nbsp;Communities challenge. The hard part of this problem is not
-            collecting reports — it is being honest about what the system does and does not know.
+            collecting reports. It is being honest about what the system does and does not know.
           </p>
 
           <div class="facts">

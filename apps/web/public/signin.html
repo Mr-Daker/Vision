@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Sign in — Vision</title>
+    <title>Vision: sign in</title>
     <meta
       name="description"
       content="Choose a demonstration account. This does not verify a real person or a DigiLocker credential."
@@ -24,34 +24,17 @@
     </div>
 
     <div class="page">
-      <header class="header">
-        <a class="logo" href="index.html" aria-label="Vision — home">
-          <img src="assets/logo.png" alt="" width="480" height="271" />
-        </a>
+      <!--
+        No header at all, including the mark that used to sit alone here. This
+        page has one thing to do and one way to leave it (the Close control
+        below, which returns to the home page), and a logo repeats that exit
+        rather than adding a second one. Removing it also lets the two panels
+        centre in the full viewport instead of a header's height being
+        subtracted from the space they centre in.
 
-        <nav class="nav" aria-label="Primary">
-          <a class="nav-link" href="index.html">Home</a>
-          <a class="nav-link" href="app.html">Report</a>
-          <a class="nav-link" href="app.html#discovery-panel">Nearby</a>
-          <a class="nav-link" href="app.html#tracking-panel">Track</a>
-        </nav>
-
-        <a class="sign-in is-current" href="signin.html" aria-current="page">Sign in</a>
-
-        <button
-          class="burger"
-          id="burger"
-          type="button"
-          aria-label="Open menu"
-          aria-expanded="false"
-          aria-controls="mobile-menu"
-        >
-          <span class="burger-bar"></span>
-          <span class="burger-bar"></span>
-          <span class="burger-bar"></span>
-        </button>
-      </header>
-
+        Nothing here is unreachable: the wordmark link lived only on the
+        header, and Close already goes to the same place it did.
+      -->
       <main class="hero auth" id="signin-main">
         <a class="auth-close" href="index.html" aria-label="Close and return to the home page">
           <svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true">
@@ -66,55 +49,115 @@
           <span class="headline-line d-012">Choose An Account</span>
         </h1>
 
-        <p class="auth-sub anim d-02">Identity is simulated for this demonstration.</p>
-
-        <div class="auth-card anim d-03">
-          <p class="auth-notice" role="note">
-            This does not verify a real person or a DigiLocker credential. Nothing here checks an
-            identity document, and no government system is contacted.
-          </p>
-
-          <div class="principal-list" id="principal-list" aria-busy="true">
-            <p class="principal-loading">Loading demonstration accounts…</p>
-          </div>
-
-          <p class="field-error" id="form-error" role="alert" hidden></p>
-        </div>
-
-        <p class="auth-note anim d-042">
-          Signing in creates a session for a simulated participant so you can send a report and
-          follow it. <a class="auth-link" href="app.html">Continue without signing in</a>
+        <p class="auth-sub anim d-02">
+          Two ways in. Identity is simulated on both sides of this demonstration.
         </p>
+
+        <!--
+          Two doors rather than one list. A resident and a ward engineer arrive
+          at the same address wanting different things, and a single column of
+          demonstration accounts asked every visitor to work out which of them
+          they were. The citizen side keeps its own sign-in inline; each
+          department workspace signs in on its own page, because each holds a
+          separate session with separate grants (V015).
+        -->
+        <div class="auth-split">
+          <section class="auth-card auth-role anim d-03" aria-labelledby="role-citizen-heading">
+            <p class="auth-role-eyebrow">For residents</p>
+            <h2 id="role-citizen-heading" class="auth-role-title">
+              Report a problem where you live
+            </h2>
+            <p class="auth-role-copy">
+              Send a report in English or Marathi, confirm whether somebody has already reported the
+              same thing, and follow what happens to yours.
+            </p>
+
+            <p class="auth-notice" role="note">
+              Identity here is simulated. No document is checked and no government system is
+              contacted.
+            </p>
+
+            <div class="principal-list" id="principal-list" aria-busy="true">
+              <p class="principal-loading">Loading demonstration accounts…</p>
+            </div>
+
+            <p class="field-error" id="form-error" role="alert" hidden></p>
+
+            <p class="auth-role-note">
+              <a class="auth-link" href="app.html">Browse nearby issues without signing in</a>
+              <span>Choose a demo account above to send a report.</span>
+            </p>
+          </section>
+
+          <section class="auth-card auth-role anim d-042" aria-labelledby="role-staff-heading">
+            <p class="auth-role-eyebrow">For demo staff</p>
+            <h2 id="role-staff-heading" class="auth-role-title">Receive, review and resolve</h2>
+            <p class="auth-role-copy">
+              Explore how staff receive reports, check uncertain matches and monitor unresolved
+              issues. Each workspace lets you choose a demo account.
+            </p>
+
+            <p class="auth-notice" role="note">
+              Every department and staff account is simulated. Being routed somewhere is not an
+              acknowledgment by anybody.
+            </p>
+
+            <ul class="role-links">
+              <li>
+                <a class="role-link" href="staff.html">
+                  <span class="role-link-title">Department inbox</span>
+                  <span class="role-link-copy">
+                    Work routed to you. Acknowledge it, plan it, and claim it complete with evidence
+                    a reporter then confirms.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a class="role-link" href="reviewer.html">
+                  <span class="role-link-title">Review queue</span>
+                  <span class="role-link-copy">
+                    Possible duplicates, unclear routing and disputed repairs, settled by a person
+                    rather than automatically.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a class="role-link" href="supervisor.html">
+                  <span class="role-link-title">Supervisor oversight</span>
+                  <span class="role-link-copy">
+                    What is waiting longer than this district said it would tolerate, and whether
+                    resolutions in a ward lasted.
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </div>
       </main>
 
-      <footer class="stats auth-stats">
-        <div class="stat anim d-05">
-          <span class="stat-icon" aria-hidden="true">#</span>
-          <span class="stat-value" data-target="2" data-suffix="" data-decimals="0">2</span>
-          <span class="stat-label">Interface Languages</span>
-        </div>
-        <div class="stat anim d-058">
-          <span class="stat-icon" aria-hidden="true">%</span>
-          <span class="stat-value" data-target="100" data-suffix="%" data-decimals="0">100%</span>
-          <span class="stat-label">Simulated Identity</span>
-        </div>
-      </footer>
+      <!--
+        No statistics strip here, though the landing page has one and this page
+        inherited it. Two reasons it went:
+
+          * a visitor who clicked Sign in has already decided, and a feature
+            count at a decision point competes with the only two things on the
+            page that matter;
+          * "100% Simulated Identity" rendered a *disclosure* as a statistic.
+            Both panels already say it in words, as a caveat. A number with a
+            percent sign reads as an achievement, which is the same category
+            error this system refuses everywhere else it declines to publish a
+            score.
+
+        The credit below is not clutter and must not follow them out. The
+        display face is CC BY 4.0 and `fonts/ATTRIBUTION.txt` records that
+        attribution is required wherever it is used; the heading on this page
+        uses it.
+      -->
       <p class="font-credit">
         Font made from
         <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
         is licensed by CC BY 4.0
       </p>
-    </div>
-
-    <div class="menu-overlay" id="menu-overlay" hidden></div>
-    <div class="menu-sheet" id="mobile-menu" hidden>
-      <nav class="menu-nav" aria-label="Mobile">
-        <a class="menu-link" href="index.html">Home</a>
-        <a class="menu-link" href="app.html">Report</a>
-        <a class="menu-link" href="app.html#discovery-panel">Nearby</a>
-        <a class="menu-link" href="app.html#tracking-panel">Track</a>
-        <a class="menu-sign-in" href="signin.html">Sign in</a>
-      </nav>
     </div>
 
     <script src="landing.js"></script>

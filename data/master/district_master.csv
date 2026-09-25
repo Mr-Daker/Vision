@@ -1,0 +1,628 @@
+country_code,state_code,state_name,district_code,district_key,district_name,block_code,block_name,locality_code,locality_name,latitude,longitude,coordinates_origin,codes_origin,source_name,source_year
+IN,12,Arunachal Pradesh,245,12245,Tawang,,,,,29.13845,94.88542,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,246,12246,West Kameng,,,,,27.80197,96.12757,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,247,12247,East Kameng,,,,,28.02923,93.33858,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,248,12248,Papum Pare,,,,,28.74169,96.88294,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,249,12249,Upper Subansiri,,,,,26.96054,94.37341,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,250,12250,West Siang,,,,,28.1166,94.3102,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,251,12251,East Siang,,,,,26.86662,96.91467,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,252,12252,Upper Siang,,,,,27.25128,93.71991,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,253,12253,Changlang,,,,,27.54267,93.85757,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,254,12254,Tirap,,,,,27.41311,95.02038,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,255,12255,Lower Subansiri,,,,,27.8913,93.6232,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,256,12256,Kurung Kumey,,,,,27.35752,94.50213,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,257,12257,Dibang Valley,,,,,28.23816,94.49408,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,258,12258,Lower Dibang Valley,,,,,28.95399,92.09218,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,259,12259,Lohit,,,,,29.05084,95.07944,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,12,Arunachal Pradesh,260,12260,Anjaw,,,,,28.36041,94.96249,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,035,03035,Gurdaspur,,,,,32.00436,75.55059,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,036,03036,Kapurthala,,,,,30.30694,75.03119,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,037,03037,Jalandhar,,,,,31.5636,74.24154,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,038,03038,Hoshiarpur,,,,,31.1778,76.4352,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,039,03039,Shahid Bhagat Singh Nagar,,,,,31.61335,74.8615,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,040,03040,Fatehgarh Sahib,,,,,31.61821,74.92453,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,041,03041,Ludhiana,,,,,30.50705,74.55118,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,042,03042,Moga,,,,,31.2176,75.8917,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,043,03043,Firozpur,,,,,30.26378,75.44365,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,044,03044,Muktsar,,,,,29.86589,76.50687,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,045,03045,Faridkot,,,,,31.43703,75.20708,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,046,03046,Bathinda,,,,,31.21853,76.00237,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,047,03047,Mansa,,,,,31.2653,75.26567,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,048,03048,Patiala,,,,,32.21918,74.82878,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,049,03049,Amritsar,,,,,31.84225,75.86716,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,050,03050,Tarn Taran,,,,,30.87455,75.61849,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,051,03051,Rupnagar,,,,,30.47715,75.87322,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,052,03052,Sahibzada Ajit Singh Nagar,,,,,30.25334,76.59387,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,053,03053,Sangrur,,,,,30.27522,75.63067,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,03,Punjab,054,03054,Barnala,,,,,30.70202,75.67988,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,099,08099,Ganganagar,,,,,25.35934,71.90416,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,100,08100,Hanumangarh,,,,,29.49843,74.38467,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,101,08101,Bikaner,,,,,24.44926,72.40878,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,102,08102,Churu,,,,,25.86864,71.10405,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,103,08103,Jhunjhunun,,,,,24.36271,76.03703,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,104,08104,Alwar,,,,,28.90007,74.32003,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,105,08105,Bharatpur,,,,,27.74157,72.51576,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,106,08106,Dhaulpur,,,,,27.59903,75.3374,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,107,08107,Karauli,,,,,27.37391,71.0026,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,108,08108,Sawai Madhopur,,,,,26.10529,73.66761,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,109,08109,Dausa,,,,,24.45196,76.23851,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,110,08110,Jaipur,,,,,25.38238,77.09807,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,111,08111,Sikar,,,,,24.49628,74.58509,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,112,08112,Nagaur,,,,,28.45669,74.75282,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,113,08113,Jodhpur,,,,,29.58929,72.08811,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,114,08114,Jaisalmer,,,,,24.9943,72.58999,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,115,08115,Barmer,,,,,26.13699,76.12446,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,116,08116,Jalor,,,,,24.60105,75.69684,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,117,08117,Sirohi,,,,,23.6849,74.0279,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,118,08118,Pali,,,,,25.63029,71.17328,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,119,08119,Ajmer,,,,,28.52074,76.72362,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,120,08120,Tonk,,,,,25.94728,71.87585,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,121,08121,Bundi,,,,,27.80059,73.81942,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,122,08122,Bhilwara,,,,,27.86245,75.50507,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,123,08123,Rajsamand,,,,,26.43428,73.75947,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,124,08124,Dungarpur,,,,,28.76856,70.9058,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,125,08125,Banswara,,,,,28.18546,72.19685,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,126,08126,Chittaurgarh,,,,,25.76469,73.97102,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,127,08127,Kota,,,,,24.48828,75.62695,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,128,08128,Baran,,,,,26.59666,72.4379,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,129,08129,Jhalawar,,,,,23.7717,70.29666,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,130,08130,Udaipur,,,,,28.47831,74.14982,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,08,Rajasthan,131,08131,Pratapgarh,,,,,24.69571,75.13914,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,400,22400,Koriya,,,,,19.14822,84.04901,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,401,22401,Surguja,,,,,18.36416,82.61725,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,402,22402,Jashpur,,,,,22.1212,82.61875,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,403,22403,Raigarh,,,,,21.2997,83.48269,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,404,22404,Korba,,,,,23.46337,84.04614,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,405,22405,Janjgir - Champa,,,,,20.37903,80.78868,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,406,22406,Bilaspur,,,,,20.33604,80.72228,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,407,22407,Kabeerdham,,,,,19.99413,82.14056,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,408,22408,Rajnandgaon,,,,,22.46988,81.26611,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,409,22409,Durg,,,,,21.39799,83.76421,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,410,22410,Raipur,,,,,22.33667,80.57646,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,411,22411,Mahasamund,,,,,22.45042,81.91055,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,412,22412,Dhamtari,,,,,18.33626,82.36425,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,413,22413,Uttar Bastar Kanker,,,,,21.83626,83.38471,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,414,22414,Bastar,,,,,19.48656,82.10702,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,415,22415,Narayanpur,,,,,19.58592,82.36235,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,416,22416,Dakshin Bastar Dantewada,,,,,18.44633,84.04867,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,22,Chhattisgarh,417,22417,Bijapur,,,,,21.61957,81.4707,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,346,20346,Garhwa,,,,,23.47117,87.37783,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,347,20347,Chatra,,,,,22.42287,86.49644,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,348,20348,Kodarma,,,,,23.12507,86.71583,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,349,20349,Giridih,,,,,22.28284,87.11629,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,350,20350,Deoghar,,,,,22.77872,86.32044,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,351,20351,Godda,,,,,24.1755,84.56459,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,352,20352,Sahibganj,,,,,24.69341,85.32157,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,353,20353,Pakur,,,,,23.63017,84.2349,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,354,20354,Dhanbad,,,,,24.95889,87.39199,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,355,20355,Bokaro,,,,,24.87244,85.53889,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,356,20356,Lohardaga,,,,,22.36345,85.51009,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,357,20357,Purbi Singhbhum,,,,,22.25993,85.05594,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,358,20358,Palamu,,,,,22.75812,87.07962,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,359,20359,Latehar,,,,,24.47169,86.67478,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,360,20360,Hazaribagh,,,,,24.64838,84.57823,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,361,20361,Ramgarh,,,,,24.20944,83.84147,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,362,20362,Dumka,,,,,23.96526,87.34321,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,363,20363,Jamtara,,,,,22.26773,87.35043,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,364,20364,Ranchi,,,,,22.89106,86.19831,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,365,20365,Khunti,,,,,23.45434,84.78046,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,366,20366,Gumla,,,,,24.42187,85.17221,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,367,20367,Simdega,,,,,23.66745,84.87761,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,368,20368,Pashchimi Singhbhum,,,,,24.16232,83.84398,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,20,Jharkhand,369,20369,Saraikela-Kharsawan,,,,,24.31712,84.69482,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,203,10203,Pashchim Champaran,,,,,24.8587,87.53624,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,204,10204,Purba Champaran,,,,,26.69172,83.76817,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,205,10205,Sheohar,,,,,26.02472,86.51793,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,206,10206,Sitamarhi,,,,,24.61887,84.98285,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,207,10207,Madhubani,,,,,26.33343,84.30388,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,208,10208,Supaul,,,,,26.62943,87.49326,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,209,10209,Araria,,,,,26.51315,84.49851,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,210,10210,Kishanganj,,,,,26.24383,84.62612,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,211,10211,Purnia,,,,,27.06882,85.7868,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,212,10212,Katihar,,,,,25.64358,85.49422,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,213,10213,Madhepura,,,,,26.88794,86.52413,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,214,10214,Saharsa,,,,,25.29138,87.48516,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,215,10215,Darbhanga,,,,,25.4357,84.22732,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,216,10216,Muzaffarpur,,,,,26.08061,84.67731,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,217,10217,Gopalganj,,,,,26.21428,84.54216,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,218,10218,Siwan,,,,,26.3921,84.86088,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,219,10219,Saran,,,,,25.61729,83.9411,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,220,10220,Vaishali,,,,,25.28879,84.72551,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,221,10221,Samastipur,,,,,25.64068,86.97359,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,222,10222,Begusarai,,,,,27.21868,86.90603,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,223,10223,Khagaria,,,,,26.58965,84.0718,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,224,10224,Bhagalpur,,,,,25.3166,84.72412,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,225,10225,Banka,,,,,26.32527,87.09965,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,226,10226,Munger,,,,,26.9155,83.70595,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,227,10227,Lakhisarai,,,,,25.727,83.97902,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,228,10228,Sheikhpura,,,,,25.68028,86.4417,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,229,10229,Nalanda,,,,,24.90825,85.99499,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,230,10230,Patna,,,,,25.45474,83.96097,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,231,10231,Bhojpur,,,,,26.08893,85.67997,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,232,10232,Buxar,,,,,24.60362,84.61246,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,233,10233,Kaimur (Bhabua),,,,,26.29255,84.15385,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,234,10234,Rohtas,,,,,24.71554,86.23668,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,235,10235,Aurangabad,,,,,25.67218,84.80136,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,236,10236,Gaya,,,,,24.62715,86.85994,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,237,10237,Nawada,,,,,26.91051,87.56162,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,238,10238,Jamui,,,,,26.10132,85.55125,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,239,10239,Jehanabad,,,,,24.74426,85.86755,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,10,Bihar,240,10240,Arwal,,,,,26.35075,84.95921,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,34,Puducherry,634,34634,Yanam,,,,,11.12877,77.62678,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,34,Puducherry,635,34635,Puducherry,,,,,11.17781,78.74561,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,34,Puducherry,636,34636,Mahe,,,,,10.12736,75.24783,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,34,Puducherry,637,34637,Karaikal,,,,,10.9619,78.61525,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,588,32588,Kasaragod,,,,,8.82649,75.89416,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,589,32589,Kannur,,,,,12.38277,76.4607,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,590,32590,Wayanad,,,,,12.34269,76.74852,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,591,32591,Kozhikode,,,,,12.23784,76.28231,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,592,32592,Malappuram,,,,,8.65382,75.23266,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,593,32593,Palakkad,,,,,10.7021,76.23104,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,594,32594,Thrissur,,,,,11.45449,75.48905,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,595,32595,Ernakulam,,,,,9.40269,75.83499,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,596,32596,Idukki,,,,,10.57342,76.14576,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,597,32597,Kottayam,,,,,9.94571,76.14014,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,598,32598,Alappuzha,,,,,11.12036,76.92425,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,599,32599,Pathanamthitta,,,,,9.92122,76.09993,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,600,32600,Kollam,,,,,8.70827,76.40617,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,32,Kerala,601,32601,Thiruvananthapuram,,,,,12.42264,75.86537,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,468,24468,Kachchh,,,,,23.96705,71.00513,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,469,24469,Banas Kantha,,,,,21.99968,70.30032,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,470,24470,Patan,,,,,21.16413,69.53384,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,471,24471,Mahesana,,,,,23.89862,69.83029,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,472,24472,Sabar Kantha,,,,,21.84257,72.42071,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,473,24473,Gandhinagar,,,,,21.07412,72.60646,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,474,24474,Ahmadabad,,,,,22.36,73.30226,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,475,24475,Surendranagar,,,,,21.94178,69.46225,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,476,24476,Rajkot,,,,,20.94,69.07373,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,477,24477,Jamnagar,,,,,22.97509,73.56559,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,478,24478,Porbandar,,,,,22.1424,71.84453,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,479,24479,Junagadh,,,,,21.8991,69.82009,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,480,24480,Amreli,,,,,21.27015,69.53421,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,481,24481,Bhavnagar,,,,,22.96707,70.53455,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,482,24482,Anand,,,,,22.45946,73.98542,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,483,24483,Kheda,,,,,23.79446,70.81212,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,484,24484,Panch Mahals,,,,,22.13052,71.69205,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,485,24485,Dohad,,,,,22.13309,70.30668,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,486,24486,Vadodara,,,,,20.72393,73.90006,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,487,24487,Narmada,,,,,22.79736,69.0035,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,488,24488,Bharuch,,,,,22.32591,72.81246,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,489,24489,The Dangs,,,,,21.96877,70.3954,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,490,24490,Navsari,,,,,20.78209,71.2103,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,491,24491,Valsad,,,,,23.76891,68.9979,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,492,24492,Surat,,,,,23.55326,70.25824,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,24,Gujarat,493,24493,Tapi,,,,,22.88255,69.66932,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,04,Chandigarh,055,04055,Chandigarh,,,,,30.67691,76.84081,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,281,15281,Mamit,,,,,24.2111,93.3924,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,282,15282,Kolasib,,,,,22.60691,92.74192,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,283,15283,Aizawl,,,,,22.79194,92.89204,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,284,15284,Champhai,,,,,23.54348,93.29548,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,285,15285,Serchhip,,,,,22.55653,92.5476,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,286,15286,Lunglei,,,,,23.84124,92.38021,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,287,15287,Lawngtlai,,,,,24.19654,93.26219,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,15,Mizoram,288,15288,Saiha,,,,,22.52373,93.36367,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,602,33602,Thiruvallur,,,,,8.58288,76.59984,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,603,33603,Chennai,,,,,12.50838,78.29074,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,604,33604,Kancheepuram,,,,,10.37036,77.99052,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,605,33605,Vellore,,,,,12.39303,79.70964,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,606,33606,Tiruvannamalai,,,,,8.55996,76.79795,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,607,33607,Viluppuram,,,,,11.45638,76.64168,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,608,33608,Salem,,,,,12.60931,79.87315,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,609,33609,Namakkal,,,,,9.51891,77.26317,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,610,33610,Erode,,,,,11.02769,79.26011,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,611,33611,The Nilgiris,,,,,8.89583,78.30651,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,612,33612,Dindigul,,,,,10.32528,79.4092,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,613,33613,Karur,,,,,11.88363,78.18202,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,614,33614,Tiruchirappalli,,,,,11.36358,78.21854,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,615,33615,Perambalur,,,,,12.8694,78.2156,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,616,33616,Ariyalur,,,,,9.53926,76.99353,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,617,33617,Cuddalore,,,,,9.08954,79.38159,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,618,33618,Nagapattinam,,,,,13.03715,77.67644,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,619,33619,Thiruvarur,,,,,9.86641,77.85321,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,620,33620,Thanjavur,,,,,9.02277,78.26018,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,621,33621,Pudukkottai,,,,,12.4478,78.63447,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,622,33622,Sivaganga,,,,,8.69771,78.79011,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,623,33623,Madurai,,,,,9.82937,78.01561,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,624,33624,Theni,,,,,8.60332,79.46512,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,625,33625,Virudhunagar,,,,,12.85348,77.84259,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,626,33626,Ramanathapuram,,,,,10.43336,79.78402,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,627,33627,Thoothukkudi,,,,,11.9372,76.85936,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,628,33628,Tirunelveli,,,,,12.69239,77.80586,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,629,33629,Kanniyakumari,,,,,9.8013,78.47638,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,630,33630,Dharmapuri,,,,,10.67721,77.28308,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,631,33631,Krishnagiri,,,,,10.57303,78.34238,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,632,33632,Coimbatore,,,,,10.48502,79.63783,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,33,Tamil Nadu,633,33633,Tiruppur,,,,,11.84622,77.41671,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,132,09132,Saharanpur,,,,,27.59345,79.48578,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,133,09133,Muzaffarnagar,,,,,29.85495,77.94976,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,134,09134,Bijnor,,,,,25.88119,78.57474,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,135,09135,Moradabad,,,,,27.08447,80.70047,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,136,09136,Rampur,,,,,26.90872,81.06688,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,137,09137,Jyotiba Phule Nagar,,,,,27.02937,81.8876,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,138,09138,Meerut,,,,,29.03616,82.67363,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,139,09139,Baghpat,,,,,28.64818,81.56512,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,140,09140,Ghaziabad,,,,,28.43138,78.9636,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,141,09141,Gautam Buddha Nagar,,,,,24.94498,83.51386,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,142,09142,Bulandshahr,,,,,26.77435,79.7706,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,143,09143,Aligarh,,,,,28.5567,80.35784,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,144,09144,Mahamaya Nagar,,,,,27.16568,80.1668,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,145,09145,Mathura,,,,,27.31939,80.50074,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,146,09146,Agra,,,,,29.85579,82.02432,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,147,09147,Firozabad,,,,,29.09187,81.28494,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,148,09148,Mainpuri,,,,,28.25643,83.45865,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,149,09149,Budaun,,,,,28.9258,82.87826,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,150,09150,Bareilly,,,,,24.87035,81.74817,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,151,09151,Pilibhit,,,,,25.15072,82.44833,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,152,09152,Shahjahanpur,,,,,26.44847,79.53992,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,153,09153,Kheri,,,,,29.63043,79.2836,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,154,09154,Sitapur,,,,,26.34542,80.39784,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,155,09155,Hardoi,,,,,25.8268,83.49234,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,156,09156,Unnao,,,,,28.86796,77.87266,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,157,09157,Lucknow,,,,,29.45216,82.52096,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,158,09158,Rae Bareli,,,,,29.75289,81.59995,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,159,09159,Farrukhabad,,,,,28.60954,78.13124,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,160,09160,Kannauj,,,,,25.55373,82.68261,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,161,09161,Etawah,,,,,28.48804,79.28716,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,162,09162,Auraiya,,,,,28.58691,82.81942,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,163,09163,Kanpur Dehat,,,,,25.289,83.62863,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,164,09164,Kanpur Nagar,,,,,29.10806,81.78549,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,165,09165,Jalaun,,,,,27.58999,83.97291,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,166,09166,Jhansi,,,,,26.65218,83.04434,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,167,09167,Lalitpur,,,,,29.74566,81.37638,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,168,09168,Hamirpur,,,,,27.65962,78.1096,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,169,09169,Mahoba,,,,,29.57589,81.21597,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,170,09170,Banda,,,,,26.51367,78.13668,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,171,09171,Chitrakoot,,,,,26.97147,82.1008,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,172,09172,Fatehpur,,,,,26.78055,80.66247,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,173,09173,Pratapgarh,,,,,28.00112,78.34635,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,174,09174,Kaushambi,,,,,28.1636,77.95061,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,175,09175,Allahabad,,,,,24.68061,83.12599,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,176,09176,Bara Banki,,,,,29.32414,83.00055,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,177,09177,Faizabad,,,,,28.45673,82.65847,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,178,09178,Ambedkar Nagar,,,,,25.01745,81.29752,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,179,09179,Sultanpur,,,,,28.56008,83.49393,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,180,09180,Bahraich,,,,,26.47054,80.2558,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,181,09181,Shrawasti,,,,,29.80203,81.19182,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,182,09182,Balrampur,,,,,25.85438,81.2227,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,183,09183,Gonda,,,,,24.72887,79.30507,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,184,09184,Siddharthnagar,,,,,28.69892,82.87418,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,185,09185,Basti,,,,,27.8908,82.81049,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,186,09186,Sant Kabir Nagar,,,,,24.7871,81.51652,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,187,09187,Mahrajganj,,,,,26.67657,80.5123,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,188,09188,Gorakhpur,,,,,29.5757,78.13226,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,189,09189,Kushinagar,,,,,26.627,82.38098,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,190,09190,Deoria,,,,,24.61695,83.79256,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,191,09191,Azamgarh,,,,,28.50054,80.96495,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,192,09192,Mau,,,,,28.17382,82.88258,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,193,09193,Ballia,,,,,28.25349,80.57134,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,194,09194,Jaunpur,,,,,27.8167,80.97792,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,195,09195,Ghazipur,,,,,24.96215,82.34114,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,196,09196,Chandauli,,,,,28.7336,78.17523,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,197,09197,Varanasi,,,,,28.20147,79.86225,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,198,09198,Sant Ravidas Nagar (Bhadohi),,,,,26.59776,82.73155,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,199,09199,Mirzapur,,,,,27.60676,78.68922,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,200,09200,Sonbhadra,,,,,28.90726,80.2569,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,201,09201,Etah,,,,,28.89876,77.82863,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,09,Uttar Pradesh,202,09202,Kanshiram Nagar,,,,,28.51574,78.60311,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,497,27497,Nandurbar,,,,,17.15046,75.4593,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,498,27498,Dhule,,,,,21.02433,79.50095,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,499,27499,Jalgaon,,,,,21.25033,75.08334,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,500,27500,Buldana,,,,,20.57362,74.00615,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,501,27501,Akola,,,,,21.34728,77.99508,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,502,27502,Washim,,,,,18.3637,78.78551,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,503,27503,Amravati,,,,,20.96228,76.79337,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,504,27504,Wardha,,,,,20.54771,76.56039,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,505,27505,Nagpur,,,,,16.64045,79.8467,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,506,27506,Bhandara,,,,,19.92821,78.98296,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,507,27507,Gondiya,,,,,17.52645,80.22539,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,508,27508,Gadchiroli,,,,,16.26451,78.62533,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,509,27509,Chandrapur,,,,,21.44562,75.00679,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,510,27510,Yavatmal,,,,,21.02096,76.90199,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,511,27511,Nanded,,,,,18.23297,76.05286,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,512,27512,Hingoli,,,,,16.21269,75.95125,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,513,27513,Parbhani,,,,,16.96874,74.46812,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,514,27514,Jalna,,,,,20.44122,76.26681,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,515,27515,Aurangabad,,,,,18.11943,79.89072,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,516,27516,Nashik,,,,,16.34477,75.63233,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,517,27517,Thane,,,,,20.58275,77.81609,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,518,27518,Mumbai Suburban,,,,,18.91225,79.75743,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,519,27519,Mumbai,,,,,19.74484,74.23613,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,520,27520,Raigarh,,,,,20.17072,75.03643,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,521,27521,Pune,,,,,21.25725,73.77632,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,522,27522,Ahmadnagar,,,,,20.94052,74.5889,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,523,27523,Bid,,,,,18.14249,79.11519,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,524,27524,Latur,,,,,20.43206,75.8781,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,525,27525,Osmanabad,,,,,17.20849,77.48621,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,526,27526,Solapur,,,,,19.5404,74.30299,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,527,27527,Satara,,,,,16.47485,74.46445,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,528,27528,Ratnagiri,,,,,18.60539,77.93493,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,529,27529,Sindhudurg,,,,,19.71619,78.35794,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,530,27530,Kolhapur,,,,,17.03471,79.67277,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,27,Maharashtra,531,27531,Sangli,,,,,18.49079,75.44312,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,25,Daman & Diu,494,25494,Diu,,,,,20.74129,72.23549,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,25,Daman & Diu,495,25495,Daman,,,,,20.55132,72.5914,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,272,14272,Senapati,,,,,24.44521,93.17748,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,273,14273,Tamenglong,,,,,25.30559,93.59461,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,274,14274,Churachandpur,,,,,24.84041,94.4565,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,275,14275,Bishnupur,,,,,24.00302,94.31087,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,276,14276,Thoubal,,,,,24.75028,93.09584,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,277,14277,Imphal West,,,,,24.7429,93.57338,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,278,14278,Imphal East,,,,,24.97785,93.10429,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,279,14279,Ukhrul,,,,,25.21758,93.79639,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,14,Manipur,280,14280,Chandel,,,,,24.43249,93.79806,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,001,01001,Kupwara,,,,,36.07194,78.50956,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,002,01002,Badgam,,,,,35.91208,75.25742,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,003,01003,Leh(Ladakh),,,,,34.1251,75.87266,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,004,01004,Kargil,,,,,33.76925,76.73258,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,005,01005,Punch,,,,,32.76334,76.20596,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,006,01006,Rajouri,,,,,35.49931,76.06673,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,007,01007,Kathua,,,,,35.9704,76.89639,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,008,01008,Baramula,,,,,33.9682,74.52235,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,009,01009,Bandipore,,,,,35.21272,76.28951,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,010,01010,Srinagar,,,,,35.15319,75.57166,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,011,01011,Ganderbal,,,,,33.94248,76.69882,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,012,01012,Pulwama,,,,,35.2608,75.58932,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,013,01013,Shupiyan,,,,,35.08417,76.1015,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,014,01014,Anantnag,,,,,33.76104,78.39249,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,015,01015,Kulgam,,,,,35.53104,75.57718,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,016,01016,Doda,,,,,35.31361,75.01453,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,017,01017,Ramban,,,,,33.1398,74.45021,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,018,01018,Kishtwar,,,,,34.51944,77.37652,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,019,01019,Udhampur,,,,,33.88035,77.81053,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,020,01020,Reasi,,,,,32.90254,77.26871,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,021,01021,Jammu,,,,,33.82893,78.37296,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,01,Jammu & Kashmir,022,01022,Samba,,,,,34.76829,77.40202,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,300,18300,Kokrajhar,,,,,25.36412,92.46543,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,301,18301,Dhubri,,,,,26.88116,92.90758,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,302,18302,Goalpara,,,,,24.75254,91.05129,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,303,18303,Barpeta,,,,,27.68024,90.52659,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,304,18304,Morigaon,,,,,27.30028,95.26757,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,305,18305,Nagaon,,,,,24.85354,94.90354,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,306,18306,Sonitpur,,,,,26.30128,92.9897,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,307,18307,Lakhimpur,,,,,27.03391,94.41132,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,308,18308,Dhemaji,,,,,27.03091,92.4966,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,309,18309,Tinsukia,,,,,26.24223,92.41453,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,310,18310,Dibrugarh,,,,,26.27843,91.12259,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,311,18311,Sivasagar,,,,,26.43691,90.22437,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,312,18312,Jorhat,,,,,25.92523,92.38603,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,313,18313,Golaghat,,,,,25.58271,92.98809,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,314,18314,Karbi Anglong,,,,,24.5224,93.46555,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,315,18315,Dima Hasao,,,,,24.86387,95.447,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,316,18316,Cachar,,,,,27.44447,93.10797,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,317,18317,Karimganj,,,,,27.20878,91.61824,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,318,18318,Hailakandi,,,,,25.37806,90.61778,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,319,18319,Bongaigaon,,,,,25.80521,95.16816,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,320,18320,Chirang,,,,,24.41341,94.74158,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,321,18321,Kamrup,,,,,27.20263,90.53949,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,322,18322,Kamrup Metropolitan,,,,,26.22045,90.998,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,323,18323,Nalbari,,,,,26.23007,90.38711,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,324,18324,Baksa,,,,,24.91109,90.36663,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,325,18325,Darrang,,,,,25.35118,92.86615,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,18,Assam,326,18326,Udalguri,,,,,27.06859,94.19506,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,16,Tripura,289,16289,West Tripura,,,,,24.11525,91.23619,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,16,Tripura,290,16290,South Tripura,,,,,23.08787,91.91167,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,16,Tripura,291,16291,Dhalai,,,,,23.76313,92.17039,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,16,Tripura,292,16292,North Tripura,,,,,24.04237,91.76279,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,293,17293,West Garo Hills,,,,,25.16958,91.33817,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,294,17294,East Garo Hills,,,,,25.73724,90.32318,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,295,17295,South Garo Hills,,,,,26.08279,92.05134,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,296,17296,West Khasi Hills,,,,,25.62566,90.20396,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,297,17297,Ribhoi,,,,,25.45982,90.77561,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,298,17298,East Khasi Hills,,,,,25.4943,92.52465,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,17,Meghalaya,299,17299,Jaintia Hills,,,,,25.55212,90.98403,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,090,07090,North West,,,,,28.62835,77.11125,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,091,07091,North,,,,,28.67779,76.86004,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,092,07092,North East,,,,,28.5802,77.15925,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,093,07093,East,,,,,28.75199,76.85381,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,094,07094,New Delhi,,,,,28.48096,77.09816,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,095,07095,Central,,,,,28.68283,76.92892,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,096,07096,West,,,,,28.59974,77.12253,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,097,07097,South West,,,,,28.50562,77.07959,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,07,Nct Of Delhi,098,07098,South,,,,,28.65003,77.09305,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,327,19327,Darjiling,,,,,22.08602,87.87744,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,328,19328,Jalpaiguri,,,,,22.99621,87.13589,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,329,19329,Koch Bihar,,,,,23.85899,88.50804,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,330,19330,Uttar Dinajpur,,,,,25.04157,88.8033,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,331,19331,Dakshin Dinajpur,,,,,24.43981,88.3341,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,332,19332,Maldah,,,,,23.27944,86.74118,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,333,19333,Murshidabad,,,,,25.96355,86.60373,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,334,19334,Birbhum,,,,,26.6763,88.87223,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,335,19335,Barddhaman,,,,,25.81241,88.12583,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,336,19336,Nadia,,,,,22.9707,87.73071,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,337,19337,North Twenty Four Parganas,,,,,25.92889,86.34704,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,338,19338,Hugli,,,,,24.43057,89.36545,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,339,19339,Bankura,,,,,24.35599,86.86677,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,340,19340,Puruliya,,,,,23.6277,87.9598,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,341,19341,Haora,,,,,25.86393,87.41367,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,342,19342,Kolkata,,,,,26.71764,86.37932,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,343,19343,South Twenty Four Parganas,,,,,23.67622,88.94727,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,344,19344,Paschim Medinipur,,,,,23.09857,88.09691,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,19,West Bengal,345,19345,Purba Medinipur,,,,,22.60548,87.67571,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,555,29555,Belgaum,,,,,16.89069,76.04856,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,556,29556,Bagalkot,,,,,13.6219,75.35402,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,557,29557,Bijapur,,,,,17.67227,77.60373,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,558,29558,Bidar,,,,,13.61558,77.97784,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,559,29559,Raichur,,,,,13.71924,75.82497,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,560,29560,Koppal,,,,,12.35637,76.02427,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,561,29561,Gadag,,,,,14.26011,75.68131,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,562,29562,Dharwad,,,,,14.65784,74.44396,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,563,29563,Uttara Kannada,,,,,14.40915,74.37292,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,564,29564,Haveri,,,,,15.45611,75.9154,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,565,29565,Bellary,,,,,13.83082,76.82137,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,566,29566,Chitradurga,,,,,15.42755,74.99211,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,567,29567,Davanagere,,,,,17.10487,78.16418,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,568,29568,Shimoga,,,,,14.94991,77.49741,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,569,29569,Udupi,,,,,15.45836,77.14752,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,570,29570,Chikmagalur,,,,,12.37638,74.96286,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,571,29571,Tumkur,,,,,16.60014,75.53838,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,572,29572,Bangalore,,,,,13.8071,77.62173,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,573,29573,Mandya,,,,,13.82704,77.80818,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,574,29574,Hassan,,,,,16.56667,75.88639,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,575,29575,Dakshina Kannada,,,,,16.88019,76.84456,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,576,29576,Kodagu,,,,,16.57865,76.67411,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,577,29577,Mysore,,,,,15.12297,77.38437,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,578,29578,Chamarajanagar,,,,,17.62238,77.37944,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,579,29579,Gulbarga,,,,,17.29634,75.89095,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,580,29580,Yadgir,,,,,12.21935,75.17216,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,581,29581,Kolar,,,,,13.17236,75.97225,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,582,29582,Chikkaballapura,,,,,14.43039,76.90947,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,583,29583,Bangalore Rural,,,,,16.41743,77.61688,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,29,Karnataka,584,29584,Ramanagara,,,,,12.24353,78.11292,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,11,Sikkim,241,11241,North  District,,,,,27.24697,88.45824,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,11,Sikkim,242,11242,West District,,,,,27.96715,88.6733,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,11,Sikkim,243,11243,South District,,,,,27.63665,88.07273,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,11,Sikkim,244,11244,East District,,,,,27.937,88.79068,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,418,23418,Sheopur,,,,,24.5569,78.00863,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,419,23419,Morena,,,,,21.68403,75.37165,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,420,23420,Bhind,,,,,24.37003,79.04115,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,421,23421,Gwalior,,,,,24.521,79.40469,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,422,23422,Datia,,,,,23.7683,79.22085,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,423,23423,Shivpuri,,,,,22.67731,78.92506,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,424,23424,Tikamgarh,,,,,23.19687,77.90953,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,425,23425,Chhatarpur,,,,,24.50562,77.26667,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,426,23426,Panna,,,,,24.49877,80.50855,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,427,23427,Sagar,,,,,24.14718,79.79543,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,428,23428,Damoh,,,,,25.69805,79.74307,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,429,23429,Satna,,,,,24.59615,77.77559,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,430,23430,Rewa,,,,,23.21884,76.91978,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,431,23431,Umaria,,,,,21.82079,77.761,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,432,23432,Neemuch,,,,,23.31882,81.42875,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,433,23433,Mandsaur,,,,,25.94368,80.71563,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,434,23434,Ratlam,,,,,21.94558,80.36334,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,435,23435,Ujjain,,,,,23.18186,81.00801,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,436,23436,Shajapur,,,,,23.21933,79.4736,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,437,23437,Dewas,,,,,25.05551,78.60248,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,438,23438,Dhar,,,,,21.904,79.23162,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,439,23439,Indore,,,,,25.42929,75.92368,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,440,23440,Khargone (West Nimar),,,,,22.95636,78.43771,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,441,23441,Barwani,,,,,24.65888,80.16227,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,442,23442,Rajgarh,,,,,21.7362,79.89194,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,443,23443,Vidisha,,,,,25.89794,80.26064,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,444,23444,Bhopal,,,,,21.8008,78.56547,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,445,23445,Sehore,,,,,23.14973,78.39049,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,446,23446,Raisen,,,,,21.76708,77.69582,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,447,23447,Betul,,,,,25.85444,77.94873,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,448,23448,Harda,,,,,25.90989,81.19097,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,449,23449,Hoshangabad,,,,,25.08196,76.8275,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,450,23450,Katni,,,,,24.84784,80.5415,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,451,23451,Jabalpur,,,,,23.00689,76.47611,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,452,23452,Narsimhapur,,,,,25.41169,74.83724,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,453,23453,Dindori,,,,,24.2634,80.54365,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,454,23454,Mandla,,,,,26.0814,77.56472,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,455,23455,Chhindwara,,,,,22.70467,75.99055,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,456,23456,Seoni,,,,,23.70179,79.8888,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,457,23457,Balaghat,,,,,26.14565,77.53116,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,458,23458,Guna,,,,,24.14984,76.50851,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,459,23459,Ashoknagar,,,,,23.32343,78.22023,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,460,23460,Shahdol,,,,,24.93017,76.55055,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,461,23461,Anuppur,,,,,22.9308,78.81,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,462,23462,Sidhi,,,,,23.24419,78.08892,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,463,23463,Singrauli,,,,,21.75191,77.53407,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,464,23464,Jhabua,,,,,23.6567,76.75809,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,465,23465,Alirajpur,,,,,22.10349,76.01491,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,466,23466,Khandwa (East Nimar),,,,,23.83703,79.15517,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,23,Madhya Pradesh,467,23467,Burhanpur,,,,,21.75321,75.38573,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,069,06069,Panchkula,,,,,30.63053,75.48969,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,070,06070,Ambala,,,,,29.12751,77.26603,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,071,06071,Yamunanagar,,,,,28.50061,76.13578,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,072,06072,Kurukshetra,,,,,29.02158,75.05648,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,073,06073,Kaithal,,,,,29.64457,75.1871,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,074,06074,Karnal,,,,,28.10833,76.29097,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,075,06075,Panipat,,,,,28.35795,75.22255,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,076,06076,Sonipat,,,,,29.71721,76.57125,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,077,06077,Jind,,,,,28.43149,76.79659,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,078,06078,Fatehabad,,,,,30.23106,75.45502,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,079,06079,Sirsa,,,,,30.54162,76.98156,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,080,06080,Hisar,,,,,28.39736,75.59952,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,081,06081,Bhiwani,,,,,29.28688,76.41011,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,082,06082,Rohtak,,,,,30.06777,76.18005,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,083,06083,Jhajjar,,,,,28.14961,74.90853,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,084,06084,Mahendragarh,,,,,28.20258,76.00985,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,085,06085,Rewari,,,,,28.13417,76.05106,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,086,06086,Gurgaon,,,,,30.57459,76.66183,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,087,06087,Mewat,,,,,29.05094,74.78705,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,088,06088,Faridabad,,,,,30.54328,77.27753,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,06,Haryana,089,06089,Palwal,,,,,30.24316,75.00917,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,35,Andaman & Nicobar Islands,638,35638,Nicobars,,,,,10.03478,93.10968,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,35,Andaman & Nicobar Islands,639,35639,North  & Middle Andaman,,,,,7.71209,92.9695,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,35,Andaman & Nicobar Islands,640,35640,South Andaman,,,,,11.78893,92.55008,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,30,Goa,585,30585,North Goa,,,,,15.36147,74.02589,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,30,Goa,586,30586,South Goa,,,,,15.03121,74.23764,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,26,Dadra & Nagar Haveli,496,26496,Dadra & Nagar Haveli,,,,,20.36698,72.86206,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,31,Lakshadweep,587,31587,Lakshadweep,,,,,11.30039,73.10621,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,532,28532,Adilabad,,,,,18.20582,79.50517,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,533,28533,Nizamabad,,,,,17.91906,80.14241,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,534,28534,Karimnagar,,,,,18.05441,80.11093,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,535,28535,Medak,,,,,19.23917,83.97143,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,536,28536,Hyderabad,,,,,18.85454,81.77699,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,537,28537,Rangareddy,,,,,17.95803,78.27779,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,538,28538,Mahbubnagar,,,,,13.34036,80.08657,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,539,28539,Nalgonda,,,,,18.93458,78.16764,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,540,28540,Warangal,,,,,14.87872,81.7243,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,541,28541,Khammam,,,,,18.28257,80.91984,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,542,28542,Srikakulam,,,,,17.43176,80.7801,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,543,28543,Vizianagaram,,,,,17.65488,83.98321,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,544,28544,Visakhapatnam,,,,,15.30653,80.07505,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,545,28545,East Godavari,,,,,18.46155,78.31357,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,546,28546,West Godavari,,,,,13.25752,81.30773,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,547,28547,Krishna,,,,,15.03768,78.24043,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,548,28548,Guntur,,,,,13.78126,81.71456,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,549,28549,Prakasam,,,,,14.71919,83.05561,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,550,28550,Sri Potti Sriramulu Nellore,,,,,16.32447,78.38167,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,551,28551,Y.S.R.,,,,,14.38741,80.43368,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,552,28552,Kurnool,,,,,17.60091,81.67681,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,553,28553,Anantapur,,,,,18.75995,80.70589,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,28,Andhra Pradesh,554,28554,Chittoor,,,,,15.33369,83.23493,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,056,05056,Uttarkashi,,,,,29.93155,79.32658,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,057,05057,Chamoli,,,,,29.2572,79.10839,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,058,05058,Rudraprayag,,,,,30.6219,78.90977,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,059,05059,Tehri Garhwal,,,,,29.87887,80.65852,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,060,05060,Dehradun,,,,,30.91012,78.42806,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,061,05061,Garhwal,,,,,30.32871,79.27433,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,062,05062,Pithoragarh,,,,,30.74208,79.46966,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,063,05063,Bageshwar,,,,,29.76412,78.27956,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,065,05065,Champawat,,,,,28.96678,79.57879,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,066,05066,Nainital,,,,,30.60205,78.01374,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,067,05067,Udham Singh Nagar,,,,,31.20146,77.88309,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,05,Uttarakhand,068,05068,Hardwar,,,,,30.27423,78.0112,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,370,21370,Bargarh,,,,,20.33322,81.81482,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,371,21371,Jharsuguda,,,,,22.20772,83.39432,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,372,21372,Sambalpur,,,,,20.15068,82.44722,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,373,21373,Debagarh,,,,,21.68798,85.41926,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,374,21374,Sundargarh,,,,,19.43551,82.93778,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,375,21375,Kendujhar,,,,,18.80819,86.8121,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,376,21376,Mayurbhanj,,,,,18.63485,82.26279,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,377,21377,Baleshwar,,,,,19.5424,83.877,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,378,21378,Bhadrak,,,,,21.22811,83.16227,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,379,21379,Kendrapara,,,,,18.91944,84.35142,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,380,21380,Jagatsinghapur,,,,,20.48536,84.81526,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,381,21381,Cuttack,,,,,21.34269,86.13697,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,382,21382,Jajapur,,,,,18.6257,86.09782,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,383,21383,Dhenkanal,,,,,20.836,86.08577,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,384,21384,Anugul,,,,,20.17137,84.87269,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,385,21385,Nayagarh,,,,,18.50795,85.48424,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,386,21386,Khordha,,,,,19.19966,83.04814,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,387,21387,Puri,,,,,20.21986,84.13848,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,388,21388,Ganjam,,,,,20.54749,84.52983,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,389,21389,Gajapati,,,,,21.24401,82.75669,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,390,21390,Kandhamal,,,,,21.05848,86.01218,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,391,21391,Baudh,,,,,20.56835,84.58915,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,392,21392,Subarnapur,,,,,19.44793,84.79276,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,393,21393,Balangir,,,,,18.79878,82.21743,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,394,21394,Nuapada,,,,,21.36866,85.49607,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,395,21395,Kalahandi,,,,,21.45662,84.53928,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,396,21396,Rayagada,,,,,21.84514,86.26297,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,397,21397,Nabarangapur,,,,,18.95755,84.36093,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,398,21398,Koraput,,,,,18.45373,83.53834,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,21,Odisha,399,21399,Malkangiri,,,,,18.44422,84.3537,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,261,13261,Mon,,,,,25.86564,93.95398,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,262,13262,Mokokchung,,,,,26.52414,93.61679,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,263,13263,Zunheboto,,,,,26.59124,94.36766,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,264,13264,Wokha,,,,,25.62601,94.01515,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,265,13265,Dimapur,,,,,26.14821,94.52378,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,266,13266,Phek,,,,,26.76999,94.95063,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,267,13267,Tuensang,,,,,25.78537,94.62057,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,268,13268,Longleng,,,,,26.74248,94.22427,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,269,13269,Kiphire,,,,,25.8458,93.54474,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,270,13270,Kohima,,,,,26.22526,94.00002,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011
+IN,13,Nagaland,271,13271,Peren,,,,,26.23909,95.12327,derived,real,"Census of India 2011, Primary Census Abstract (via data.gov.in)",2011

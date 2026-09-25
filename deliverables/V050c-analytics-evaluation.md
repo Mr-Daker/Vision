@@ -10,7 +10,7 @@ The distinction matters for reading precision. Only 162 of 2,508 district-sector
 
 ## Evaluation integrity
 
-- **Leakage:** No ground-truth column reached the analytics. The five analysis files are executed through local.run_file, which raises PermissionError if a query names an evaluation table; labels are read only after every analysis has produced its output, and joined in Python. In BigQuery the same separation is enforced by dataset permissions: the analytics service account has no read grant on voice_eval.
+- **Leakage:** No ground-truth column reached the analytics. The five analysis files are executed through local.run_file, which raises PermissionError if a query names an evaluation table; labels are read only after every analysis has produced its output, and joined in Python. BigQuery stores labels in the separate voice_eval dataset, and the query guard refuses to bind it into an analysis. A live IAM-denial claim requires running under a dedicated analytics identity that has voice_analytics access and no voice_eval access; personal ADC commonly has project-level access to both and is not evidence of that production permission boundary.
 - **Rule freeze:** Rules frozen 2026-09-22T14:25:46Z and unchanged since (6 SQL files verified by SHA-256).
 - **Split:** deterministic SHA-256 of cell identity, salt `voice-eval-split-v1`, stratified by scenario. 1755 development / 753 hidden of 2508 planted cells.
 - **Universe:** planted cells from the other split are excluded entirely rather than scored as negatives, so a development positive cannot manufacture a false positive on the hidden run.
@@ -72,6 +72,19 @@ Recall@K is bounded by K divided by the number of relevant cells; the ceiling co
 **The development figures are not a second result.** They are reported only so the generalisation gap is visible. Where hidden performance is materially below development performance, the thresholds were fitted to the development cells and the hidden figure is the one that counts.
 
 **Execution gap is reported but should not be quoted.** Only nine planted Scenario C cells have enough reports on both sides of a completion date for a before/after comparison, and the hidden portion of those is smaller still. Its thresholds were deliberately not tuned, and its interval is too wide to support any claim about the method. It is shown for completeness, not as evidence.
+
+## The limiting factor is statistical power, not the method
+
+Almost every figure above carries an interval too wide to be quoted as a rate. That is not a failure of the analyses — it is the hidden split having between three and eight examples per scenario. With five hidden Scenario D cells, recall can only take the values 0, 0.2, 0.4, 0.6, 0.8 or 1.0, and the 95% interval around any of them spans most of the range. No amount of method improvement fixes this; only more labelled examples do.
+
+The generalisation gap itself is reassuring and is the useful result here. Unmet need moves from F1 0.54 on development to 0.46 on hidden, new investment gap from 0.47 to 0.41 — a modest drop consistent with mild threshold fitting rather than rules that only worked on the cells that produced them.
+
+**Two ways to get power, in order of preference:**
+
+1. **Plant more scenarios.** `PLANT_COUNTS` in `pipelines/voice_data/scenarios.py` currently plants 162 cells of 2,508. Raising it to ~600 would give roughly 60 hidden cells per scenario and bring most intervals inside the reportable width. The generator supports this today; it costs one regeneration.
+2. **Repeated stratified k-fold** over the planted cells, reporting the distribution across folds rather than one hidden number. This uses every labelled cell for evaluation without reusing any for tuning, at the cost of a more complex claim.
+
+Until one of those is done, the honest summary is: the rules appear to generalise, and the hidden sample is too small to say by how much.
 
 ## Known weaknesses
 

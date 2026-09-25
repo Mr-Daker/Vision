@@ -110,6 +110,13 @@ export class SupervisorApiClient {
     return result;
   }
 
+  durability(jurisdictionId: string): Promise<ApiResult<unknown>> {
+    return this.send(
+      "GET",
+      `/v1/supervisor/durability?jurisdiction_id=${encodeURIComponent(jurisdictionId)}`,
+    );
+  }
+
   queues(jurisdictionId: string): Promise<ApiResult<unknown>> {
     return this.send(
       "GET",

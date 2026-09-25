@@ -154,7 +154,7 @@ const candidateCard = (candidate: ComparisonCandidateView): HTMLElement => {
     const group = element("div");
     const value =
       factor.contribution === null
-        ? `not counted — ${factor.status.replace(/_/g, " ")}`
+        ? `not counted: ${factor.status.replace(/_/g, " ")}`
         : `${String(factor.contribution)} at weight ${String(factor.appliedWeight)}`;
     group.append(
       element("dt", undefined, factor.factor.replace(/_/g, " ")),
@@ -295,7 +295,7 @@ const render = (data: ComparisonPayload): void => {
     `${String(data.candidateCount)} open report(s) ordered at ${new Date(data.asOf).toLocaleString("en-IN")}` +
     (data.exhaustive
       ? ""
-      : " — the candidate limit was reached, so this is not every open report") +
+      : " (the candidate limit was reached, so this is not every open report)") +
     ` · ${data.note}`;
 
   const scenarioSelect = el<HTMLSelectElement>("scenario-select");

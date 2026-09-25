@@ -46,6 +46,9 @@ export type SupervisorIssueRow = {
     readonly reason: string;
     readonly recordedAt: string;
   };
+  /** Absent only when the issue has no representative location yet (V0xx). */
+  readonly latitude?: number;
+  readonly longitude?: number;
 };
 
 export type SupervisorQueueView = {
@@ -181,6 +184,12 @@ export const toSupervisorQueueView = (payload: unknown): SupervisorQueueView | u
               recordedAt: String(override["recorded_at"]),
             },
           }),
+      ...(optionalNumber(item["latitude"]) === undefined
+        ? {}
+        : { latitude: Number(item["latitude"]) }),
+      ...(optionalNumber(item["longitude"]) === undefined
+        ? {}
+        : { longitude: Number(item["longitude"]) }),
     });
   }
 

@@ -17,6 +17,7 @@
  */
 
 import type { Translate } from "./i18n.ts";
+import type { StringKey } from "./locales/strings.ts";
 
 export type ReportPayload = {
   readonly submission_id: string;
@@ -35,6 +36,7 @@ export type ReportRow = {
   readonly submittedAt: string;
   readonly observedAt: string;
   readonly statusLabel: string;
+  readonly issueStatus: string | undefined;
   readonly reference: string | undefined;
   readonly hasIssue: boolean;
   readonly evidenceCount: number;
@@ -55,11 +57,30 @@ export const toReportRows = (payload: readonly ReportPayload[]): readonly Report
     submittedAt: item.submitted_at,
     observedAt: item.observed_at,
     statusLabel: item.status_label,
+    issueStatus: item.issue_status ?? undefined,
     reference: item.issue_public_reference ?? undefined,
     hasIssue: item.issue_public_reference !== null,
     evidenceCount: item.evidence_count,
     awaitingAnswerForIssueId: item.awaiting_answer_for_issue_id ?? undefined,
   }));
+
+/** Keep citizen history in the chosen language; an unknown future state keeps
+ * the server's label instead of being guessed into the wrong lifecycle step. */
+export const reportStatusKey = (issueStatus: string | undefined): StringKey | undefined => {
+  if (issueStatus === undefined) return "tracking.status_received";
+  const keys: Readonly<Record<string, StringKey>> = {
+    created: "tracking.status_created",
+    routing_review: "tracking.status_routing_review",
+    routed_internal: "tracking.status_routed_internal",
+    agency_ack_received: "tracking.status_agency_ack_received",
+    work_planned: "tracking.status_work_planned",
+    resolution_claimed: "tracking.status_resolution_claimed",
+    resolution_confirmed: "tracking.status_resolution_confirmed",
+    resolution_disputed: "tracking.status_resolution_disputed",
+    reopened: "tracking.status_reopened",
+  };
+  return keys[issueStatus];
+};
 
 export type DiscoveredPayload = {
   readonly public_reference: string;
