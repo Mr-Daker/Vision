@@ -12,7 +12,7 @@ Vision works the other way round. Reports of the same problem are grouped into o
 
 Built for **GDG India · Code for Communities**, Digital Public Infrastructure & Governance track.
 
-**Live demo:** <https://vision-api-716180242189.asia-south1.run.app> on Cloud Run in Mumbai. It runs an earlier build: the two-door sign-in and the report roadmap described below are not deployed there yet.
+**Live demo:** <https://vision-api-716180242189.asia-south1.run.app> on Cloud Run in Mumbai, running this build. Choose **Residents** to report and follow a problem, or **Staff** for the department, reviewer and supervisor workspaces.
 
 > **This is a demonstration.** Identity, departments and recipients are simulated, and nothing sent from it reaches a government system. Every person, place, report and figure in the demo data is synthetic unless this page says otherwise, and the screens say so wherever it matters.
 
