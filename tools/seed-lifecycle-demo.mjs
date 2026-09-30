@@ -27,6 +27,7 @@ import pg from "pg";
 const DATABASE_URL =
   process.env.DATABASE_URL ?? "postgresql://vision:vision_local_dev_only@127.0.0.1:5432/vision_dev";
 const DAY = 86_400_000;
+const PROFILE_ID = process.env.JURISDICTION_PROFILE_ID ?? "demo-district-a";
 
 const stableUuid = (name) => {
   const hex = createHash("sha256")
@@ -171,19 +172,41 @@ try {
       "no department staff account exists; sign in as department staff once, then rerun",
     );
 
-  const directoryFor = async (category) => {
-    const prefix = {
-      sanitation: "sanitation.",
-      water_supply: "water.",
-      electrical: "electrical.",
-      structural: "structure.",
-    }[category];
+  // The smallest area of this deployment that contains the point. Staff and
+  // supervisors only see issues inside the areas they are responsible for, so
+  // an issue with no area is visible to the resident and to nobody else.
+  const jurisdictionAt = async (lon, lat) => {
     const { rows } = await client.query(
-      `select responsibility_id, department_id from responsibility_directory
-        where category like $1 order by category limit 1`,
-      [`${prefix}%`],
+      `select jurisdiction_id, internal_code from jurisdiction
+        where jurisdiction_profile_id = $1
+          and effective_from <= now() and (effective_to is null or effective_to > now())
+          and ST_Covers(boundary, ST_SetSRID(ST_MakePoint($2,$3),4326)::geography)
+        order by ST_Area(boundary) asc limit 1`,
+      [PROFILE_ID, lon, lat],
     );
-    if (rows[0] === undefined) throw new Error(`no routing directory entry for '${category}'`);
+    if (rows[0] === undefined) {
+      throw new Error(
+        `no area of '${PROFILE_ID}' contains ${lat.toFixed(4)}, ${lon.toFixed(4)}; ` +
+          "the resident's latest report must be inside the demonstration district",
+      );
+    }
+    return rows[0];
+  };
+
+  // The department the worker itself would pick: the area's entry for the
+  // exact category, falling back to a sub-category only when there is none.
+  const directoryFor = async (category, jurisdictionId) => {
+    const { rows } = await client.query(
+      `select responsibility_id, department_id, department_label, directory_version
+         from responsibility_directory
+        where jurisdiction_id = $1 and (category = $2 or category like $3)
+          and effective_from <= now() and (effective_to is null or effective_to > now())
+        order by (category = $2) desc, category limit 1`,
+      [jurisdictionId, category, `${category.split("_")[0].replace("structural", "structure")}.%`],
+    );
+    if (rows[0] === undefined) {
+      throw new Error(`no routing directory entry for '${category}' in this area`);
+    }
     return rows[0];
   };
 
@@ -327,11 +350,13 @@ try {
       disputed: "resolution_disputed",
       reopened: "reopened",
     }[c.stage];
+    const area = await jurisdictionAt(lon, lat);
     await client.query(
       `insert into canonical_issue
-         (issue_id, public_reference, category, current_status, opened_at, representative_location, last_evidence_at)
-       values ($1,$2,$3,$4,$5, ST_SetSRID(ST_MakePoint($6,$7),4326)::geography, $5)`,
-      [issueId, reference, c.category, status, at(groupedMs), lon, lat],
+         (issue_id, public_reference, category, current_status, opened_at, representative_location,
+          last_evidence_at, jurisdiction_id)
+       values ($1,$2,$3,$4,$5, ST_SetSRID(ST_MakePoint($6,$7),4326)::geography, $5, $8)`,
+      [issueId, reference, c.category, status, at(groupedMs), lon, lat, area.jurisdiction_id],
     );
     await client.query(
       `insert into issue_evidence_link (issue_evidence_link_id, evidence_id, canonical_issue_id, effective_from)
@@ -357,9 +382,15 @@ try {
 
     if (c.stage === "routing_review") {
       await client.query(
-        `insert into routing_decision (routing_id, issue_id, directory_version, category, recipient_mode, outcome, reason, decided_at)
-         values ($1,$2,'demo-directory.v1',$3,'none','unknown_owner_review','no responsible department for this location in the directory',$4)`,
-        [stableUuid(`routing:${c.key}`), issueId, c.category, at(groupedMs + 60_000)],
+        `insert into routing_decision (routing_id, issue_id, directory_version, category, jurisdiction_id, recipient_mode, outcome, reason, decided_at)
+         values ($1,$2,'demo-routing.v1',$3,$4,'none','unknown_owner_review','no responsible department for this location in the directory',$5)`,
+        [
+          stableUuid(`routing:${c.key}`),
+          issueId,
+          c.category,
+          area.jurisdiction_id,
+          at(groupedMs + 60_000),
+        ],
       );
       await event(
         "canonical_issue",
@@ -372,18 +403,21 @@ try {
       continue;
     }
 
-    const directory = await directoryFor(c.category);
+    const directory = await directoryFor(c.category, area.jurisdiction_id);
     await client.query(
       `insert into routing_decision
-         (routing_id, issue_id, directory_version, category, recipient_mode, outcome, reason,
-          decided_at, department_id, responsibility_id)
-       values ($1,$2,'demo-directory.v1',$3,'simulated','routed','routed by the synthetic lifecycle seed',$4,$5,$6)`,
+         (routing_id, issue_id, directory_version, category, jurisdiction_id, recipient_mode,
+          outcome, reason, decided_at, department_id, department_label, responsibility_id)
+       values ($1,$2,$3,$4,$5,'simulated','routed','routed by the synthetic lifecycle seed',$6,$7,$8,$9)`,
       [
         stableUuid(`routing:${c.key}`),
         issueId,
+        directory.directory_version,
         c.category,
+        area.jurisdiction_id,
         at(routedMs),
         directory.department_id,
+        directory.department_label,
         directory.responsibility_id,
       ],
     );
