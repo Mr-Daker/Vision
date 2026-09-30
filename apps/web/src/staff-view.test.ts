@@ -7,6 +7,7 @@ import {
   daysWaitingLabel,
   resolutionStageLabel,
   resolutionStageOf,
+  scopeToOpen,
   toStaffInboxView,
   toStaffWorkspaces,
 } from "./staff-view.ts";
@@ -262,4 +263,20 @@ test("V035: with no policy loaded, no confirmation bar is invented", () => {
   // Silent rather than guessing "1 of 1": a staff member reading a bar must be
   // reading a policy somebody configured.
   assert.equal(confirmationProgressLabel(item), undefined);
+});
+
+test("the inbox opens on the scope that has work, not on whichever comes first", () => {
+  // Eight scopes (a ward and a department each) and the first happened to be
+  // empty, so the inbox opened saying nothing was waiting while another scope
+  // held fourteen issues.
+  assert.equal(scopeToOpen([0, 0, 14, 2], 0), 2);
+  assert.equal(scopeToOpen([0, 3, 14, 2], 0), 2, "the busiest, not the first non-empty");
+  assert.equal(scopeToOpen([5, 0, 14], 0), 0, "a scope that already has work is left alone");
+  assert.equal(scopeToOpen([0, 0, 0], 1), 1, "nowhere has work: stay where the person is");
+  assert.equal(
+    scopeToOpen([undefined, 4, undefined], 0),
+    1,
+    "a scope that failed to load is skipped",
+  );
+  assert.equal(scopeToOpen([], 0), 0);
 });

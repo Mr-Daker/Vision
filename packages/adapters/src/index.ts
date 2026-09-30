@@ -61,3 +61,4 @@ export * from "./integrity.ts";
 export * from "./performance.ts";
 export * from "./observability.ts";
 export * from "./resolution-durability.ts";
+export * from "./report-roadmap.ts";

@@ -28,6 +28,8 @@ const DATABASE_URL =
 let client: pg.Client;
 const issues: string[] = [];
 const assets: string[] = [];
+const participants: string[] = [];
+const submissions: string[] = [];
 let jurisdictionId: string;
 
 /** A fixed reference point; every offset below is relative to it. */
@@ -58,6 +60,19 @@ after(async () => {
   if (issues.length > 0) {
     await client.query("delete from candidate_query_log where submission_id = any($1::uuid[])", [
       issues,
+    ]);
+    await client.query(
+      "delete from issue_evidence_link where canonical_issue_id = any($1::uuid[])",
+      [issues],
+    );
+    await client.query("delete from evidence_item where submission_id = any($1::uuid[])", [
+      submissions,
+    ]);
+    await client.query("delete from submission where submission_id = any($1::uuid[])", [
+      submissions,
+    ]);
+    await client.query("delete from participant where participant_id = any($1::uuid[])", [
+      participants,
     ]);
     await client.query("delete from canonical_issue where issue_id = any($1::uuid[])", [issues]);
   }
@@ -92,7 +107,34 @@ type IssueSpec = {
   readonly accuracyMetres?: number;
 };
 
-const newIssue = async (spec: IssueSpec): Promise<string> => {
+/** The report behind an issue. Production never creates one without it. */
+const attachReport = async (issueId: string, when: string): Promise<void> => {
+  const participantId = randomUUID();
+  const submissionId = randomUUID();
+  const evidenceId = randomUUID();
+  await client.query("insert into participant (participant_id) values ($1)", [participantId]);
+  await client.query(
+    `insert into submission
+       (submission_id, participant_id, observed_at, server_received_at, interface_locale,
+        locale_pack_version, idempotency_key, taxonomy_version)
+     values ($1,$2,$3::timestamptz,$3::timestamptz,'en-IN','test.v1',$4,'test.v1')`,
+    [submissionId, participantId, when, `cand-${submissionId}`],
+  );
+  await client.query(
+    `insert into evidence_item (evidence_id, submission_id, media_type, content_text, ingested_at)
+     values ($1,$2,'text','a test report',$3::timestamptz)`,
+    [evidenceId, submissionId, when],
+  );
+  await client.query(
+    `insert into issue_evidence_link (issue_evidence_link_id, evidence_id, canonical_issue_id, effective_from)
+     values ($1,$2,$3,$4::timestamptz)`,
+    [randomUUID(), evidenceId, issueId, when],
+  );
+  participants.push(participantId);
+  submissions.push(submissionId);
+};
+
+const newIssue = async (spec: IssueSpec & { readonly bare?: boolean }): Promise<string> => {
   const issueId = randomUUID();
   const at = offsetMetres(spec.metresEast);
   await client.query(
@@ -113,6 +155,12 @@ const newIssue = async (spec: IssueSpec): Promise<string> => {
     ],
   );
   issues.push(issueId);
+  if (spec.bare !== true) {
+    await attachReport(
+      issueId,
+      new Date(Date.now() - (spec.openedHoursAgo ?? 1) * 3_600_000).toISOString(),
+    );
+  }
   return issueId;
 };
 
@@ -141,6 +189,20 @@ test("V026: an issue inside the radius is returned with its distance in metres",
     (found?.distanceMetres ?? 0) > 35 && (found?.distanceMetres ?? 0) < 45,
     `expected about 40 m, got ${String(found?.distanceMetres)}`,
   );
+});
+
+test("an issue with no live report behind it is never offered as a candidate", async () => {
+  // Test runs and interrupted cleanups leave issues whose reports are gone.
+  // They sit at their old coordinates, rank first because they are nearest,
+  // and a resident was asked "is this the same problem?" about an issue with
+  // nothing in it.
+  const ghost = await newIssue({ metresEast: 0, bare: true });
+  const real = await newIssue({ metresEast: 40 });
+
+  const result = await retrieveCandidates(client, query());
+  const ids = result.candidates.map((candidate) => candidate.issueId);
+  assert.ok(ids.includes(real), "an issue with a report is still found");
+  assert.equal(ids.includes(ghost), false, "an issue with no report is not");
 });
 
 test("V026: an issue well outside the radius is not returned", async () => {

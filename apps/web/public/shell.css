@@ -1,0 +1,424 @@
+/* ============================================================
+   The sidebar shell (role dashboards design, 2026-09-29).
+
+   Loaded last on every dashboard — the resident app and the five
+   operator pages — so it can set the shared frame and the Signal
+   headline style over whatever each page's own stylesheet does.
+
+   Desktop (60rem and up): a persistent 16.25rem sidebar beside the
+   page. Narrower: a top bar with a menu button, and the sidebar is a
+   drawer that slides in from the left. `shell.ts` keeps the drawer's
+   state and its focus rules; this file only draws them.
+
+   The dot is the motif. The headline face is a dot matrix, so the
+   ground is a faint dot grid, the menu icon is a 3×3 grid of dots,
+   and the current item is marked with a dot rather than a bar.
+   ============================================================ */
+
+.shell [hidden] {
+  display: none !important;
+}
+
+/* One ground for every dashboard, replacing the per-page atmospheres
+   (graticules, waves) that made each screen read as its own product. */
+body:has(.shell) {
+  background-color: var(--sg-page);
+  background-image:
+    radial-gradient(
+      64rem 42rem at 0% 0%,
+      color-mix(in srgb, var(--sg-accent) 9%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(color-mix(in srgb, var(--sg-ink) 8%, transparent) 1px, transparent 1.3px);
+  background-size:
+    auto,
+    22px 22px;
+  background-attachment: fixed;
+  color: var(--sg-ink);
+}
+
+body:has(.shell)::before,
+body:has(.shell)::after {
+  content: none;
+}
+
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.shell-main {
+  min-width: 0;
+}
+
+/* ── Headline type ─────────────────────────────────────────── */
+
+.shell-main h1 {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: clamp(var(--sg-text-lg), 1.1rem + 2.2vw, var(--sg-text-xl));
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  color: var(--sg-ink);
+  text-wrap: balance;
+}
+
+.shell-main :is(h2, h3) {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+
+.shell-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.5rem 0.875rem 1.25rem;
+  background: var(--sg-sidebar);
+  border-right: 1px solid var(--sg-line);
+  font-family: var(--font-sans);
+}
+
+.shell-wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  color: var(--sg-ink);
+  font-family: var(--font-headline);
+  font-size: var(--sg-text-lg);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.shell-role {
+  margin: 0.25rem 0.75rem 1.25rem;
+  color: var(--sg-accent-text);
+  font-size: var(--sg-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shell-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shell-group {
+  margin: 1.25rem 0.75rem 0.375rem;
+  color: var(--sg-ink-dim);
+  font-size: var(--sg-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shell-group:first-child {
+  margin-top: 0;
+}
+
+.shell-link,
+.shell-quiet,
+.shell-signout {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: var(--sg-ink-muted);
+  font: 500 0.9375rem/1.3 var(--font-sans);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.shell-link::before {
+  content: "";
+  flex: none;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.shell-link:hover,
+.shell-quiet:hover,
+.shell-signout:hover {
+  background: color-mix(in srgb, var(--sg-ink) 6%, transparent);
+  color: var(--sg-ink);
+}
+
+.shell-link[aria-current] {
+  background: var(--sg-accent-soft);
+  color: var(--sg-accent-text);
+}
+
+.shell-link[aria-current]::before {
+  opacity: 1;
+  transform: scale(1.35);
+}
+
+/* A nested list under one option (the supervisor's queues), with counts. */
+.shell-subnav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0.125rem 0 0.25rem;
+  padding: 0 0 0 0.875rem;
+  list-style: none;
+}
+
+.shell-sublink {
+  min-height: 2.5rem;
+  font-size: var(--sg-text-sm);
+}
+
+.shell-link .shell-count {
+  margin-left: auto;
+  color: var(--sg-ink-dim);
+  font-size: var(--sg-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.shell-link[aria-current] .shell-count {
+  color: var(--sg-accent-text);
+}
+
+.shell-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sg-line);
+}
+
+.shell-account {
+  margin: 0 0.75rem 0.5rem;
+  color: var(--sg-ink-muted);
+  font-size: var(--sg-text-sm);
+  line-height: 1.4;
+}
+
+.shell-note {
+  margin: 0 0.75rem 0.5rem;
+  color: var(--sg-ink-dim);
+  font-size: var(--sg-text-xs);
+  line-height: 1.45;
+}
+
+.shell-account:empty {
+  display: none;
+}
+
+.shell-footer .language-label {
+  margin: 0.25rem 0.75rem 0;
+  color: var(--sg-ink-dim);
+  font-size: var(--sg-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shell-footer .language-select {
+  margin: 0.25rem 0.75rem 0.5rem;
+  width: calc(100% - 1.5rem);
+}
+
+:is(.shell-wordmark, .shell-link, .shell-quiet, .shell-signout, .shell-menu):focus-visible {
+  outline: 3px solid var(--sg-focus);
+  outline-offset: 2px;
+}
+
+/* ── Top bar (phone and tablet) ────────────────────────────── */
+
+.shell-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: color-mix(in srgb, var(--sg-page) 86%, transparent);
+  border-bottom: 1px solid var(--sg-line);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.shell-bar .shell-wordmark {
+  font-size: 1.75rem;
+  padding: 0 0.25rem;
+}
+
+.shell-menu {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--sg-line);
+  border-radius: 0.75rem;
+  background: var(--sg-panel);
+  color: var(--sg-ink);
+  cursor: pointer;
+}
+
+/* A 3×3 grid of dots: the headline face's own unit, as the menu glyph. */
+.shell-menu-icon {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  background: radial-gradient(circle, currentColor 1.6px, transparent 2px) 0 0 / 6px 6px;
+}
+
+/* Drawn, not a glyph: × in the dot-matrix face is a smudge. */
+.shell-close {
+  display: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--sg-line);
+  border-radius: 0.75rem;
+  background: var(--sg-panel);
+  color: var(--sg-ink);
+  cursor: pointer;
+}
+
+.shell-close-icon {
+  position: relative;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.shell-close-icon::before,
+.shell-close-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.shell-close-icon::after {
+  transform: rotate(-45deg);
+}
+
+.shell-close:focus-visible {
+  outline: 3px solid var(--sg-focus);
+  outline-offset: 2px;
+}
+
+.shell-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgb(6 5 12 / 0.55);
+}
+
+@media (max-width: 59.99rem) {
+  /* The bar already carries the wordmark; in the drawer its place is the
+     close control, level with the menu button that opened it. */
+  .shell-sidebar > .shell-wordmark {
+    display: none;
+  }
+
+  .shell-close {
+    display: inline-grid;
+    margin: -0.875rem 0 1rem 0.125rem;
+  }
+
+  .shell-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: min(18rem, 86vw);
+    overflow-y: auto;
+    box-shadow: 0 0 0 1px var(--sg-line);
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s linear 260ms;
+  }
+
+  .shell[data-drawer="open"] .shell-sidebar {
+    transform: none;
+    visibility: visible;
+    box-shadow: 24px 0 64px rgb(0 0 0 / 0.35);
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s;
+  }
+}
+
+@media (min-width: 60rem) {
+  .shell {
+    display: grid;
+    grid-template-columns: 16.25rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .shell-bar,
+  .shell-backdrop {
+    display: none !important;
+  }
+
+  .shell-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+}
+
+/* Signed out, the sidebar keeps the wordmark and its footer (the language
+   control on the resident side, Switch role on the staff side) and loses
+   every option, because none of them can be used yet. */
+.shell[data-signed-in="false"] :is(.shell-nav-wrap, .shell-role, .shell-signout) {
+  display: none !important;
+}
+
+/* …and the views themselves wait for a session: signed out, the page is the
+   account choice and the notices above it. */
+.shell[data-signed-in="false"] .shell-main [data-view] {
+  display: none !important;
+}
+
+.shell-column {
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-sidebar,
+  .shell[data-drawer="open"] .shell-sidebar,
+  .shell-link,
+  .shell-link::before {
+    transition: none;
+  }
+}

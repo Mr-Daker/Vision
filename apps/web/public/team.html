@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vision: staff sign-in</title>
+    <meta
+      name="description"
+      content="Choose a staff role in the Vision demonstration, then a demonstration account for it. Identity is simulated."
+    />
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <link rel="stylesheet" href="/theme.css" />
+    <link rel="stylesheet" href="/signin.css" />
+    <link rel="stylesheet" href="/team.css" />
+    <script type="module" src="/js/app/team-main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#team-main">Skip to staff sign-in</a>
+
+    <!--
+      The staff door (role dashboards design, 2026-09-29).
+
+      Choose a role and you are signed straight into that role's dashboard.
+      Each role is a separate session on the server (V015), so this page signs
+      into exactly one of them, as the first account the server offers for it.
+    -->
+    <main class="door" id="team-main">
+      <a class="door-close" href="/signin.html" aria-label="Back to the two ways in">
+        <span aria-hidden="true">←</span>
+        <span>Back</span>
+      </a>
+
+      <header class="door-head">
+        <p class="door-eyebrow">Staff</p>
+        <h1 class="door-title" id="team-title" tabindex="-1">Choose your role</h1>
+        <p class="door-sub">
+          Staff identity is simulated in this build, and so is every department: being routed
+          somewhere is not an acknowledgment by anybody.
+        </p>
+      </header>
+
+      <p class="team-error" id="team-error" role="alert" hidden></p>
+
+      <section class="team-step" id="team-roles" aria-label="Staff roles">
+        <div class="door-grid door-grid-3">
+          <button type="button" class="door-card" data-role="department">
+            <span class="door-card-index" aria-hidden="true">01</span>
+            <span class="door-card-eyebrow">Department staff</span>
+            <span class="door-card-title">Work routed to your department</span>
+            <span class="door-card-copy">
+              Accept and assign issues, plan the work, and claim it complete with evidence a
+              reporter then confirms.
+            </span>
+            <span class="door-card-cta">Sign in</span>
+          </button>
+
+          <button type="button" class="door-card" data-role="reviewer">
+            <span class="door-card-index" aria-hidden="true">02</span>
+            <span class="door-card-eyebrow">Reviewer</span>
+            <span class="door-card-title">Settle what a machine should not decide</span>
+            <span class="door-card-copy">
+              Possible duplicates, unclear routing, redactions and disputed repairs, decided by a
+              person.
+            </span>
+            <span class="door-card-cta">Sign in</span>
+          </button>
+
+          <button type="button" class="door-card" data-role="supervisor">
+            <span class="door-card-index" aria-hidden="true">03</span>
+            <span class="door-card-eyebrow">Supervisor</span>
+            <span class="door-card-title">What is waiting too long, and did repairs last</span>
+            <span class="door-card-copy">
+              Oversight queues, resolution durability, the district dashboard and policy comparison.
+            </span>
+            <span class="door-card-cta">Sign in</span>
+          </button>
+        </div>
+      </section>
+
+      <section
+        class="team-step team-accounts-step"
+        id="team-accounts"
+        aria-labelledby="team-accounts-heading"
+        hidden
+      >
+        <h2 class="team-accounts-heading" id="team-accounts-heading" tabindex="-1">
+          Signing you in
+        </h2>
+        <p class="team-status" id="team-status" aria-live="polite"></p>
+        <button type="button" class="team-back" id="team-back">Choose a different role</button>
+      </section>
+    </main>
+
+    <p class="font-credit">
+      Font made from
+      <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
+      is licensed by CC BY 4.0
+    </p>
+  </body>
+</html>

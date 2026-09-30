@@ -20,6 +20,13 @@ import type { LocationReading } from "./location.ts";
 
 export const MAX_TEXT_LENGTH = 500;
 
+/**
+ * The notice the person agrees to when they tick the box above "Send report".
+ * The server stores this string against the agreement, so changing what the
+ * notice says means changing this version, not editing the words in place.
+ */
+export const PROCESSING_NOTICE_VERSION = "notice.v1";
+
 export type DescriptionDraft = {
   readonly text: string;
   /** A finalized voice recording, if one was made. */
@@ -33,6 +40,13 @@ export type CaptureForm = {
   readonly interfaceLocale: string;
   /** Minted when the citizen starts a report, reused across every retry. */
   readonly idempotencyKey: string;
+  /**
+   * Whether they agreed that the demonstration may process this report.
+   * Without it a report is saved but never counted, and its author could not
+   * answer "is it fixed?" later — so the form asks before it sends, once,
+   * rather than sending a report that can never complete.
+   */
+  readonly processingConsent: boolean;
 };
 
 export type SubmissionRequestBody = {
@@ -44,6 +58,10 @@ export type SubmissionRequestBody = {
     readonly observed_at: string;
   };
   readonly interface_locale: string;
+  readonly consent: {
+    readonly notice_version: string;
+    readonly purposes: readonly string[];
+  };
   readonly text?: string;
   readonly evidence: readonly {
     readonly object_reference: string;
@@ -81,6 +99,9 @@ export const findBlocks = (form: CaptureForm): readonly FormBlock[] => {
   }
   if (form.description.text.length > MAX_TEXT_LENGTH) {
     blocks.push({ field: "text", errorKey: "error.validation" });
+  }
+  if (!form.processingConsent) {
+    blocks.push({ field: "consent", errorKey: "error.consent_required" });
   }
   return blocks;
 };
@@ -120,6 +141,7 @@ export const buildRequestBody = (form: CaptureForm): SubmissionRequestBody => {
       observed_at: location.observedAt,
     },
     interface_locale: form.interfaceLocale,
+    consent: { notice_version: PROCESSING_NOTICE_VERSION, purposes: ["demo_processing"] },
     ...(text.length > 0 ? { text } : {}),
     evidence,
   };

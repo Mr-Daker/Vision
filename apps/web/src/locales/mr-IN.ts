@@ -23,10 +23,15 @@ export const mrIN: LocalePack = {
     "app.language_label": "भाषा",
     "app.translation_pending":
       "हे भाषांतर स्थानिक भाषिकाच्या तपासणीशिवाय तयार केले आहे, त्यामुळे ते अडखळणारे वाटू शकते. हे अधिकृत भाषांतर नाही.",
-    "app.skip_to_form": "थेट तक्रार फॉर्मवर जा",
-    "login.heading": "प्रात्यक्षिकासाठी खाते निवडा",
-    "login.choose": "{label} म्हणून पुढे जा",
-    "login.signed_in_as": "प्रात्यक्षिक खात्याने साइन इन केले आहे — खरी ओळख पडताळणी नाही",
+    "app.skip_to_form": "थेट मुख्य मजकुराकडे जा",
+    "nav.label": "रहिवाशांसाठी पर्याय",
+    "nav.menu": "मेनू",
+    "nav.role": "रहिवासी",
+    "nav.report": "समस्या नोंदवा",
+    "nav.nearby": "जवळपासच्या समस्या",
+    "login.heading": "साइन इन करत आहे…",
+    "login.retry": "पुन्हा प्रयत्न करा",
+    "login.signed_in_as": "ओळख पडताळणीशिवाय साइन इन केले आहे. या आवृत्तीत DigiLocker जोडलेले नाही.",
     "login.sign_out": "साइन आउट",
 
     "location.heading": "समस्या कुठे आहे?",
@@ -45,6 +50,8 @@ export const mrIN: LocalePack = {
     "location.manual_apply": "मी भरलेले ठिकाण वापरा",
     "location.latitude": "अक्षांश",
     "location.longitude": "रेखांश",
+    "location.latitude_invalid": "-90 ते 90 मधील अक्षांश टाका, उदाहरणार्थ 16.85.",
+    "location.longitude_invalid": "-180 ते 180 मधील रेखांश टाका, उदाहरणार्थ 74.56.",
     "location.permission_denied":
       "या उपकरणाने ठिकाण देण्यास परवानगी दिली नाही. तुम्ही ठिकाण स्वतः भरू शकता.",
     "location.unavailable": "आत्ता तुमचे ठिकाण मिळाले नाही. पुन्हा प्रयत्न करा किंवा ते स्वतः भरा.",
@@ -120,6 +127,10 @@ export const mrIN: LocalePack = {
     "error.rate_limited": "फार जास्त विनंत्या. कृपया {seconds} सेकंदांनी पुन्हा प्रयत्न करा.",
     "error.validation": "कृपया दर्शवलेली माहिती दुरुस्त करा.",
     "error.server": "सर्व्हरला तक्रार स्वीकारता आली नाही. काहीही जतन झाले नाही.",
+    "review.consent":
+      "मी सहमत आहे की या प्रात्यक्षिकाने माझी तक्रार — फोटो, वर्णन आणि ठिकाण — समान तक्रारींशी जोडण्यासाठी, विभागाकडे पाठवण्यासाठी आणि ही समस्या नोंदवणाऱ्यांमध्ये मला मोजण्यासाठी वापरावी. हे केवळ अनुकरण आहे; कोणतीही माहिती खऱ्या सरकारी यंत्रणेपर्यंत पोहोचत नाही.",
+    "error.consent_required":
+      "तक्रार पाठवण्यापूर्वी ती कशी हाताळली जाईल याला सहमती देण्यासाठी चौकटीत खूण करा.",
     "error.photo_required": "तक्रार पाठवण्यापूर्वी फोटो जोडा आणि अपलोड करा.",
     "error.upload_incomplete": "पाठवण्यापूर्वी फोटोचे अपलोड पूर्ण करा किंवा फोटो काढून टाका.",
     "error.duplicate_tap": "तुमची तक्रार आधीच पाठवली जात आहे.",
@@ -139,7 +150,45 @@ export const mrIN: LocalePack = {
     "tracking.status_reopened": "समस्या पुन्हा उघडली",
     "tracking.no_issue_yet": "अद्याप कोणत्याही समस्येशी जोडलेले नाही",
     "tracking.receipt_reference": "पावती संदर्भ: {reference}",
-    "tracking.open_receipt": "जतन केलेली पावती उघडा",
+    "tracking.open_receipt": "प्रगती पहा",
+    "roadmap.heading": "तुमचा अहवाल कुठे आहे",
+    "roadmap.issue_heading": "ही समस्या कुठे आहे",
+    "roadmap.step_received": "मिळाला",
+    "roadmap.step_checked": "फोटो आणि वर्णन तपासले",
+    "roadmap.step_grouped": "समस्येशी जोडला",
+    "roadmap.step_routed": "विभागाकडे पाठवला",
+    "roadmap.step_acknowledged": "विभागाने दखल घेतली",
+    "roadmap.step_work_planned": "कामाचे नियोजन",
+    "roadmap.step_repair_claimed": "दुरुस्ती झाल्याचा दावा, फोटोसह",
+    "roadmap.step_confirmed": "दुरुस्ती झाल्याची तुम्ही खात्री करता",
+    "roadmap.note_being_checked": "तुमचा फोटो आणि वर्णन प्रक्रियेच्या प्रतीक्षेत आहेत.",
+    "roadmap.note_being_grouped": "हीच समस्या आधी कोणी नोंदवली आहे का ते तपासत आहे.",
+    "roadmap.note_your_answer_needed":
+      "तुमचे उत्तर हवे आहे: तुमचे अहवाल उघडा आणि ही आधीच्या अहवालासारखीच समस्या आहे का ते सांगा.",
+    "roadmap.note_being_routed": "कोणता विभाग जबाबदार आहे ते ठरवत आहे.",
+    "roadmap.note_choosing_department":
+      "विभाग आपोआप निवडता आला नाही, म्हणून एक व्यक्ती विभाग निवडत आहे.",
+    "roadmap.note_with_department": "विभागाकडे आहे. तुमच्याकडून काहीही आवश्यक नाही.",
+    "roadmap.note_work_planned": "विभागाने कामाचे नियोजन केले आहे.",
+    "roadmap.note_your_confirmation_needed":
+      "विभागाच्या मते दुरुस्ती झाली आहे. खात्री करण्यासाठी, किंवा दुरुस्ती झाली नाही हे सांगण्यासाठी, समस्या उघडा.",
+    "roadmap.note_repair_disputed":
+      "दुरुस्ती झाली नाही असे तुम्ही सांगितले. पुढे काय करायचे ते एक समीक्षक ठरवेल.",
+    "roadmap.note_reopened": "ही समस्या पुन्हा उघडली आहे आणि पुन्हा विभागाकडे आहे.",
+    "roadmap.note_fixed": "तुम्ही दुरुस्तीची खात्री केली. हा अहवाल पूर्ण झाला.",
+    "roadmap.escalation_heading": "वरिष्ठांकडे पाठवणे",
+    "roadmap.day_count": "विभागाकडे {total} पैकी {days} वा दिवस",
+    "roadmap.day_count_past": "विभागाकडे {days} वा दिवस, {total} दिवसांची मुदत उलटून गेली",
+    "roadmap.flag_due":
+      "{date} पर्यंत कारवाई न झाल्यास पर्यवेक्षकाच्या यादीत नोंदवले जाईल ({days} दिवस).",
+    "roadmap.flagged": "{date} रोजी पर्यवेक्षकाच्या यादीत नोंदवले.",
+    "roadmap.escalate_due":
+      "{date} पर्यंतही कारवाई न झाल्यास वरिष्ठ पातळीवर नोंदवले जाईल ({days} दिवस).",
+    "roadmap.escalated": "{date} रोजी वरिष्ठ पातळीवर नोंदवले.",
+    "roadmap.paused":
+      "तुम्हाला दुरुस्तीची खात्री करण्यास सांगितले असताना विभागाचे घड्याळ थांबलेले असते.",
+    "roadmap.recorded_not_sent":
+      "या सूचना अंतर्गत नोंदवल्या जातात. या आवृत्तीत कोणत्याही अधिकाऱ्याला कळवले जात नाही.",
     "lookup.heading": "जतन केलेली पावती शोधा",
     "lookup.hint":
       "तुम्ही अहवाल पाठवल्यानंतर दाखवलेला पावती संदर्भ भरा. या साइन इन केलेल्या खात्याच्या पावत्याच उघडता येतील.",
@@ -149,6 +198,7 @@ export const mrIN: LocalePack = {
     "lookup.invalid": "पावती संदर्भ जसा दाखवला होता तसाच पूर्ण भरा.",
     "lookup.not_found":
       "या साइन इन केलेल्या खात्यासाठी पावती सापडली नाही. संदर्भ तपासून पुन्हा प्रयत्न करा.",
+    "lookup.issue": "समस्या",
     "lookup.found": "जतन केलेली पावती",
     "discovery.heading": "जवळपास नोंदवलेल्या समस्या",
     "discovery.search": "माझ्या ठिकाणाजवळ शोधा",
@@ -157,6 +207,12 @@ export const mrIN: LocalePack = {
     "discovery.load_more": "अधिक दाखवा",
     "discovery.open_detail": "ही समस्या उघडा",
     "discovery.map_heading": "जवळपासच्या समस्यांचा नकाशा",
+    "discovery.bounds": "{radius} मीटरच्या आत शोधले, जास्तीत जास्त {limit} निकाल",
+    "discovery.bounds_category":
+      "{radius} मीटरच्या आत {category} साठी शोधले, जास्तीत जास्त {limit} निकाल",
+    "discovery.enter_location": "त्याऐवजी ठिकाण टाका",
+    "discovery.search_here": "इथे शोधा",
+    "detail.summary": "{reference} · {category} · {status}",
     "discovery.map_note":
       "अंदाजे निर्देशांक नकाशा. समस्यांची चिन्हे सार्वजनिक माहितीसाठी गोल केलेली ठिकाणे वापरतात; मध्यभाग तुमचे शोधाचे ठिकाण आहे. हा रस्त्यांचा नकाशा नाही.",
     "discovery.map_key_centre": "शोधाचे मध्यस्थान",

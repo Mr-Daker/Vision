@@ -919,13 +919,14 @@ body.menu-open {
 
 /* ── Font licence credit ──────────────────────────────────────
    BubbledotICG-FinePos is CC BY 4.0, which requires attribution
-   wherever it is used. Small and low-contrast, but present and
-   selectable — a credit that is display:none is not a credit. */
+   wherever it is used. Small, but present, selectable and readable
+   (4.5:1 on the page's black) — a credit that is display:none, or
+   too faint to read, is not a credit. */
 
 .font-credit {
   margin: 0 0 10px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.58);
   font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: -0.01em;

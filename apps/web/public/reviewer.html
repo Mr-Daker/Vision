@@ -11,102 +11,182 @@
     />
     <link rel="stylesheet" href="/theme.css" />
     <link rel="stylesheet" href="/reviewer.css" />
+    <link rel="stylesheet" href="/shell.css" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <script type="module" src="/js/app/reviewer-main.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#reviewer-main">Skip to reviewer workspace</a>
-    <header class="reviewer-header">
-      <a class="reviewer-brand" href="/">
-        <img src="/assets/logo.png" alt="" width="480" height="271" />
-        <span>Vision review</span>
-      </a>
-      <nav aria-label="Workspace navigation">
-        <a href="/staff.html">Department inbox</a>
-        <a href="/supervisor.html">Oversight</a>
-        <a href="/app.html">Citizen app</a>
-        <button type="button" id="reviewer-signout" hidden>Sign out</button>
-      </nav>
-    </header>
-
-    <main id="reviewer-main">
-      <div class="page-intro">
-        <p class="eyebrow">Private operations workspace</p>
-        <h1>Evidence and matching review</h1>
-        <p>
-          Work only within your server-authorized jurisdiction. Every decision requires a reason and
-          preserves the state it replaced.
-        </p>
+    <!--
+      Role dashboard (role dashboards design, 2026-09-29). The sidebar holds
+      this role's options and nothing else: a reviewer is not shown
+      another role's workspace, because that workspace holds a different
+      session and would only refuse them. Switch role goes back to the staff
+      door.
+    -->
+    <div class="shell" data-signed-in="false">
+      <div class="shell-bar">
+        <button
+          type="button"
+          class="shell-menu"
+          id="shell-menu"
+          aria-controls="shell-sidebar"
+          aria-expanded="false"
+          aria-label="Menu"
+        >
+          <span class="shell-menu-icon" aria-hidden="true"></span>
+        </button>
+        <a class="shell-wordmark" href="/">Vision</a>
       </div>
 
-      <p id="reviewer-error" class="page-error" role="alert" tabindex="-1" hidden></p>
-      <p id="reviewer-live" class="visually-hidden" aria-live="polite"></p>
-
-      <section id="reviewer-login" class="login-panel" aria-labelledby="reviewer-login-heading">
-        <p class="eyebrow">Access required</p>
-        <h2 id="reviewer-login-heading" tabindex="-1">Choose a reviewer account</h2>
-        <p id="identity-disclosure" class="disclosure">
-          Simulated demonstration identity: not a real identity check
-        </p>
-        <p>
-          This demonstration does not contact DigiLocker or a government staff directory. The role
-          and jurisdiction grant are still stored and enforced by the server.
-        </p>
-        <div id="reviewer-login-choices" class="login-choices" aria-live="polite"></div>
-      </section>
-
-      <section id="reviewer-workspace" aria-labelledby="workspace-heading" hidden>
-        <div class="workspace-heading-row">
-          <div>
-            <p id="reviewer-role" class="eyebrow"></p>
-            <h2 id="workspace-heading" tabindex="-1">Current review queue</h2>
-          </div>
-          <button type="button" id="refresh-queue" class="secondary-button">Refresh</button>
+      <aside class="shell-sidebar" id="shell-sidebar" aria-label="Review queue">
+        <a class="shell-wordmark" href="/">Vision</a>
+        <p class="shell-role">Reviewer</p>
+        <nav class="shell-nav-wrap" aria-label="Review queue">
+          <ul class="shell-nav">
+            <li class="shell-group">Review queue</li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="all"
+              >
+                All review types
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="redaction_decision"
+              >
+                Redaction decisions
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="flagged_evidence"
+              >
+                Evidence consistency
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="ambiguous_match"
+              >
+                Ambiguous matches
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="correction_request"
+              >
+                Citizen corrections
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                class="shell-link"
+                data-filter-for="kind-filter"
+                data-filter-value="uncertain_classification"
+              >
+                Classifications
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <div class="shell-footer">
+          <p class="shell-account" id="shell-account"></p>
+          <p class="shell-note">
+            Staff identity is simulated in this build: not a real identity check.
+          </p>
+          <a class="shell-quiet" href="/team.html">Switch role</a>
+          <button type="button" id="reviewer-signout" class="shell-signout" hidden>Sign out</button>
         </div>
+      </aside>
 
-        <div class="queue-controls">
-          <label>
-            Authorized jurisdiction
-            <select id="jurisdiction-select"></select>
-          </label>
-          <label>
-            Review type
-            <select id="kind-filter">
-              <option value="all">All review types</option>
-              <option value="redaction_decision">Redaction decisions</option>
-              <option value="flagged_evidence">Evidence consistency</option>
-              <option value="ambiguous_match">Ambiguous matches</option>
-              <option value="correction_request">Citizen corrections</option>
-              <option value="uncertain_classification">Classifications</option>
-            </select>
-          </label>
-        </div>
+      <div class="shell-backdrop" id="shell-backdrop" hidden></div>
 
-        <dl class="queue-summary" aria-label="Queue summary">
-          <div>
-            <dt>Waiting in scope</dt>
-            <dd id="queue-count">0</dd>
+      <div class="shell-column">
+        <main id="reviewer-main" class="shell-main">
+          <div class="page-intro">
+            <p class="eyebrow">Private operations workspace</p>
+            <h1>Evidence and matching review</h1>
+            <p>
+              Work only within your server-authorized jurisdiction. Every decision requires a reason
+              and preserves the state it replaced.
+            </p>
           </div>
-          <div>
-            <dt>Visible after filter</dt>
-            <dd id="visible-count">0</dd>
-          </div>
-          <div>
-            <dt>Awaiting jurisdiction</dt>
-            <dd id="orphan-count">0</dd>
-          </div>
-        </dl>
-        <p id="queue-bound" class="queue-note"></p>
-        <p id="orphan-note" class="disclosure" hidden></p>
-        <div id="review-map" class="issue-overview-map" hidden></div>
-        <div id="review-list" class="review-list"></div>
-      </section>
-    </main>
 
-    <footer>
-      Simulated identity and synthetic jurisdictions are labelled throughout, and every department
-      and recipient in this build is simulated. No screen here is an official government
-      acknowledgment, and no decision made here reaches a real authority.
-    </footer>
+          <p id="reviewer-error" class="page-error" role="alert" tabindex="-1" hidden></p>
+          <p id="reviewer-live" class="visually-hidden" aria-live="polite"></p>
+
+          <section id="reviewer-workspace" aria-labelledby="workspace-heading" hidden>
+            <div class="workspace-heading-row">
+              <div>
+                <p id="reviewer-role" class="eyebrow"></p>
+                <h2 id="workspace-heading" tabindex="-1">Current review queue</h2>
+              </div>
+              <button type="button" id="refresh-queue" class="secondary-button">Refresh</button>
+            </div>
+
+            <div class="queue-controls">
+              <label>
+                Authorized jurisdiction
+                <select id="jurisdiction-select"></select>
+              </label>
+              <label class="shell-replaced">
+                Review type
+                <select id="kind-filter">
+                  <option value="all">All review types</option>
+                  <option value="redaction_decision">Redaction decisions</option>
+                  <option value="flagged_evidence">Evidence consistency</option>
+                  <option value="ambiguous_match">Ambiguous matches</option>
+                  <option value="correction_request">Citizen corrections</option>
+                  <option value="uncertain_classification">Classifications</option>
+                </select>
+              </label>
+            </div>
+
+            <dl class="queue-summary" aria-label="Queue summary">
+              <div>
+                <dt>Waiting in scope</dt>
+                <dd id="queue-count">0</dd>
+              </div>
+              <div>
+                <dt>Visible after filter</dt>
+                <dd id="visible-count">0</dd>
+              </div>
+              <div>
+                <dt>Awaiting jurisdiction</dt>
+                <dd id="orphan-count">0</dd>
+              </div>
+            </dl>
+            <p id="queue-bound" class="queue-note"></p>
+            <p id="orphan-note" class="disclosure" hidden></p>
+            <div id="review-map" class="issue-overview-map" hidden></div>
+            <div id="review-list" class="review-list"></div>
+          </section>
+        </main>
+
+        <footer>
+          Simulated identity and synthetic jurisdictions are labelled throughout, and every
+          department and recipient in this build is simulated. No screen here is an official
+          government acknowledgment, and no decision made here reaches a real authority.
+        </footer>
+      </div>
+    </div>
   </body>
 </html>

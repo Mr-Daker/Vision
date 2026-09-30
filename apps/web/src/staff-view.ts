@@ -63,6 +63,29 @@ export type StaffInboxView = {
   readonly items: readonly StaffInboxItem[];
 };
 
+/**
+ * Which scope the inbox opens on.
+ *
+ * A staff account holds one scope per ward and department, and the inbox used
+ * to open on the first. When that one was empty the screen said nothing was
+ * waiting while another held the whole queue. So: stay where the person
+ * already is if it has work, otherwise go to the busiest (the first, on a
+ * tie), and if nowhere has work, stay put. `undefined` is a scope whose count
+ * could not be read, which is not evidence that it is empty.
+ */
+export const scopeToOpen = (counts: readonly (number | undefined)[], current: number): number => {
+  if ((counts[current] ?? 0) > 0) return current;
+  let best = current;
+  let bestCount = 0;
+  counts.forEach((count, index) => {
+    if (count !== undefined && count > bestCount) {
+      best = index;
+      bestCount = count;
+    }
+  });
+  return best;
+};
+
 const record = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
 

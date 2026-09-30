@@ -91,6 +91,12 @@ after(async () => {
     await client.query("delete from evidence_item where submission_id = $1", [id]);
     await client.query("delete from submission where submission_id = $1", [id]);
   }
+  if (owners.length > 0) {
+    await client.query(
+      "delete from consent_record where participant_id = any($1::uuid[]) and notice_version = $2",
+      [owners, CONSENT_TEST_NOTICE],
+    );
+  }
   // Sessions are disposable per run. Identity mappings and participants are
   // stable simulated fixtures and are intentionally retained (see above).
   if (owners.length > 0) {
@@ -394,4 +400,101 @@ test("V016 API: a retried finalize replays rather than creating a second object"
   assert.equal(first.status, 200);
   assert.equal(second.status, 200);
   assert.equal(((await second.json()) as { replayed?: boolean }).replayed, true);
+});
+
+// ---------------------------------------------------------------------------
+// Agreement to processing, recorded with the report
+// ---------------------------------------------------------------------------
+
+const CONSENT_TEST_NOTICE = "notice.api-consent-test";
+
+const consentRowsFor = async (submissionId: string) =>
+  (
+    await client.query(
+      `select c.notice_version, c.notice_locale, c.granted_purposes
+         from consent_record c
+         join submission s on s.participant_id = c.participant_id
+        where s.submission_id = $1 and c.notice_version = $2`,
+      [submissionId, CONSENT_TEST_NOTICE],
+    )
+  ).rows;
+
+test("consent: a report sent with the agreement records it against the resident", async () => {
+  const session = await login(DEMO_PRINCIPALS[0]!.credential);
+  const created = await fetch(`${baseUrl}/v1/submissions`, {
+    method: "POST",
+    headers: authed(session, {
+      "content-type": "application/json",
+      "idempotency-key": `api-consent-${Date.now()}`,
+    }),
+    body: JSON.stringify({
+      ...submissionBody(),
+      consent: { notice_version: CONSENT_TEST_NOTICE, purposes: ["demo_processing"] },
+    }),
+  });
+  assert.equal(created.status, 202);
+  const receipt = (await created.json()) as { submission_id: string };
+  createdSubmissions.push(receipt.submission_id);
+
+  const rows = await consentRowsFor(receipt.submission_id);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0]?.["granted_purposes"], ["demo_processing"]);
+  assert.equal(rows[0]?.["notice_locale"], "en-IN", "the language they were shown it in");
+});
+
+test("consent: a second report under the same notice does not write a second agreement", async () => {
+  const session = await login(DEMO_PRINCIPALS[0]!.credential);
+  const send = async (suffix: string) => {
+    const response = await fetch(`${baseUrl}/v1/submissions`, {
+      method: "POST",
+      headers: authed(session, {
+        "content-type": "application/json",
+        "idempotency-key": `api-consent-${suffix}-${Date.now()}`,
+      }),
+      body: JSON.stringify({
+        ...submissionBody(),
+        consent: { notice_version: CONSENT_TEST_NOTICE, purposes: ["demo_processing"] },
+      }),
+    });
+    assert.equal(response.status, 202);
+    const receipt = (await response.json()) as { submission_id: string };
+    createdSubmissions.push(receipt.submission_id);
+    return receipt.submission_id;
+  };
+  const first = await send("a");
+  const second = await send("b");
+  assert.equal((await consentRowsFor(first)).length, 1);
+  assert.equal((await consentRowsFor(second)).length, 1, "still one grant, not two");
+});
+
+test("consent: a report sent without the agreement is still saved, and records none", async () => {
+  const session = await login(DEMO_PRINCIPALS[1]!.credential);
+  const created = await fetch(`${baseUrl}/v1/submissions`, {
+    method: "POST",
+    headers: authed(session, {
+      "content-type": "application/json",
+      "idempotency-key": `api-noconsent-${Date.now()}`,
+    }),
+    body: JSON.stringify(submissionBody()),
+  });
+  assert.equal(created.status, 202);
+  const receipt = (await created.json()) as { submission_id: string };
+  createdSubmissions.push(receipt.submission_id);
+  assert.equal((await consentRowsFor(receipt.submission_id)).length, 0);
+});
+
+test("consent: an unknown purpose is refused and the report is not saved", async () => {
+  const session = await login(DEMO_PRINCIPALS[1]!.credential);
+  const key = `api-badconsent-${Date.now()}`;
+  const response = await fetch(`${baseUrl}/v1/submissions`, {
+    method: "POST",
+    headers: authed(session, { "content-type": "application/json", "idempotency-key": key }),
+    body: JSON.stringify({
+      ...submissionBody(),
+      consent: { notice_version: CONSENT_TEST_NOTICE, purposes: ["sell_my_data"] },
+    }),
+  });
+  assert.equal(response.status, 400);
+  const { rows } = await client.query("select 1 from submission where idempotency_key = $1", [key]);
+  assert.equal(rows.length, 0, "a refused agreement leaves no half-saved report");
 });

@@ -72,6 +72,22 @@ const readRawBody = async (
   return Buffer.concat(chunks);
 };
 
+/**
+ * The agreement a client sends with a report, or nothing when it sent none.
+ * Anything present but malformed is passed on as an empty agreement so that
+ * validation refuses it, rather than being dropped here and read as "not asked".
+ */
+const consentFrom = (
+  value: unknown,
+): { readonly consent?: { readonly noticeVersion: string; readonly purposes: string[] } } => {
+  if (value === undefined || value === null) return {};
+  const record = typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const purposes = Array.isArray(record["purposes"]) ? record["purposes"].map(String) : [];
+  return {
+    consent: { noticeVersion: String(record["notice_version"] ?? ""), purposes },
+  };
+};
+
 export const createSubmissionRoutes = (deps: SubmissionRouteDependencies) => {
   const quotas = new QuotaStore();
   const { config } = deps;
@@ -341,6 +357,7 @@ export const createSubmissionRoutes = (deps: SubmissionRouteDependencies) => {
             observedAt: String(observed["observed_at"] ?? new Date().toISOString()),
           },
           interfaceLocale: String(body["interface_locale"] ?? ""),
+          ...consentFrom(body["consent"]),
           ...(typeof body["language_hint"] === "string"
             ? { languageHint: body["language_hint"] }
             : {}),

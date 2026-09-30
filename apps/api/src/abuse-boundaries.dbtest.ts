@@ -117,6 +117,21 @@ before(async () => {
   await client.query(
     "delete from canonical_issue where jurisdiction_id in (select jurisdiction_id from jurisdiction where internal_code like 'ABUSE%')",
   );
+  // Grants and the access log name a jurisdiction, so they go first. Without
+  // this an interrupted run left grants behind, the delete below then failed
+  // on the foreign key, and every later run failed in this hook — the
+  // wreckage-clearing step was itself what the wreckage broke.
+  for (const table of [
+    "staff_department_grant",
+    "staff_jurisdiction_grant",
+    "private_evidence_access_log",
+    "candidate_query_log",
+  ]) {
+    await client.query(
+      `delete from ${table}
+        where jurisdiction_id in (select jurisdiction_id from jurisdiction where internal_code like 'ABUSE%')`,
+    );
+  }
   await client.query("delete from jurisdiction where internal_code like 'ABUSE%'");
 
   await client.query(

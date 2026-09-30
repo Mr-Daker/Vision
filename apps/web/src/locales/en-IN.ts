@@ -13,10 +13,16 @@ export const enIN: LocalePack = {
     "app.language_label": "Language",
     "app.translation_pending":
       "This translation was drafted without a native reviewer and may read awkwardly. It is not an official translation.",
-    "app.skip_to_form": "Skip to the report form",
-    "login.heading": "Choose a demonstration account",
-    "login.choose": "Continue as {label}",
-    "login.signed_in_as": "Signed in with a demo account — not a real identity check",
+    "app.skip_to_form": "Skip to the main content",
+    "nav.label": "Resident options",
+    "nav.menu": "Menu",
+    "nav.role": "Resident",
+    "nav.report": "Report a problem",
+    "nav.nearby": "Problems nearby",
+    "login.heading": "Signing you in…",
+    "login.retry": "Try again",
+    "login.signed_in_as":
+      "Signed in without identity verification. DigiLocker is not connected in this build.",
     "login.sign_out": "Sign out",
 
     "location.heading": "Where is the problem?",
@@ -35,6 +41,8 @@ export const enIN: LocalePack = {
     "location.manual_apply": "Use the location I entered",
     "location.latitude": "Latitude",
     "location.longitude": "Longitude",
+    "location.latitude_invalid": "Enter a latitude between -90 and 90, for example 16.85.",
+    "location.longitude_invalid": "Enter a longitude between -180 and 180, for example 74.56.",
     "location.permission_denied":
       "This device did not allow location sharing. You can enter the location yourself instead.",
     "location.unavailable":
@@ -115,6 +123,10 @@ export const enIN: LocalePack = {
     "error.rate_limited": "Too many requests. Please try again in {seconds} seconds.",
     "error.validation": "Please fix the highlighted fields.",
     "error.server": "The server could not accept the report. Nothing was saved.",
+    "review.consent":
+      "I agree that this demonstration may process my report — the photo, description and location — to group it with similar reports, route it to a department and count me among the people who reported it. It is a simulation; nothing reaches a real government system.",
+    "error.consent_required":
+      "Tick the box to agree to how your report is processed before sending it.",
     "error.photo_required": "Add and upload a photo before sending your report.",
     "error.upload_incomplete": "Finish or remove the photo upload before sending.",
     "error.duplicate_tap": "Your report is already being sent.",
@@ -134,7 +146,43 @@ export const enIN: LocalePack = {
     "tracking.status_reopened": "Issue reopened",
     "tracking.no_issue_yet": "Not yet grouped with an issue",
     "tracking.receipt_reference": "Receipt reference: {reference}",
-    "tracking.open_receipt": "Open saved receipt",
+    "tracking.open_receipt": "View progress",
+    "roadmap.heading": "Where your report is",
+    "roadmap.issue_heading": "Where this issue is",
+    "roadmap.step_received": "Received",
+    "roadmap.step_checked": "Photo and description checked",
+    "roadmap.step_grouped": "Grouped with an issue",
+    "roadmap.step_routed": "Sent to a department",
+    "roadmap.step_acknowledged": "Department acknowledges",
+    "roadmap.step_work_planned": "Work planned",
+    "roadmap.step_repair_claimed": "Repair claimed, with a photo",
+    "roadmap.step_confirmed": "You confirm it is fixed",
+    "roadmap.note_being_checked": "Your photo and description are waiting to be processed.",
+    "roadmap.note_being_grouped":
+      "Checking whether somebody has already reported the same problem.",
+    "roadmap.note_your_answer_needed":
+      "Your answer is needed: open Your reports and say whether this is the same problem as an existing report.",
+    "roadmap.note_being_routed": "Working out which department is responsible.",
+    "roadmap.note_choosing_department":
+      "A person is choosing the department, because it could not be chosen automatically.",
+    "roadmap.note_with_department": "With the department. Nothing is needed from you.",
+    "roadmap.note_work_planned": "The department has planned the work.",
+    "roadmap.note_your_confirmation_needed":
+      "The department says it is repaired. Open the issue to confirm, or to say it is not fixed.",
+    "roadmap.note_repair_disputed":
+      "You said it is not fixed. A reviewer decides what happens next.",
+    "roadmap.note_reopened": "This issue was reopened and is back with the department.",
+    "roadmap.note_fixed": "You confirmed the repair. This report is complete.",
+    "roadmap.escalation_heading": "Escalation",
+    "roadmap.day_count": "Day {days} of {total} with the department",
+    "roadmap.day_count_past": "Day {days} with the department, past the {total}-day wait",
+    "roadmap.flag_due": "Flagged to a supervisor if not acted on by {date} ({days} days).",
+    "roadmap.flagged": "Flagged to a supervisor on {date}.",
+    "roadmap.escalate_due": "Escalated if still not acted on by {date} ({days} days).",
+    "roadmap.escalated": "Escalated on {date}.",
+    "roadmap.paused": "The department's clock is paused while you are asked to confirm the repair.",
+    "roadmap.recorded_not_sent":
+      "These alerts are recorded internally. This build does not notify any official.",
     "lookup.heading": "Find a saved receipt",
     "lookup.hint":
       "Enter the receipt reference shown after you sent your report. Only receipts belonging to this signed-in account can be opened.",
@@ -144,6 +192,7 @@ export const enIN: LocalePack = {
     "lookup.invalid": "Enter the complete receipt reference exactly as it was shown.",
     "lookup.not_found":
       "No receipt was found for this signed-in account. Check the reference and try again.",
+    "lookup.issue": "Issue",
     "lookup.found": "Saved receipt",
     "discovery.heading": "Problems reported nearby",
     "discovery.search": "Search near my location",
@@ -152,6 +201,11 @@ export const enIN: LocalePack = {
     "discovery.load_more": "Show more",
     "discovery.open_detail": "Open this issue",
     "discovery.map_heading": "Nearby issue map",
+    "discovery.bounds": "Searched within {radius} m, up to {limit} results",
+    "discovery.bounds_category": "Searched within {radius} m for {category}, up to {limit} results",
+    "discovery.enter_location": "Enter a location instead",
+    "discovery.search_here": "Search here",
+    "detail.summary": "{reference} · {category} · {status}",
     "discovery.map_note":
       "Approximate coordinate map. Issue markers use rounded public locations; the centre is your search location. This is not a street map.",
     "discovery.map_key_centre": "Search centre",

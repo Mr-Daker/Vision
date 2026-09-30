@@ -1,0 +1,58 @@
+/* ============================================================
+   The staff door (team.html). Layered over signin.css, which draws
+   the frame and the cards; this adds the three-up grid and the
+   account step.
+   ============================================================ */
+
+@media (min-width: 60rem) {
+  .door-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.door-grid-3 .door-card-title {
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem);
+}
+
+.team-error {
+  margin: 0;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--sg-radius);
+  background: var(--sg-danger-bg);
+  color: var(--sg-danger);
+  font-weight: 500;
+}
+
+.team-accounts-step {
+  display: grid;
+  gap: 1rem;
+  max-width: 34rem;
+}
+
+.team-accounts-heading {
+  margin: 0;
+  color: var(--sg-ink-muted);
+  font-size: var(--sg-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.team-status {
+  margin: 0;
+  color: var(--sg-ink-muted);
+  font-size: 1.0625rem;
+}
+
+.team-back {
+  justify-self: start;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--sg-accent-text);
+  font: 600 0.9375rem var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}

@@ -263,6 +263,9 @@ export const buildAppWithDatabase = (
     objectStore,
     // V035: the bar a repair claim must clear is configured, not compiled in.
     confirmationPolicy,
+    // A resident's roadmap shows the waits the supervisor view holds a
+    // department to, from the same pack.
+    ageingPolicy: resolveAgeingPolicy(env["JURISDICTION_PROFILE_ID"] ?? "demo-district-a"),
     // The pack decides what this deployment will classify (V023), and the
     // discovery filter offers exactly those categories (V030).
     taxonomy: resolveTaxonomy(env["JURISDICTION_PROFILE_ID"] ?? "demo-district-a"),

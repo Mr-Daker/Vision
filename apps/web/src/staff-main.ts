@@ -1,12 +1,20 @@
 /** DOM controller for the separate V034 department staff workspace. */
 
 import { StaffApiClient, type StaffSessionPayload } from "./staff-api.ts";
+import { mountShell, wireFilterLinks } from "./shell.ts";
+import {
+  SIGN_IN_DID_NOT_STICK,
+  confirmSignedIn,
+  leaveToSignIn,
+  sendToStaffDoor,
+} from "./staff-door.ts";
 import {
   categoryLabel,
   daysWaitingLabel,
   confirmationProgressLabel,
   resolutionStageLabel,
   resolutionStageOf,
+  scopeToOpen,
   shortStaffId,
   toStaffInboxView,
   toStaffWorkspaces,
@@ -17,6 +25,8 @@ import {
 import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new StaffApiClient();
+const shell = mountShell();
+wireFilterLinks();
 let session: StaffSessionPayload | undefined;
 let workspaces: readonly StaffWorkspace[] = [];
 let inbox: StaffInboxView | undefined;
@@ -58,9 +68,9 @@ const formatTime = (value: string | undefined): string =>
 
 const renderSession = (): void => {
   const authenticated = session?.authenticated === true;
-  el("staff-login").hidden = authenticated;
   el("staff-workspace").hidden = !authenticated;
   el("staff-signout").hidden = !authenticated;
+  shell.setSignedIn(authenticated);
   if (!authenticated) return;
 
   const select = workspaceSelect();
@@ -497,6 +507,28 @@ const renderInbox = (): void => {
   void renderIssueOverviewMap(el("staff-map"), points);
 };
 
+/**
+ * Counts what is waiting in every scope this account holds, shows the number
+ * in the selector, and opens on a scope that has work. Only on first load: a
+ * person who then chooses another scope keeps their choice.
+ */
+const surveyScopes = async (): Promise<void> => {
+  const results = await Promise.all(
+    workspaces.map((workspace) => api.inbox(workspace.jurisdictionId, workspace.departmentId)),
+  );
+  const counts = results.map((result) =>
+    result.ok ? toStaffInboxView(result.value)?.items.length : undefined,
+  );
+  const select = workspaceSelect();
+  [...select.options].forEach((option, index) => {
+    const workspace = workspaces[index];
+    const count = counts[index];
+    if (workspace === undefined || count === undefined) return;
+    option.textContent = `${workspace.internalCode} · ${workspace.departmentLabel} (${String(count)})`;
+  });
+  select.value = String(scopeToOpen(counts, Number(select.value)));
+};
+
 const loadInbox = async (): Promise<void> => {
   const workspace = selectedWorkspace();
   if (workspace === undefined) {
@@ -534,38 +566,6 @@ const acceptSession = (payload: StaffSessionPayload): boolean => {
   return true;
 };
 
-const showLoginChoices = async (): Promise<void> => {
-  const choices = el("staff-login-choices");
-  choices.replaceChildren();
-  const result = await api.capabilities();
-  if (!result.ok) {
-    showError(result.message);
-    return;
-  }
-  el("staff-identity-disclosure").textContent = result.value.identity_label;
-  for (const principal of result.value.demo_principals) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "login-choice";
-    button.textContent = principal.label;
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      button.textContent = "Signing in…";
-      const login = await api.login(principal.credential);
-      if (!login.ok || !login.value.authenticated || !acceptSession(login.value)) {
-        button.disabled = false;
-        button.textContent = principal.label;
-        showError(login.ok ? "The staff responsibility grant is incomplete." : login.message);
-        return;
-      }
-      renderSession();
-      await loadInbox();
-      el("staff-workspace-heading").focus();
-    });
-    choices.append(button);
-  }
-};
-
 const initialize = async (): Promise<void> => {
   el("refresh-inbox").addEventListener("click", () => void loadInbox());
   workspaceSelect().addEventListener("change", () => void loadInbox());
@@ -575,22 +575,25 @@ const initialize = async (): Promise<void> => {
   });
   el("staff-signout").addEventListener("click", async () => {
     await api.logout();
-    session = undefined;
-    workspaces = [];
-    inbox = undefined;
-    renderSession();
-    await showLoginChoices();
-    el("staff-login-heading").focus();
+    leaveToSignIn();
   });
 
   const existing = await api.session();
   if (existing.ok && existing.value.authenticated && acceptSession(existing.value)) {
+    confirmSignedIn();
     renderSession();
+    await surveyScopes();
     await loadInbox();
     return;
   }
   renderSession();
-  await showLoginChoices();
+  // Signed in but without a complete grant is not a reason to sign in again:
+  // the door would find the same session and send the visitor straight back.
+  if (existing.ok && existing.value.authenticated) {
+    showError("The staff responsibility grant is incomplete.");
+    return;
+  }
+  if (!sendToStaffDoor()) showError(SIGN_IN_DID_NOT_STICK);
 };
 
 void initialize();

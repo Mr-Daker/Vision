@@ -236,6 +236,73 @@ test("V027: a candidate with no semantic vector is never matched on distance alo
   assert.match(proposal.reasons.join(" "), /no semantic|not compared|without a/i);
 });
 
+test("a close, same-category candidate that cannot be compared is put to a person, not silently split", () => {
+  // With no text comparison available (no embedding provider), "cannot compare"
+  // used to read as "different", so two reports of one pothole, 35 m and a
+  // minute apart, became two issues and nothing ever grouped. Asking is the
+  // honest answer: it neither merges on proximity alone nor hides a likely
+  // duplicate from the person who can settle it.
+  const proposal = proposeMatch(
+    input([signals({ semanticDistance: undefined, distanceMetres: 35 })]),
+  );
+
+  assert.equal(proposal.decision, "ambiguous");
+  if (proposal.decision !== "ambiguous") return;
+  assert.equal(proposal.mayMerge, false, "proximity alone still cannot authorise a merge");
+  assert.equal(proposal.requiresReview, true);
+  assert.equal(proposal.candidates.length, 1);
+  assert.match(proposal.reasons.join(" "), /no text comparison/i);
+});
+
+test("uncompared candidates are offered closest first, and no more than a person can weigh", () => {
+  const near = (id: string, distanceMetres: number) =>
+    signals({
+      issueId: id,
+      publicReference: `VIS-${id}`,
+      semanticDistance: undefined,
+      distanceMetres,
+    });
+  const proposal = proposeMatch(
+    input([
+      near("far", 120),
+      near("close", 10),
+      near("mid", 60),
+      near("d", 70),
+      near("e", 80),
+      near("f", 90),
+      near("g", 100),
+    ]),
+  );
+  assert.equal(proposal.decision, "ambiguous");
+  if (proposal.decision !== "ambiguous") return;
+  assert.deepEqual(
+    proposal.candidates.map((candidate) => candidate.issueId),
+    ["close", "mid", "d", "e", "f"],
+  );
+});
+
+test("an uncompared candidate that is out of range or in another category is still a new issue", () => {
+  const far = proposeMatch(
+    input([signals({ semanticDistance: undefined, distanceMetres: 5_000 })]),
+  );
+  assert.equal(far.decision, "new_issue");
+
+  const otherCategory = proposeMatch(
+    input([signals({ semanticDistance: undefined, distanceMetres: 5, categoryMatches: false })]),
+  );
+  assert.equal(otherCategory.decision, "new_issue");
+});
+
+test("a candidate the text comparison supports still wins over uncompared neighbours", () => {
+  const proposal = proposeMatch(
+    input([
+      signals({ issueId: "compared", publicReference: "VIS-C", semanticDistance: 0.02 }),
+      signals({ issueId: "uncompared", publicReference: "VIS-U", semanticDistance: undefined }),
+    ]),
+  );
+  assert.equal(proposal.decision, "existing_issue");
+});
+
 test("V027: a same-asset, same-category candidate may match without a vector", () => {
   // An asset identifier is a much stronger signal than proximity: it names
   // the physical thing rather than a place near it.

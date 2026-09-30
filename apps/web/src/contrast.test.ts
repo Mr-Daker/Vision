@@ -134,3 +134,49 @@ test("V019: every interactive class reserves a 44px minimum target", () => {
   assert.match(buttonBlock?.[1] ?? "", /min-height:\s*2\.75rem/);
   assert.match(buttonBlock?.[1] ?? "", /min-width:\s*2\.75rem/);
 });
+
+// ---------------------------------------------------------------------------
+// The Signal theme (role dashboards design, 2026-09-29)
+// ---------------------------------------------------------------------------
+
+// `theme.css` is the token source every dashboard reads. Its first `:root`
+// block is the light scheme and the `prefers-color-scheme: dark` block after
+// it is the dark one, the same ordering contract as app.css above.
+const THEME_PATH = join(dirname(fileURLToPath(import.meta.url)), "../public/theme.css");
+const theme = readFileSync(THEME_PATH, "utf8");
+const themeLight = readTokens(theme, 0);
+const themeDark = { ...themeLight, ...readTokens(theme, 1) };
+
+const SIGNAL_PAIRS: readonly (readonly [string, string, string, number])[] = [
+  ["body text", "--sg-ink", "--sg-page", TEXT_MINIMUM],
+  ["muted text on the page", "--sg-ink-muted", "--sg-page", TEXT_MINIMUM],
+  ["muted text on a panel", "--sg-ink-muted", "--sg-panel", TEXT_MINIMUM],
+  ["muted text in the sidebar", "--sg-ink-muted", "--sg-sidebar", TEXT_MINIMUM],
+  ["dim text in the sidebar", "--sg-ink-dim", "--sg-sidebar", TEXT_MINIMUM],
+  ["primary button label", "--sg-accent-ink", "--sg-accent", TEXT_MINIMUM],
+  ["active nav item", "--sg-accent-text", "--sg-accent-soft", TEXT_MINIMUM],
+  ["accent text on the page", "--sg-accent-text", "--sg-page", TEXT_MINIMUM],
+  ["error text", "--sg-danger", "--sg-danger-bg", TEXT_MINIMUM],
+  ["caution text", "--sg-warning-ink", "--sg-warning-bg", TEXT_MINIMUM],
+  ["focus ring on the page", "--sg-focus", "--sg-page", NON_TEXT_MINIMUM],
+  ["focus ring on a panel", "--sg-focus", "--sg-panel", NON_TEXT_MINIMUM],
+];
+
+for (const [schemeName, tokens] of [
+  ["light", themeLight],
+  ["dark", themeDark],
+] as const) {
+  test(`Signal theme: ${schemeName} scheme meets the contrast thresholds`, () => {
+    for (const [description, foreground, background, minimum] of SIGNAL_PAIRS) {
+      const fg = tokens[foreground];
+      const bg = tokens[background];
+      assert.notEqual(fg, undefined, `${schemeName}: ${foreground} is not defined`);
+      assert.notEqual(bg, undefined, `${schemeName}: ${background} is not defined`);
+      const measured = ratio(fg ?? "#000000", bg ?? "#ffffff");
+      assert.ok(
+        measured >= minimum,
+        `${schemeName}: ${description} is ${measured.toFixed(2)}:1, below ${String(minimum)}:1`,
+      );
+    }
+  });
+}

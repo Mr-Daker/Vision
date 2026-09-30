@@ -183,6 +183,36 @@ test("V021: a valid photo is fingerprinted but left unresolved with no derivativ
   assert.equal(String(row["perceptual_hash"]).length, 16);
 });
 
+test("a photo uploaded through the API is processed by the worker, a separate process", async () => {
+  // The running system has two processes and two object-store instances: the
+  // API accepts the upload, the worker processes it. The worker's instance
+  // never held the upload grant, reported no content type, and every photo a
+  // resident sent was rejected as 'application/octet-stream'. The tests above
+  // share one instance, which is why none of them saw it.
+  const participant = await newParticipant();
+  const reference = await uploadFixture(
+    participant,
+    "png-scene-32x32.png",
+    "image/png",
+    "k-worker",
+  );
+  const { evidenceId } = await submissionWith(participant, reference);
+
+  const workerStore = new FilesystemObjectStoreAdapter({
+    root: storeRoot,
+    grantHmacKey: "test-only-key",
+  });
+  const worker = new MediaProcessingService(client, workerStore);
+  const outcome = await worker.processEvidence({
+    evidenceId,
+    purpose: "media pipeline normalisation in the worker process",
+  });
+
+  assert.equal(outcome.ok, true, JSON.stringify(outcome.reasons));
+  const row = await evidenceRow(evidenceId);
+  assert.equal(row["processing_status"], "needs_review", "a valid photograph must not be rejected");
+});
+
 test("V021: no derivative file exists on disk for an unresolved case", async () => {
   const participant = await newParticipant();
   const reference = await uploadFixture(participant, "png-rgb-8x8.png", "image/png", "k2");

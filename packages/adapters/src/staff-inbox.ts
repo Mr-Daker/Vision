@@ -546,6 +546,42 @@ export const recordAcknowledgment = async (
         is_government_acknowledgment: input.provenance.providerMode === "real",
       },
     });
+
+    // Acknowledged and already assigned is the state that plans the work.
+    // Planning used to happen only inside `assignIssue`, so a person working
+    // down the card in its natural order — accept, assign, then the recipient
+    // replies — left the issue acknowledged and assigned for good: nothing
+    // planned it, the completion claim stayed disabled, and the card gave no
+    // way to know why. The state follows the facts, whichever came first.
+    const assignment = await tx.query(
+      `select assignment_id, assigned_staff_id, reason from assignment
+        where issue_id = $1 and valid_to is null
+        order by valid_from desc limit 1`,
+      [input.issueId],
+    );
+    const active = assignment.rows[0];
+    if (active !== undefined) {
+      await advanceIssueStatus(tx, {
+        issueId: input.issueId,
+        from: "agency_ack_received",
+        to: "work_planned",
+        context: {
+          actor: "staff",
+          hasActiveOutgoingAlias: false,
+          hasActiveAssignment: true,
+        },
+        eventType: "work_planned",
+        actorType: "staff",
+        actorId: input.principal.staffId,
+        payload: {
+          assignment_id: String(active["assignment_id"]),
+          department_id: input.departmentId,
+          assigned_staff_id:
+            active["assigned_staff_id"] === null ? null : String(active["assigned_staff_id"]),
+          reason: String(active["reason"]),
+        },
+      });
+    }
   }
 
   return { acknowledgmentId, alreadyRecorded: false };

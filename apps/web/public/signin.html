@@ -3,164 +3,81 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
     <title>Vision: sign in</title>
     <meta
       name="description"
-      content="Choose a demonstration account. This does not verify a real person or a DigiLocker credential."
+      content="Two ways into Vision: residents and staff. Identity is simulated; no document or DigiLocker credential is checked."
     />
 
     <link rel="icon" href="icon.svg" type="image/svg+xml" />
 
     <link rel="stylesheet" href="theme.css" />
-    <link rel="stylesheet" href="landing.css" />
     <link rel="stylesheet" href="signin.css" />
   </head>
   <body>
-    <a class="skip-link" href="#signin-main">Skip to sign in</a>
-    <div class="bg">
-      <video class="bg-video" autoplay muted loop playsinline>
-        <source src="assets/hero.mp4" type="video/mp4" />
-      </video>
-    </div>
+    <a class="skip-link" href="#signin-main">Skip to the two ways in</a>
 
-    <div class="page">
-      <!--
-        No header at all, including the mark that used to sit alone here. This
-        page has one thing to do and one way to leave it (the Close control
-        below, which returns to the home page), and a logo repeats that exit
-        rather than adding a second one. Removing it also lets the two panels
-        centre in the full viewport instead of a header's height being
-        subtracted from the space they centre in.
+    <!--
+      Two doors and nothing else (role dashboards design, 2026-09-29).
 
-        Nothing here is unreachable: the wordmark link lived only on the
-        header, and Close already goes to the same place it did.
-      -->
-      <main class="hero auth" id="signin-main">
-        <a class="auth-close" href="index.html" aria-label="Close and return to the home page">
-          <svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true">
-            <path
-              d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
-            />
-          </svg>
-          <span>Close</span>
+      This page used to list demonstration accounts for residents and three
+      workspace links for staff, which asked every visitor to work out which
+      of five things they were before they could start. Now it asks one
+      question, and neither door asks for an account: residents are signed
+      straight in on their dashboard, and staff choose a role on team.html
+      and are signed straight into it, because each staff role holds a
+      separate session (V015).
+    -->
+    <main class="door" id="signin-main">
+      <a class="door-close" href="index.html" aria-label="Close and return to the home page">
+        <span aria-hidden="true">×</span>
+        <span>Close</span>
+      </a>
+
+      <header class="door-head">
+        <p class="door-eyebrow">Vision</p>
+        <h1 class="door-title">Choose your way in</h1>
+        <p class="door-sub">
+          Identity is simulated in this build. No document is checked and no government system is
+          contacted.
+        </p>
+      </header>
+
+      <div class="door-grid">
+        <a class="door-card" href="app.html">
+          <span class="door-card-index" aria-hidden="true">01</span>
+          <span class="door-card-eyebrow">Residents</span>
+          <span class="door-card-title">Report and follow problems where you live</span>
+          <span class="door-card-copy">
+            Send a report in English or Marathi, see what is already reported nearby, and follow
+            what happens to yours.
+          </span>
+          <span class="door-card-cta">Continue as a resident</span>
         </a>
 
-        <h1 class="auth-title anim d-008">
-          <span class="headline-line d-012">Choose An Account</span>
-        </h1>
+        <a class="door-card" href="team.html">
+          <span class="door-card-index" aria-hidden="true">02</span>
+          <span class="door-card-eyebrow">Staff</span>
+          <span class="door-card-title">Work on reported problems</span>
+          <span class="door-card-copy">
+            Department staff, reviewers and supervisors. Every department and staff account here is
+            simulated.
+          </span>
+          <span class="door-card-cta">Continue as staff</span>
+        </a>
+      </div>
+    </main>
 
-        <p class="auth-sub anim d-02">
-          Two ways in. Identity is simulated on both sides of this demonstration.
-        </p>
-
-        <!--
-          Two doors rather than one list. A resident and a ward engineer arrive
-          at the same address wanting different things, and a single column of
-          demonstration accounts asked every visitor to work out which of them
-          they were. The citizen side keeps its own sign-in inline; each
-          department workspace signs in on its own page, because each holds a
-          separate session with separate grants (V015).
-        -->
-        <div class="auth-split">
-          <section class="auth-card auth-role anim d-03" aria-labelledby="role-citizen-heading">
-            <p class="auth-role-eyebrow">For residents</p>
-            <h2 id="role-citizen-heading" class="auth-role-title">
-              Report a problem where you live
-            </h2>
-            <p class="auth-role-copy">
-              Send a report in English or Marathi, confirm whether somebody has already reported the
-              same thing, and follow what happens to yours.
-            </p>
-
-            <p class="auth-notice" role="note">
-              Identity here is simulated. No document is checked and no government system is
-              contacted.
-            </p>
-
-            <div class="principal-list" id="principal-list" aria-busy="true">
-              <p class="principal-loading">Loading demonstration accounts…</p>
-            </div>
-
-            <p class="field-error" id="form-error" role="alert" hidden></p>
-
-            <p class="auth-role-note">
-              <a class="auth-link" href="app.html">Browse nearby issues without signing in</a>
-              <span>Choose a demo account above to send a report.</span>
-            </p>
-          </section>
-
-          <section class="auth-card auth-role anim d-042" aria-labelledby="role-staff-heading">
-            <p class="auth-role-eyebrow">For demo staff</p>
-            <h2 id="role-staff-heading" class="auth-role-title">Receive, review and resolve</h2>
-            <p class="auth-role-copy">
-              Explore how staff receive reports, check uncertain matches and monitor unresolved
-              issues. Each workspace lets you choose a demo account.
-            </p>
-
-            <p class="auth-notice" role="note">
-              Every department and staff account is simulated. Being routed somewhere is not an
-              acknowledgment by anybody.
-            </p>
-
-            <ul class="role-links">
-              <li>
-                <a class="role-link" href="staff.html">
-                  <span class="role-link-title">Department inbox</span>
-                  <span class="role-link-copy">
-                    Work routed to you. Acknowledge it, plan it, and claim it complete with evidence
-                    a reporter then confirms.
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a class="role-link" href="reviewer.html">
-                  <span class="role-link-title">Review queue</span>
-                  <span class="role-link-copy">
-                    Possible duplicates, unclear routing and disputed repairs, settled by a person
-                    rather than automatically.
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a class="role-link" href="supervisor.html">
-                  <span class="role-link-title">Supervisor oversight</span>
-                  <span class="role-link-copy">
-                    What is waiting longer than this district said it would tolerate, and whether
-                    resolutions in a ward lasted.
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </section>
-        </div>
-      </main>
-
-      <!--
-        No statistics strip here, though the landing page has one and this page
-        inherited it. Two reasons it went:
-
-          * a visitor who clicked Sign in has already decided, and a feature
-            count at a decision point competes with the only two things on the
-            page that matter;
-          * "100% Simulated Identity" rendered a *disclosure* as a statistic.
-            Both panels already say it in words, as a caveat. A number with a
-            percent sign reads as an achievement, which is the same category
-            error this system refuses everywhere else it declines to publish a
-            score.
-
-        The credit below is not clutter and must not follow them out. The
-        display face is CC BY 4.0 and `fonts/ATTRIBUTION.txt` records that
-        attribution is required wherever it is used; the heading on this page
-        uses it.
-      -->
-      <p class="font-credit">
-        Font made from
-        <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
-        is licensed by CC BY 4.0
-      </p>
-    </div>
-
-    <script src="landing.js"></script>
-    <script src="signin.js"></script>
+    <!--
+      The display face is CC BY 4.0 and `fonts/ATTRIBUTION.txt` records that
+      attribution is required wherever it is used; the heading on this page
+      uses it, so the credit stays.
+    -->
+    <p class="font-credit">
+      Font made from
+      <a href="http://www.onlinewebfonts.com/fonts" rel="noopener noreferrer">Web Fonts</a>
+      is licensed by CC BY 4.0
+    </p>
   </body>
 </html>

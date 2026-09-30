@@ -127,6 +127,16 @@ const newIssue = async (metresEast: number, category = "sanitation"): Promise<st
   return issueId;
 };
 
+/**
+ * An issue somebody reported, which is the only kind the public list shows.
+ * `newIssue` alone makes a bare one: no live report, so nothing to list.
+ */
+const newListedIssue = async (metresEast: number, category = "sanitation"): Promise<string> => {
+  const issueId = await newIssue(metresEast, category);
+  await newReport(await newParticipant(), issueId);
+  return issueId;
+};
+
 const newReport = async (
   participantId: string,
   issueId: string | undefined,
@@ -311,7 +321,7 @@ test("V030: nearby public issues are discoverable without any private field", as
 });
 
 test("V030: discovery reports a coarse location, never the precise one", async () => {
-  const near = await newIssue(30);
+  const near = await newListedIssue(30);
   void near;
 
   const page = await discoverNearbyIssues(client, {
@@ -328,7 +338,7 @@ test("V030: discovery reports a coarse location, never the precise one", async (
 
 test("V030: discovery is bounded and pages with a cursor", async () => {
   const category = `disc-${randomUUID().slice(0, 6)}`;
-  for (let index = 0; index < 3; index += 1) await newIssue(10 + index, category);
+  for (let index = 0; index < 3; index += 1) await newListedIssue(10 + index, category);
 
   const first = await discoverNearbyIssues(client, {
     lon: ORIGIN.lon,
@@ -349,6 +359,21 @@ test("V030: discovery is bounded and pages with a cursor", async () => {
     cursor: first.nextCursor,
   });
   assert.equal(second.issues.length, 1);
+});
+
+test("an issue with no live report behind it is not listed", async () => {
+  const category = `ghost-${randomUUID().slice(0, 6)}`;
+  await newIssue(5, category); // bare: nothing to show or follow
+  const real = await newListedIssue(6, category);
+  const page = await discoverNearbyIssues(client, {
+    lon: ORIGIN.lon,
+    lat: ORIGIN.lat,
+    radiusMetres: 500,
+    category,
+  });
+  assert.equal(page.issues.length, 1);
+  assert.match(page.issues[0]?.publicReference ?? "", /^VIS-/);
+  assert.equal(page.issues[0]?.publicReference, `VIS-${real.slice(0, 8).toUpperCase()}`);
 });
 
 test("V030: an absurd page size is clamped rather than accepted", async () => {
@@ -372,8 +397,8 @@ test("V030: an empty discovery result is not proof that nothing is wrong nearby"
 
 test("V030: a filter restricts the category without hiding that it was applied", async () => {
   const marker = `f-${randomUUID().slice(0, 6)}`;
-  await newIssue(10, marker);
-  await newIssue(12, `${marker}-other`);
+  await newListedIssue(10, marker);
+  await newListedIssue(12, `${marker}-other`);
 
   const page = await discoverNearbyIssues(client, {
     lon: ORIGIN.lon,
@@ -582,8 +607,8 @@ test("V030: an issue retired by a merge does not appear twice in discovery", asy
   // Otherwise a merged duplicate shows up beside its survivor on a public
   // map, which reads as two problems where there is one.
   const category = `merge-${randomUUID().slice(0, 6)}`;
-  const surviving = await newIssue(10, category);
-  const retired = await newIssue(12, category);
+  const surviving = await newListedIssue(10, category);
+  const retired = await newListedIssue(12, category);
 
   const before = await discoverNearbyIssues(client, {
     lon: ORIGIN.lon,

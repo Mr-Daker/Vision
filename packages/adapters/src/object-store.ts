@@ -18,6 +18,7 @@
  */
 
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { closeSync, openSync, readSync } from "node:fs";
 import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, normalize, sep } from "node:path";
 
@@ -132,6 +133,9 @@ export const grantOriginalAccess = (decision: Decision, purpose: string): Origin
   }
   return { purpose } as OriginalAccessGrant;
 };
+
+/** Longer than every signature in PERMITTED_TYPES. */
+const SNIFF_BYTES = 32;
 
 const sniffContentType = (bytes: Buffer): string | undefined => {
   for (const [type, signatures] of Object.entries(PERMITTED_TYPES)) {
@@ -450,7 +454,32 @@ export class FilesystemObjectStoreAdapter implements ObjectStoreAdapter {
    * re-checks it is doing defence in depth, not validation.
    */
   contentTypeOf(objectReference: string): string | undefined {
-    return this.grants.get(objectReference)?.finalized_result?.content_type;
+    const known = this.grants.get(objectReference)?.finalized_result?.content_type;
+    if (known !== undefined) return known;
+
+    // The upload was finalized by another process — the API, when this is the
+    // worker — so this instance never held its grant. The answer is still
+    // durable: an object exists under `originals/` only after `finalizeUpload`
+    // proved its bytes are the type it declared, so the stored bytes carry
+    // that validated type. Without this, every photo the worker processed fell
+    // back to 'application/octet-stream' and was rejected as unsupported.
+    let path: string;
+    try {
+      path = this.pathFor("originals", objectReference);
+    } catch {
+      return undefined;
+    }
+    let descriptor: number | undefined;
+    try {
+      descriptor = openSync(path, "r");
+      const head = Buffer.alloc(SNIFF_BYTES);
+      const read = readSync(descriptor, head, 0, SNIFF_BYTES, 0);
+      return sniffContentType(head.subarray(0, read));
+    } catch {
+      return undefined;
+    } finally {
+      if (descriptor !== undefined) closeSync(descriptor);
+    }
   }
 
   private async quarantine(objectReference: string, reason: string): Promise<void> {

@@ -14,6 +14,13 @@
  */
 
 import { SupervisorApiClient } from "./supervisor-api.ts";
+import { mountShell } from "./shell.ts";
+import {
+  SIGN_IN_DID_NOT_STICK,
+  confirmSignedIn,
+  leaveToSignIn,
+  sendToStaffDoor,
+} from "./staff-door.ts";
 import {
   DashboardApiClient,
   type DashboardIssueDetail,
@@ -42,6 +49,7 @@ import {
 import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const auth = new SupervisorApiClient();
+const shell = mountShell();
 const api = new DashboardApiClient();
 let payload: DashboardPayload | undefined;
 
@@ -75,8 +83,15 @@ const element = (tag: string, className?: string, text?: string): HTMLElement =>
   return node;
 };
 
+// "am"/"pm" in upper case: the facts lists capitalise every word (so a status
+// like "work planned" reads well), which turned "10:30:00 am" into "10:30:00 Am".
+const uppercaseMeridiem = (text: string): string =>
+  text.replace(/\b([ap])m\b/i, (m) => m.toUpperCase());
+
 const formatTime = (iso: string | null | undefined): string =>
-  iso === null || iso === undefined ? "—" : new Date(iso).toLocaleString("en-IN");
+  iso === null || iso === undefined
+    ? "—"
+    : uppercaseMeridiem(new Date(iso).toLocaleString("en-IN"));
 
 // ---------------------------------------------------------------------------
 // Banners
@@ -371,6 +386,12 @@ const issueCard = (row: DashboardIssueRow): HTMLElement => {
   }
   card.append(facts);
 
+  // Nothing to open: say so instead of offering a button that loads nothing.
+  if (row.activeEvidenceLinks === 0) {
+    card.append(element("p", "queue-note", "No evidence is attached to this report."));
+    return card;
+  }
+
   const open = document.createElement("button");
   open.type = "button";
   open.className = "review-action";
@@ -445,42 +466,12 @@ const load = async (): Promise<void> => {
 };
 
 const showWorkspace = async (role: string | undefined): Promise<void> => {
-  el("dashboard-login").hidden = true;
   el("dashboard-workspace").hidden = false;
   el("dashboard-signout").hidden = false;
+  shell.setSignedIn(true);
   el("dashboard-role").textContent =
     role === undefined ? "Signed in" : `Signed in as ${role.replace(/_/g, " ")}`;
   await load();
-};
-
-const renderLoginChoices = async (): Promise<void> => {
-  const capabilities = await auth.capabilities();
-  const host = el("dashboard-login-choices");
-  if (!capabilities.ok) {
-    host.replaceChildren(element("p", "queue-note", capabilities.message));
-    return;
-  }
-  host.replaceChildren(
-    ...capabilities.value.demo_principals.map((principal) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "login-choice";
-      button.textContent = principal.label;
-      button.addEventListener("click", () => {
-        void (async () => {
-          button.disabled = true;
-          const result = await auth.login(principal.credential);
-          button.disabled = false;
-          if (!result.ok) {
-            showError(result.message);
-            return;
-          }
-          await showWorkspace(result.value.role);
-        })();
-      });
-      return button;
-    }),
-  );
 };
 
 el("refresh-dashboard").addEventListener("click", () => {
@@ -495,21 +486,18 @@ el("close-drilldown").addEventListener("click", () => {
 el("dashboard-signout").addEventListener("click", () => {
   void (async () => {
     await auth.logout();
-    el("dashboard-workspace").hidden = true;
-    el("dashboard-signout").hidden = true;
-    el("dashboard-login").hidden = false;
-    payload = undefined;
-    await renderLoginChoices();
-    announce("Signed out.");
+    leaveToSignIn();
   })();
 });
 
 void (async () => {
-  await renderLoginChoices();
   const session = await auth.session();
   if (session.ok && session.value.authenticated) {
+    confirmSignedIn();
     await showWorkspace(session.value.role);
+    return;
   }
+  if (!sendToStaffDoor()) showError(SIGN_IN_DID_NOT_STICK);
 })();
 
 /** Exposed for the browser verification pass, which reads what was rendered. */

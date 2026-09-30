@@ -13,6 +13,18 @@
  */
 
 import { SupervisorApiClient } from "./supervisor-api.ts";
+import { mountShell } from "./shell.ts";
+import {
+  SIGN_IN_DID_NOT_STICK,
+  confirmSignedIn,
+  leaveToSignIn,
+  sendToStaffDoor,
+} from "./staff-door.ts";
+import {
+  parseSupervisorHash,
+  SUPERVISOR_VIEW_TITLES,
+  type SupervisorView,
+} from "./supervisor-sections.ts";
 import {
   figureText,
   panelPreamble,
@@ -35,9 +47,12 @@ import {
 import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new SupervisorApiClient();
+const shell = mountShell();
 let queues: SupervisorQueueView | undefined;
 let durability: DurabilityView | undefined;
+/** Which queue the Waiting issues part shows. Set from the hash, nowhere else. */
 let filter: SupervisorQueueId | "all" = "all";
+let view: SupervisorView = "overview";
 
 const el = <T extends HTMLElement>(id: string): T => {
   const node = document.getElementById(id);
@@ -65,8 +80,13 @@ const element = (tag: string, className?: string, text?: string): HTMLElement =>
 
 const selectJurisdiction = (): HTMLSelectElement => el<HTMLSelectElement>("jurisdiction-select");
 
+// "am"/"pm" in upper case: the facts lists capitalise every word (so a status
+// like "work planned" reads well), which turned "10:30:00 am" into "10:30:00 Am".
+const uppercaseMeridiem = (text: string): string =>
+  text.replace(/\b([ap])m\b/i, (m) => m.toUpperCase());
+
 const formatTime = (iso: string | undefined): string =>
-  iso === undefined ? "—" : new Date(iso).toLocaleString("en-IN");
+  iso === undefined ? "—" : uppercaseMeridiem(new Date(iso).toLocaleString("en-IN"));
 
 /** One issue, with both clocks and whatever alerts stand against it. */
 const issueCard = (row: SupervisorIssueRow): HTMLElement => {
@@ -102,6 +122,8 @@ const issueCard = (row: SupervisorIssueRow): HTMLElement => {
     facts.append(group);
   }
 
+  // The configured waits and the reasons are what a supervisor reads when
+  // deciding what to do, not in order to find the issue, so they fold away.
   const why = element("details", "ordering-detail");
   const summary = element("summary", undefined, "Why is this here?");
   const list = element("ul");
@@ -109,9 +131,9 @@ const issueCard = (row: SupervisorIssueRow): HTMLElement => {
   for (const queue of row.queues) {
     list.append(element("li", undefined, QUEUE_EXPLANATIONS[queue]));
   }
-  why.append(summary, list);
+  why.append(summary, facts, list);
 
-  article.append(top, heading, status, clocks, facts, why);
+  article.append(top, heading, status, clocks, why);
 
   if (row.override !== undefined) {
     const quote = element("blockquote");
@@ -226,7 +248,18 @@ const issueCard = (row: SupervisorIssueRow): HTMLElement => {
   });
   actions.append(save);
 
-  article.append(overrideField, daysRow, cardError, actions);
+  // Folded: every card used to carry this form open, which made nineteen
+  // issues a fifteen-thousand-pixel page. It is still one click away, and
+  // still demands a reason.
+  const override = element("details", "ordering-detail card-override");
+  override.append(
+    element("summary", undefined, "Change this issue's clock"),
+    overrideField,
+    daysRow,
+    cardError,
+    actions,
+  );
+  article.append(override);
   return article;
 };
 
@@ -246,11 +279,19 @@ const render = (): void => {
 
   for (const queue of ["unacknowledged", "overdue", "escalated", "disputed", "reopened"] as const) {
     el(`count-${queue}`).textContent = String(queues.counts[queue]);
+    el(`nav-count-${queue}`).textContent = String(queues.counts[queue]);
   }
+  const waiting = queues.issues.filter((issue) => issue.queues.length > 0).length;
+  el("nav-count-all").textContent = String(waiting);
+
+  const rows = visibleIssues();
+  el("supervisor-workspace-heading").textContent =
+    filter === "all" ? "Every queue" : QUEUE_LABELS[filter];
+  el("queue-count-line").textContent =
+    `${String(rows.length)} issue${rows.length === 1 ? "" : "s"} in this queue`;
 
   const list = el<HTMLDivElement>("supervisor-list");
   list.replaceChildren();
-  const rows = visibleIssues();
   if (rows.length === 0) {
     list.append(
       element(
@@ -288,6 +329,17 @@ const render = (): void => {
 const renderDurability = (): void => {
   if (durability === undefined) return;
   el("durability-preamble").textContent = panelPreamble(durability);
+  // The overview's one line. Worded like the empty state below it: no concern
+  // is not the same as every unit being fine.
+  const concernCount = durability.concerns.length;
+  el("overview-durability-line").textContent =
+    durability.totalClaims === 0
+      ? `No completion claim in the last ${String(durability.windowDays)} days, so there is nothing to measure yet.`
+      : `${String(durability.totalClaims)} completion claim(s) over ${String(durability.windowDays)} days. ${
+          concernCount === 0
+            ? "No unit can be told apart from the rest on this evidence."
+            : `${String(concernCount)} figure(s) can be told apart from the rest.`
+        }`;
   el("durability-ranking-note").textContent = durability.rankingNote;
 
   const limits = el("durability-limits");
@@ -309,7 +361,7 @@ const renderDurability = (): void => {
   }
   for (const concern of durability.concerns) {
     const card = element("article", "durability-concern");
-    card.append(element("h4", undefined, `${concern.unit} · ${signalLabel(concern.signal)}`));
+    card.append(element("h3", undefined, `${concern.unit} · ${signalLabel(concern.signal)}`));
     card.append(element("p", "durability-figure", `This ward: ${figureText(concern.figure)}`));
     card.append(
       element("p", "durability-figure", `Every other ward: ${figureText(concern.baseline)}`),
@@ -331,7 +383,7 @@ const renderDurability = (): void => {
   signals.replaceChildren();
   for (const signal of durability.signals) {
     const block = element("div", "durability-signal");
-    block.append(element("h4", undefined, signalLabel(signal.signal)));
+    block.append(element("h3", undefined, signalLabel(signal.signal)));
     block.append(element("p", "durability-observed", signal.observed));
     const list = element("ul", "durability-units");
     for (const unit of signal.units) {
@@ -390,9 +442,9 @@ const showWorkspace = (
     synthetic: boolean;
   }[],
 ): void => {
-  el("supervisor-login").hidden = true;
   el("supervisor-workspace").hidden = false;
   el<HTMLButtonElement>("supervisor-signout").hidden = false;
+  shell.setSignedIn(true);
   const select = selectJurisdiction();
   const previous = select.value;
   select.replaceChildren();
@@ -406,51 +458,52 @@ const showWorkspace = (
   }
   if ([...select.options].some((option) => option.value === previous)) select.value = previous;
   el("supervisor-role").textContent = "Supervisor · server-authorized jurisdictions";
+  applyHash(false);
 };
 
 const start = async (): Promise<void> => {
   const session = await api.session();
   if (session.ok && session.value.authenticated) {
+    confirmSignedIn();
     showWorkspace((session.value.jurisdictions ?? []) as never);
     await loadQueues();
     return;
   }
-  const capabilities = await api.capabilities();
-  if (!capabilities.ok) {
-    showError("The supervisor sign-in options could not be loaded.");
-    return;
-  }
-  const choices = el("supervisor-login-choices");
-  choices.replaceChildren();
-  for (const principal of capabilities.value.demo_principals) {
-    const button = element("button", "login-choice", principal.label);
-    (button as HTMLButtonElement).type = "button";
-    button.addEventListener("click", () => {
-      void (async () => {
-        const result = await api.login(principal.credential);
-        if (!result.ok) {
-          showError(result.message);
-          return;
-        }
-        showWorkspace((result.value.jurisdictions ?? []) as never);
-        await loadQueues();
-      })();
-    });
-    choices.append(button);
-  }
+  if (!sendToStaffDoor()) showError(SIGN_IN_DID_NOT_STICK);
 };
 
 el("refresh-queues").addEventListener("click", () => void loadQueues());
 el("refresh-durability").addEventListener("click", () => void loadDurability());
 selectJurisdiction().addEventListener("change", () => void loadQueues());
-el<HTMLSelectElement>("queue-filter").addEventListener("change", (event) => {
-  filter = (event.target as HTMLSelectElement).value as SupervisorQueueId | "all";
+
+/**
+ * Shows the part and the queue the hash names. The sidebar's items are plain
+ * links, so this is also what the back and forward buttons run.
+ */
+const applyHash = (focus: boolean): void => {
+  const location_ = parseSupervisorHash(window.location.hash);
+  view = location_.view;
+  filter = location_.queue;
+  shell.showView(view);
+  // "Waiting issues" is the current page only while it shows every queue;
+  // with one queue chosen, that queue's own link is.
+  for (const link of document.querySelectorAll<HTMLElement>("[data-queue-link]")) {
+    const current = view === "queues" && link.dataset["queueLink"] === filter;
+    if (current) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  }
+  if (view === "queues" && filter !== "all") {
+    document.querySelector('[data-view-link="queues"]')?.removeAttribute("aria-current");
+  }
+  el("supervisor-title").textContent = SUPERVISOR_VIEW_TITLES[view];
   render();
-});
+  if (focus) el("supervisor-title").focus();
+};
+window.addEventListener("hashchange", () => applyHash(true));
 el("supervisor-signout").addEventListener("click", () => {
   void (async () => {
     await api.logout();
-    window.location.reload();
+    leaveToSignIn();
   })();
 });
 

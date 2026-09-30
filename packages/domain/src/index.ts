@@ -19,6 +19,7 @@ export * from "./match-proposal.ts";
 export * from "./confirmation-policy.ts";
 export * from "./triage-order.ts";
 export * from "./ageing-policy.ts";
+export * from "./report-roadmap.ts";
 
 export * from "./metric-semantics.ts";
 export * from "./summary-projection.ts";

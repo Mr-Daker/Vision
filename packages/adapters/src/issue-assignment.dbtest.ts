@@ -168,6 +168,24 @@ const newIssueRow = async (metresEast: number, category: string): Promise<string
   return issueId;
 };
 
+/**
+ * Puts a live report behind an issue row, the way a real issue has one.
+ * An issue with none is a leftover, not a problem somebody reported.
+ */
+const withLiveReport = async (issueId: string): Promise<string> => {
+  const { submissionId } = await newSubmission();
+  const { rows } = await client.query(
+    "select evidence_id from evidence_item where submission_id = $1",
+    [submissionId],
+  );
+  await client.query(
+    `insert into issue_evidence_link (issue_evidence_link_id, evidence_id, canonical_issue_id, effective_from)
+     values ($1,$2,$3, now())`,
+    [randomUUID(), rows[0]?.["evidence_id"], issueId],
+  );
+  return issueId;
+};
+
 const base = {
   matcherVersion: MATCHER_VERSION,
   taxonomyVersion: "demo-taxonomy.v1",
@@ -370,7 +388,7 @@ test("V028: a decision made on stale candidates is rerun rather than committed",
   const category = newCategory();
   const { submissionId, participantId } = await newSubmission();
   // The proposal saw nothing, but by commit time an issue exists here.
-  const appeared = await newIssueRow(3, category);
+  const appeared = await withLiveReport(await newIssueRow(3, category));
 
   const result = await assignSubmissionToIssue(
     client,
@@ -393,6 +411,64 @@ test("V028: a decision made on stale candidates is rerun rather than committed",
     submissionId,
   ]);
   assert.equal(rows[0]?.["state"], "failed_retryable");
+});
+
+test("V028: a stale attempt is superseded by its rerun, which can then be committed", async () => {
+  const category = newCategory();
+  const { submissionId, participantId } = await newSubmission();
+  const appeared = await withLiveReport(await newIssueRow(3, category));
+
+  const first = await assignSubmissionToIssue(
+    client,
+    assignInput(submissionId, participantId, newIssueProposal(), category, {
+      candidateIdsSeen: [],
+    }),
+  );
+  assert.equal(first.status, "stale");
+
+  // The rerun has seen the new candidate and attaches to it. Only one match
+  // per report may be current, so the stale attempt has to step aside — before
+  // this it could not, and the retry threw for ever, so a report that met one
+  // stale attempt was never grouped.
+  const second = await assignSubmissionToIssue(
+    client,
+    assignInput(submissionId, participantId, existingProposal(appeared), category, {
+      candidateIdsSeen: [appeared],
+    }),
+  );
+  assert.equal(second.status, "attached");
+
+  const { rows } = await client.query(
+    `select attempt_number, state, superseded_at is not null as superseded
+       from issue_match where submission_id = $1 order by attempt_number`,
+    [submissionId],
+  );
+  assert.deepEqual(
+    rows.map((row) => [row["attempt_number"], row["state"], row["superseded"]]),
+    [
+      [1, "failed_retryable", true],
+      [2, "match_confirmed", false],
+    ],
+  );
+});
+
+test("V028: an issue with no live report behind it does not make a decision stale", async () => {
+  const category = newCategory();
+  const { submissionId, participantId } = await newSubmission();
+  // Nothing reported this: no evidence links to it. The candidate search never
+  // offers such an issue, so the recheck must not count it either — or every
+  // report near one is "stale" for ever and never gets grouped at all.
+  await newIssueRow(3, category);
+
+  const result = await assignSubmissionToIssue(
+    client,
+    assignInput(submissionId, participantId, newIssueProposal(), category, {
+      candidateIdsSeen: [],
+    }),
+  );
+
+  assert.equal(result.status, "created");
+  if (result.status === "created") issues.push(result.issueId);
 });
 
 // ---------------------------------------------------------------------------

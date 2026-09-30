@@ -297,6 +297,16 @@ export const runMatchingStage = async (
     },
   );
   if (!lease.acquired) {
+    if (lease.reason === "already_leased") {
+      // Somebody holds the stage right now, or died holding it. That is not
+      // "done": acknowledging it would mark the task delivered and leave the
+      // report ungrouped for good. Refuse so the relay tries again once the
+      // lease has run out.
+      return {
+        status: "failed",
+        reason: "another worker holds a live lease on this report's matching; retry after it ends",
+      };
+    }
     return { status: "already_processed" };
   }
 

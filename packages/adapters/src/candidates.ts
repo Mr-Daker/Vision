@@ -166,6 +166,13 @@ export const retrieveCandidates = async (
         (asset_id is not null and asset_id = $5) as asset_matches
       from canonical_issue
      where opened_at >= now() - ($4::numeric * interval '1 hour')
+       -- An issue is a problem somebody reported. One with no live report
+       -- behind it (its evidence was removed or re-linked, or a run was
+       -- interrupted) is not a problem a new report can be "the same as", and
+       -- offering it asked residents about issues with nothing in them.
+       and exists (select 1 from issue_evidence_link link
+                    where link.canonical_issue_id = canonical_issue.issue_id
+                      and link.effective_to is null)
        and ($8::uuid is null or jurisdiction_id is null or jurisdiction_id = $8::uuid)
        and (not $9::boolean or jurisdiction_id is null)
        and (

@@ -30,7 +30,7 @@
 import type { RecurrenceClassification } from "./participation.ts";
 
 /** Bumped whenever a rule or threshold below changes; recorded on every proposal. */
-export const MATCHER_VERSION = "matcher.v1";
+export const MATCHER_VERSION = "matcher.v2";
 
 export type MatchThresholds = {
   /** Cosine distance at or below which two texts are "about the same thing". */
@@ -109,8 +109,17 @@ type Assessment = {
   readonly signals: MatchSignals;
   readonly eligible: boolean;
   readonly strength: number;
+  /**
+   * Same category and close enough, but no text comparison was available. Not
+   * eligible to match, and not evidence of a different problem either: it is
+   * a likely duplicate nobody could check, which a person should see.
+   */
+  readonly uncompared?: boolean;
   readonly reasons: readonly string[];
 };
+
+/** More than this and a person cannot weigh them; the nearest are the likeliest. */
+const MAX_UNCOMPARED_CANDIDATES = 5;
 
 const assess = (signals: MatchSignals, thresholds: MatchThresholds): Assessment => {
   const reasons: string[] = [];
@@ -164,11 +173,14 @@ const assess = (signals: MatchSignals, thresholds: MatchThresholds): Assessment 
   }
 
   if (signals.semanticDistance === undefined) {
-    // Only "it is near" is left, and proximity alone must not decide.
+    // Only "it is near" is left, and proximity alone must not decide. It also
+    // must not be read as "different": that is what left every pair of
+    // duplicates ungrouped whenever no embedding provider was configured.
     return {
       signals,
       eligible: false,
       strength: 0,
+      uncompared: true,
       reasons: [
         ...reasons,
         "no semantic comparison was available, and proximity on its own is not enough to call two reports the same problem",
@@ -236,6 +248,30 @@ export const proposeMatch = (input: MatchProposalInput): MatchProposal => {
     .sort((a, b) => b.strength - a.strength);
 
   if (eligible.length === 0) {
+    const uncompared = assessments
+      .filter((assessment) => assessment.uncompared === true)
+      .sort((a, b) => a.signals.distanceMetres - b.signals.distanceMetres)
+      .slice(0, MAX_UNCOMPARED_CANDIDATES);
+    if (uncompared.length > 0) {
+      // Close, same category, and impossible to compare by meaning. Neither a
+      // merge (proximity alone cannot decide) nor a new issue (that hides a
+      // likely duplicate): a person is asked, nearest candidate first.
+      return {
+        ...base,
+        decision: "ambiguous",
+        candidates: uncompared.map((assessment) => ({
+          issueId: assessment.signals.issueId,
+          publicReference: assessment.signals.publicReference,
+        })),
+        requiresReview: true,
+        mayMerge: false,
+        permittedTreatments: [],
+        reasons: [
+          "no text comparison was available, so whether this is the same problem as a nearby report of the same category cannot be decided automatically",
+          ...uncompared.flatMap((assessment) => assessment.reasons),
+        ],
+      };
+    }
     return {
       ...base,
       decision: "new_issue",

@@ -30,6 +30,7 @@ const read = (page: string): string => readFileSync(join(PUBLIC_DIR, page), "utf
 const IDENTITY_SCREENS = [
   "index.html",
   "signin.html",
+  "team.html",
   "app.html",
   "staff.html",
   "reviewer.html",
@@ -41,6 +42,7 @@ const IDENTITY_SCREENS = [
 /** Screens where a department, a recipient or a delivery appears. */
 const DEPARTMENT_SCREENS = [
   "index.html",
+  "team.html",
   "app.html",
   "staff.html",
   "reviewer.html",

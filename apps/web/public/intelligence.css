@@ -51,6 +51,9 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
+  /* One column that can shrink: with the default auto column the page took the
+     widest child's minimum (378px on a 375px phone) and scrolled sideways. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   background: #000000;
   color: var(--pi-ink);

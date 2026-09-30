@@ -1,6 +1,13 @@
 /** DOM controller for the separate V032 reviewer workspace. */
 
 import { ReviewerApiClient, type ReviewerSession } from "./reviewer-api.ts";
+import { mountShell, wireFilterLinks } from "./shell.ts";
+import {
+  SIGN_IN_DID_NOT_STICK,
+  confirmSignedIn,
+  leaveToSignIn,
+  sendToStaffDoor,
+} from "./staff-door.ts";
 import {
   ACTION_LABELS,
   ageLabel,
@@ -14,6 +21,8 @@ import {
 import { renderIssueOverviewMap, type IssueMapPoint } from "./issue-map.ts";
 
 const api = new ReviewerApiClient();
+const shell = mountShell();
+wireFilterLinks();
 let session: ReviewerSession | undefined;
 let queue: ReviewerQueueView | undefined;
 let filter = "all";
@@ -42,9 +51,9 @@ const selectJurisdiction = (): HTMLSelectElement => el("jurisdiction-select");
 
 const renderSession = (): void => {
   const authenticated = session?.authenticated === true;
-  el("reviewer-login").hidden = authenticated;
   el("reviewer-workspace").hidden = !authenticated;
   el("reviewer-signout").hidden = !authenticated;
+  shell.setSignedIn(authenticated);
   if (!authenticated) return;
 
   const select = selectJurisdiction();
@@ -339,39 +348,6 @@ const loadQueue = async (): Promise<void> => {
   renderQueue();
 };
 
-const showLoginChoices = async (): Promise<void> => {
-  const choices = el("reviewer-login-choices");
-  choices.replaceChildren();
-  const result = await api.capabilities();
-  if (!result.ok) {
-    showError(result.message);
-    return;
-  }
-  el("identity-disclosure").textContent = result.value.identity_label;
-  for (const principal of result.value.demo_principals) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "login-choice";
-    button.textContent = principal.label;
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      button.textContent = "Signing in…";
-      const login = await api.login(principal.credential);
-      if (!login.ok) {
-        button.disabled = false;
-        button.textContent = principal.label;
-        showError(login.message);
-        return;
-      }
-      session = login.value;
-      renderSession();
-      await loadQueue();
-      el("workspace-heading").focus();
-    });
-    choices.append(button);
-  }
-};
-
 const initialize = async (): Promise<void> => {
   el("refresh-queue").addEventListener("click", () => void loadQueue());
   selectJurisdiction().addEventListener("change", () => void loadQueue());
@@ -381,22 +357,19 @@ const initialize = async (): Promise<void> => {
   });
   el("reviewer-signout").addEventListener("click", async () => {
     await api.logout();
-    session = undefined;
-    queue = undefined;
-    renderSession();
-    await showLoginChoices();
-    el("reviewer-login-heading").focus();
+    leaveToSignIn();
   });
 
   const existing = await api.session();
   if (existing.ok && existing.value.authenticated) {
+    confirmSignedIn();
     session = existing.value;
     renderSession();
     await loadQueue();
     return;
   }
   renderSession();
-  await showLoginChoices();
+  if (!sendToStaffDoor()) showError(SIGN_IN_DID_NOT_STICK);
 };
 
 void initialize();

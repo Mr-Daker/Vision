@@ -27,6 +27,7 @@ import {
   geolocationErrorKey,
   isLocationStale,
   readingAgeMinutes,
+  parseTypedCoordinates,
   validateCoordinates,
   type LocationReading,
 } from "./location.ts";
@@ -45,6 +46,7 @@ import {
   buildRequestBody,
   canSubmit,
   findBlocks,
+  PROCESSING_NOTICE_VERSION,
   newIdempotencyKey,
   type CaptureForm,
 } from "./submission.ts";
@@ -95,6 +97,7 @@ const formWith = (overrides: Loose<CaptureForm> = {}): CaptureForm =>
       description: { text: "" },
       interfaceLocale: enIN.code,
       idempotencyKey: "web-test-key",
+      processingConsent: true,
     },
     overrides,
   );
@@ -216,6 +219,39 @@ test("V019: impossible coordinates are refused before anything is sent", () => {
   assert.equal(validateCoordinates(91, 74.58).length, 1);
   assert.equal(validateCoordinates(16.85, 181).length, 1);
   assert.equal(validateCoordinates(Number.NaN, Number.POSITIVE_INFINITY).length, 2);
+});
+
+test("typed coordinates: a blank field is missing, not zero", () => {
+  // `Number("")` is 0, so an empty form used to become 0.0°, 0.0° — a valid
+  // point in the Atlantic that was then saved as the place of the problem.
+  assert.deepEqual(
+    parseTypedCoordinates("", "").issues.map((i) => i.field),
+    ["lat", "lon"],
+  );
+  assert.deepEqual(
+    parseTypedCoordinates("  ", "74.5").issues.map((i) => i.field),
+    ["lat"],
+  );
+  assert.deepEqual(
+    parseTypedCoordinates("16.85", "").issues.map((i) => i.field),
+    ["lon"],
+  );
+  assert.deepEqual(
+    parseTypedCoordinates("abc", "74.5").issues.map((i) => i.field),
+    ["lat"],
+  );
+  const good = parseTypedCoordinates(" 16.85 ", "74.56");
+  assert.deepEqual(good.issues, []);
+  assert.deepEqual([good.lat, good.lon], [16.85, 74.56]);
+  // A real zero is still a real coordinate.
+  assert.deepEqual(parseTypedCoordinates("0", "0").issues, []);
+});
+
+test("typed coordinates: each error says what is wrong, not just which field", () => {
+  const [lat] = parseTypedCoordinates("95", "74.5").issues;
+  assert.equal(lat?.key, "location.latitude_invalid");
+  const [lon] = parseTypedCoordinates("16.8", "").issues;
+  assert.equal(lon?.key, "location.longitude_invalid");
 });
 
 test("V019: a denied permission is distinguished from an unavailable position", () => {
@@ -516,6 +552,44 @@ test("V020: nothing is written to the device without consent", () => {
   assert.equal(drafts.load(1_000), undefined);
 });
 
+test("a report that was sent is not a draft: it cannot come back and swallow the next one", () => {
+  // A draft save is debounced. Sending inside that window cleared the draft,
+  // then the pending save wrote it back — with the sent report's idempotency
+  // key. The next report from this device reused the key, so the server
+  // replayed the old receipt and the new report was silently discarded.
+  const store = memoryStore();
+  const drafts = new DraftStore(store);
+  drafts.recordConsent("granted");
+  assert.equal(drafts.save(draftInput({ idempotencyKey: "web-sent" }), 1_000), true);
+
+  drafts.markSent("web-sent");
+  drafts.clear();
+
+  // The late save from the pending timer writes nothing.
+  assert.equal(drafts.save(draftInput({ idempotencyKey: "web-sent" }), 1_500), false);
+  assert.equal(drafts.load(2_000), undefined);
+
+  // A different report, with its own key, saves normally.
+  assert.equal(drafts.save(draftInput({ idempotencyKey: "web-next" }), 2_000), true);
+  assert.equal(drafts.load(2_500)?.idempotencyKey, "web-next");
+});
+
+test("a draft already on the device for a sent report is discarded on load", () => {
+  // Devices that hit the race before this fix still hold such a draft.
+  const store = memoryStore();
+  const drafts = new DraftStore(store);
+  drafts.recordConsent("granted");
+  drafts.save(draftInput({ idempotencyKey: "web-stale" }), 1_000);
+  drafts.markSent("web-stale");
+
+  assert.equal(drafts.load(2_000), undefined);
+  assert.equal(
+    store.map.has("vision.draft.v1"),
+    false,
+    "the stale draft is deleted, not just ignored",
+  );
+});
+
 test("V020: declining consent deletes anything an earlier grant stored", () => {
   const store = memoryStore();
   const drafts = new DraftStore(store);
@@ -705,6 +779,8 @@ test("V019: every locale key is rendered somewhere, and every rendered key exist
       // writing the sentence, so the keys are named here and rendered by
       // main.ts. Same reasoning as the rail above.
       "tracking.ts",
+      // The resident dashboard names each view's heading key there.
+      "resident-views.ts",
       // Renamed when the landing page took `/`; the citizen app is now app.html.
       "../public/app.html",
     ].map((file) => readFile(join(here, file), "utf8")),
@@ -721,4 +797,22 @@ test("V019: every locale key is rendered somewhere, and every rendered key exist
   for (const match of used.matchAll(/\bt\("([\w.]+)"/g)) referenced.add(match[1] ?? "");
   const missing = [...referenced].filter((key) => !declared.includes(key));
   assert.deepEqual(missing, [], "the interface renders keys the locale pack does not define");
+});
+
+test("a report cannot be sent until the person has agreed to its processing", () => {
+  const blocks = findBlocks(formWith({ processingConsent: false }));
+  assert.deepEqual(
+    blocks.map((block) => [block.field, block.errorKey]),
+    [["consent", "error.consent_required"]],
+    "the only thing missing is the agreement, and the message says so",
+  );
+  assert.deepEqual(findBlocks(formWith()), []);
+});
+
+test("the agreement travels with the report as the notice version and purpose", () => {
+  const body = buildRequestBody(formWith());
+  assert.deepEqual(body.consent, {
+    notice_version: PROCESSING_NOTICE_VERSION,
+    purposes: ["demo_processing"],
+  });
 });

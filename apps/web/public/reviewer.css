@@ -22,76 +22,51 @@
    the screen is a decision rather than a picture.
    ============================================================ */
 
-/* The light scheme. Both schemes are kept: an operator may sit in
-   front of this for a shift, and dropping one to win a cosmetic
-   argument would be removing an accessibility option. Ratios here
-   are the citizen app's, which contrast.test.ts measures against
-   app.css — reusing the same pairs means they are already proven
-   rather than estimated. */
+/* Both schemes are kept: an operator may sit in front of this for a
+   shift, and dropping one to win a cosmetic argument would be removing
+   an accessibility option. The values come from the Signal tokens in
+   theme.css, whose ratios contrast.test.ts measures. */
 :root {
-  --page: #ffffff;
-  --ink: #16191d; /* 17.6:1 on --page */
-  --muted: #4a5157; /* 8.1:1 on --page */
-  --dim: #646b72; /* 5.4:1 on --page */
-  --line: rgba(22, 25, 29, 0.14);
-  --line-strong: rgba(22, 25, 29, 0.26);
-  --surface: #f4f4f5;
-  --glass: rgba(255, 255, 255, 0.66);
-  --glass-edge: rgba(22, 25, 29, 0.12);
-  --accent: #16191d; /* 17.6:1 with --accent-ink */
-  --accent-hover: #000000;
-  --accent-ink: #ffffff;
-  --danger: #a4231b; /* 7.4:1 on --page */
-  --danger-soft: rgba(164, 35, 27, 0.08);
+  /* Signal (theme.css): every colour below resolves to a --sg-* token,
+     which carries both schemes and is contrast-tested there. */
+  --page: var(--sg-page);
+  --ink: var(--sg-ink);
+  --muted: var(--sg-ink-muted);
+  --dim: var(--sg-ink-dim);
+  --line: color-mix(in srgb, var(--sg-ink) 14%, transparent);
+  --line-strong: color-mix(in srgb, var(--sg-ink) 26%, transparent);
+  --surface: var(--sg-panel);
+  --glass: color-mix(in srgb, var(--sg-panel) 72%, transparent);
+  --glass-edge: color-mix(in srgb, var(--sg-ink) 12%, transparent);
+  --accent: var(--sg-accent);
+  --accent-hover: var(--sg-accent-hover);
+  --accent-ink: var(--sg-accent-ink);
+  --danger: var(--sg-danger);
+  --danger-soft: color-mix(in srgb, var(--sg-danger) 10%, transparent);
   /* Warm amber means one thing across these screens and nothing
      else: "this part is simulated, or is a caveat". It is never
      decoration. */
-  --caution: #6b4300; /* 8.2:1 on --caution-soft */
-  --caution-soft: rgba(240, 176, 106, 0.16);
-  --focus: #1f6feb; /* 4.6:1 on --page */
+  --caution: var(--sg-warning-ink);
+  --caution-soft: var(--sg-warning-bg);
+  --focus: var(--sg-focus);
   --radius: 0.75rem;
   --measure: 72rem;
 
-  /* The landing wave at the intensity a working surface can carry:
-     enough for the glass to have something to refract, not enough
-     to compete with a queue. Light scheme gets a fraction of it —
-     a dark atmosphere under near-black text costs contrast for
-     nothing. */
   --ground-violet: rgba(126, 106, 168, 0.07);
-  --ground-crest: rgba(178, 106, 92, 0.06);
+  --ground-crest: rgba(178, 106, 92, 0.04);
   --ground-grid: rgba(22, 25, 29, 0.03);
 
-  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23646b72' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23625e72' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-/* The dark scheme is the product's own: exactly the landing page's
-   ground and accent, so arriving here from the front door is not a
-   change of product. */
+/* The dark scheme: only what is not already a --sg-* token. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #000000;
-    --ink: #ffffff; /* 21:1 on --page */
-    --muted: #b4b4b4; /* 10.1:1 on --page */
-    --dim: #8a9099; /* 6.5:1 on --page, 5.8:1 on the glass */
-    --line: rgba(255, 255, 255, 0.1);
-    --line-strong: rgba(255, 255, 255, 0.22);
-    --surface: #141416;
-    --glass: rgba(22, 23, 27, 0.62);
-    --glass-edge: rgba(255, 255, 255, 0.11);
-    --accent: #ffffff; /* 21:1 with --accent-ink */
-    --accent-hover: #e4e4e4;
-    --accent-ink: #000000;
-    --danger: #ff8a6b; /* 9.1:1 on --page, 8.1:1 on the glass */
-    --danger-soft: rgba(255, 138, 107, 0.12);
-    --caution: #f0b06a; /* 11.1:1 on --page */
-    --caution-soft: rgba(240, 176, 106, 0.1);
-    --focus: #9ec5ff; /* 11.9:1 on --page */
-
-    --ground-violet: rgba(150, 128, 198, 0.16);
-    --ground-crest: rgba(206, 122, 104, 0.13);
+    --ground-violet: rgba(150, 128, 198, 0.14);
+    --ground-crest: rgba(206, 122, 104, 0.06);
     --ground-grid: rgba(255, 255, 255, 0.028);
 
-    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%238a9099' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%238e8c99' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -204,94 +179,13 @@ body::after {
 }
 
 /* ── Chrome ───────────────────────────────────────────────────
-   The landing page's header, held down to operator weight: the
-   logo on its white plate, the workspace name in the display face,
-   and pill links that read as chrome rather than as content. */
+   The header became the role sidebar (shell.css): wordmark, this
+   role's options, Switch role and Sign out. A sidebar option that
+   stands in for a filter <select> leaves the select in the page for
+   the script, and hides its visible copy here. */
 
-.reviewer-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.7rem clamp(1rem, 4vw, 2.25rem);
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--page) 72%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-}
-
-.reviewer-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-  color: inherit;
-  text-decoration: none;
-}
-
-/* The plate is the image's own box: an absolute height plus padding
-   on a replaced element, never a percentage, which in a shrink-to-
-   fit parent is circular and falls back to the intrinsic width. */
-.reviewer-brand img {
-  display: block;
-  width: auto;
-  height: 2.55rem;
-  padding: 0.42rem 0.6rem;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: var(--nav-shadow);
-  object-fit: contain;
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.reviewer-brand:hover img {
-  transform: scale(1.04);
-}
-
-/* Full ink, not the nav's muted grey: `.reviewer-header a` is more
-   specific than `.reviewer-brand`, so without this the product's
-   own name renders at the weight of a link to somewhere else. */
-.reviewer-brand span {
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.reviewer-header nav {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.reviewer-header a,
-.reviewer-header button {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  padding: 0.5rem 0.95rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.85rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.reviewer-header a:hover,
-.reviewer-header button:hover {
-  border-color: var(--line-strong);
-  color: var(--ink);
+.shell-replaced {
+  display: none !important;
 }
 
 main {
@@ -351,8 +245,8 @@ h3 {
 .eyebrow {
   margin-bottom: 0.6rem;
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.66rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -553,8 +447,8 @@ label {
   display: grid;
   gap: 0.4rem;
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -632,15 +526,16 @@ textarea {
 
 .queue-summary dt {
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.6rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .queue-summary dd {
   margin: 0.35rem 0 0;
-  font-family: var(--font-display);
+  font-family: var(--font-headline);
   font-size: clamp(1.75rem, 4vw, 2.4rem);
   font-weight: 400;
   line-height: 1;
@@ -766,8 +661,8 @@ textarea {
 
 .kind-label,
 .age-label {
-  font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -782,7 +677,7 @@ textarea {
 }
 
 .review-card h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -810,8 +705,8 @@ blockquote {
 
 blockquote strong {
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.58rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -862,7 +757,7 @@ blockquote strong {
   border: 1px dashed var(--line-strong);
   border-radius: 1rem;
   color: var(--dim);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.82rem;
   letter-spacing: 0.02em;
   text-align: center;
@@ -884,27 +779,6 @@ footer {
 }
 
 @media (max-width: 760px) {
-  /* The brand and three pills cannot share a row at this width, and
-     a wrapped header is 142px — eighteen per cent of a phone screen
-     held there permanently, over the queue the operator is working.
-     Navigation to the other workspace is not something they need in
-     view at all times, so it scrolls away. The skip link still
-     reaches the main region. */
-  .reviewer-header {
-    position: static;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .reviewer-header nav {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .reviewer-brand span {
-    font-size: 0.7rem;
-  }
-
   .queue-controls {
     grid-template-columns: 1fr;
   }
@@ -969,8 +843,9 @@ footer {
 .claim-progress {
   margin: 0 0 0.9rem;
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 600;
 }

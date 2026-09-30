@@ -34,12 +34,30 @@ export type CoordinateIssue = { readonly field: "lat" | "lon"; readonly key: Str
 export const validateCoordinates = (lat: number, lon: number): readonly CoordinateIssue[] => {
   const issues: CoordinateIssue[] = [];
   if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
-    issues.push({ field: "lat", key: "location.latitude" });
+    issues.push({ field: "lat", key: "location.latitude_invalid" });
   }
   if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
-    issues.push({ field: "lon", key: "location.longitude" });
+    issues.push({ field: "lon", key: "location.longitude_invalid" });
   }
   return issues;
+};
+
+/**
+ * Coordinates as a person typed them.
+ *
+ * A blank field is missing, not zero: `Number("")` is 0, which is a valid
+ * point (0°, 0° in the Atlantic), so an empty form used to pass validation and
+ * be saved as the place of the problem.
+ */
+export const parseTypedCoordinates = (
+  latText: string,
+  lonText: string,
+): { readonly lat: number; readonly lon: number; readonly issues: readonly CoordinateIssue[] } => {
+  const parse = (text: string): number =>
+    text.trim().length === 0 ? Number.NaN : Number(text.trim());
+  const lat = parse(latText);
+  const lon = parse(lonText);
+  return { lat, lon, issues: validateCoordinates(lat, lon) };
 };
 
 /**

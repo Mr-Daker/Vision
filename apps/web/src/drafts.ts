@@ -36,6 +36,11 @@ export interface KeyValueStore {
 export const DRAFT_TTL_HOURS = 24;
 const DRAFT_KEY = "vision.draft.v1";
 const CONSENT_KEY = "vision.draft-consent.v1";
+/**
+ * The idempotency key of the report last sent from this device. A draft that
+ * carries it is a report that already exists, not work in progress.
+ */
+const SENT_KEY = "vision.draft-sent-key.v1";
 
 export type DraftConsent = "granted" | "declined" | "unasked";
 
@@ -91,6 +96,11 @@ export class DraftStore {
   /** Returns whether anything was written, so the interface can be honest. */
   save(input: DraftInput, nowMs: number): boolean {
     if (this.consent() !== "granted") return false;
+    // A pending debounced save can fire after the report was sent and the
+    // draft cleared. Writing it back would resurrect the sent report's key,
+    // and the next report from this device would be answered with the old
+    // receipt and discarded.
+    if (this.store.getItem(SENT_KEY) === input.idempotencyKey) return false;
 
     const photoReference = acceptedReference(input.photo);
     const voiceReference = acceptedReference(input.voice);
@@ -147,7 +157,22 @@ export class DraftStore {
       this.store.removeItem(DRAFT_KEY);
       return undefined;
     }
+    // Written by a save that raced a send, before that could not happen.
+    if (this.store.getItem(SENT_KEY) === draft.idempotencyKey) {
+      this.store.removeItem(DRAFT_KEY);
+      return undefined;
+    }
     return draft;
+  }
+
+  /** Records that the report with this key reached the server. */
+  markSent(idempotencyKey: string): void {
+    try {
+      this.store.setItem(SENT_KEY, idempotencyKey);
+    } catch {
+      // Storage refused: the draft is cleared regardless, and the timer is
+      // cancelled by the caller. This only loses the belt to those braces.
+    }
   }
 
   clear(): void {
@@ -158,6 +183,7 @@ export class DraftStore {
   clearAll(): void {
     this.store.removeItem(DRAFT_KEY);
     this.store.removeItem(CONSENT_KEY);
+    this.store.removeItem(SENT_KEY);
   }
 }
 

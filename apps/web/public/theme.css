@@ -101,4 +101,71 @@
 
   /* The minimum touch target the interface holds itself to (V019). */
   --target-min: 2.75rem;
+
+  /* ── Signal (role dashboards design, 2026-09-29) ────────────
+     The one palette and type scale every dashboard reads. Page
+     stylesheets keep their own token names and point them here, so
+     a colour changes in one place and every screen follows.
+
+     Headlines use the dot-matrix face, and only at 1.75rem and up:
+     below that its dots close up and it stops being type. It has no
+     Devanagari, so the stack falls through to a sans face for a
+     translated heading instead of to monospace. Labels and body stay
+     in Inter at every size.
+
+     `contrast.test.ts` reads this block as the light scheme and the
+     dark block below it as the dark scheme, and fails if any text
+     pair drops under 4.5:1 or the focus ring under 3:1. */
+  --font-headline: "BubbledotICG-FinePos", "Inter", "Noto Sans Devanagari", system-ui, sans-serif;
+  --font-label: var(--font-sans);
+
+  --sg-text-xs: 0.75rem;
+  --sg-text-sm: 0.875rem;
+  --sg-text-base: 1rem;
+  --sg-text-md: 1.25rem;
+  --sg-text-lg: 1.75rem;
+  --sg-text-xl: 2.5rem;
+  --sg-text-2xl: 3.5rem;
+
+  --sg-page: #f8f7fb; /* ink 17.2:1 */
+  --sg-sidebar: #f0eef6;
+  --sg-panel: #ffffff;
+  --sg-line: #d6d2e3;
+  --sg-ink: #15131d;
+  --sg-ink-muted: #4f4b5e; /* 7.9:1 on page, 7.3:1 on sidebar */
+  --sg-ink-dim: #625e72; /* 5.4:1 on sidebar */
+  --sg-accent: #4b3fc4; /* 7.5:1 with its ink */
+  --sg-accent-hover: #3b30a6;
+  --sg-accent-ink: #ffffff;
+  --sg-accent-soft: #e6e2ff;
+  --sg-accent-text: #3b30a6; /* 7.7:1 on accent-soft */
+  --sg-danger: #a4231b;
+  --sg-danger-bg: #fdf3f2;
+  --sg-warning-ink: #6b4300;
+  --sg-warning-bg: #fff8e6;
+  --sg-focus: #1f6feb; /* 4.3:1 on page */
+  --sg-radius: 0.75rem;
+  --sg-radius-lg: 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sg-page: #0d0c10; /* ink 16.9:1 */
+    --sg-sidebar: #121117;
+    --sg-panel: #17161d;
+    --sg-line: #2c2a36;
+    --sg-ink: #eeeef2;
+    --sg-ink-muted: #a9a7b3; /* 8.2:1 on page, 7.6:1 on panel */
+    --sg-ink-dim: #8e8c99; /* 5.7:1 on sidebar */
+    --sg-accent: #b9b1ff; /* 9.3:1 with its ink */
+    --sg-accent-hover: #cdc7ff;
+    --sg-accent-ink: #16132b;
+    --sg-accent-soft: #221f33;
+    --sg-accent-text: #c9c2ff; /* 9.6:1 on accent-soft */
+    --sg-danger: #ff8a80;
+    --sg-danger-bg: #2b1a1c;
+    --sg-warning-ink: #f2cf7a;
+    --sg-warning-bg: #2a2116;
+    --sg-focus: #9ec5ff; /* 11.0:1 on page */
+  }
 }

@@ -117,6 +117,12 @@ const recheckCandidates = async (
     `select issue_id
        from canonical_issue
       where category = $5
+        -- The same rule as the candidate search: an issue with no live report
+        -- behind it is never offered, so it must not count as "appeared" here
+        -- either, or every report near one would be stale on every attempt.
+        and exists (select 1 from issue_evidence_link link
+                     where link.canonical_issue_id = canonical_issue.issue_id
+                       and link.effective_to is null)
         and ($7::uuid is null or jurisdiction_id is null or jurisdiction_id = $7::uuid)
         and (not $8::boolean or jurisdiction_id is null)
         and opened_at >= now() - ($4::numeric * interval '1 hour')
@@ -170,6 +176,17 @@ const aliasEdges = async (tx: Queryable): Promise<readonly AliasEdge[]> => {
 const runAssignment = async (tx: Queryable, input: AssignmentInput): Promise<AssignmentResult> => {
   const attemptNumber = await nextAttemptNumber(tx, input.submissionId);
   const now = new Date().toISOString();
+
+  // Only one match per report is current. An earlier attempt that was recorded
+  // as retryable stays as history but steps aside for this one; without that,
+  // the rerun a stale attempt asks for could never be written, and the report
+  // was never grouped. Attempts a person has answered are not touched.
+  await tx.query(
+    `update issue_match
+        set superseded_at = now()
+      where submission_id = $1 and superseded_at is null and state = 'failed_retryable'`,
+    [input.submissionId],
+  );
 
   // Ambiguity is recorded and stops here. No issue, no link, no merge: a merge
   // is the one step that is expensive to undo, so it never happens without a

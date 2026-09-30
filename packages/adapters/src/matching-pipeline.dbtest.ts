@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 
+import { acquireStageLease } from "./outbox.ts";
 import {
   runMatchingStage,
   type ClassifyText,
@@ -618,6 +619,28 @@ test("PIPE: the recheck searches the same bounds retrieval did", async () => {
 // ---------------------------------------------------------------------------
 // The stage is a V017 stage
 // ---------------------------------------------------------------------------
+
+test("PIPE: a live lease held by someone else is a retry, not a finished job", async () => {
+  const { submissionId } = await newSubmission({ origin: nextOrigin() });
+  // Another worker holds the stage — or died holding it, which looks the same
+  // until the lease runs out. Reporting that as "already processed" marks the
+  // task delivered, and the report then waits in "received" for ever.
+  const held = await acquireStageLease(
+    client,
+    { submissionId, stage: MATCHING_STAGE, pipelineVersion: MATCHING_PIPELINE_VERSION },
+    { owner: "someone-else", leaseSeconds: 300 },
+  );
+  assert.equal(held.acquired, true);
+
+  const result = await runMatchingStage(client, {
+    submissionId,
+    jurisdictionId,
+    ...stageOptions(),
+  });
+
+  assert.equal(result.status, "failed");
+  if (result.status === "failed") assert.match(result.reason, /lease/i);
+});
 
 test("PIPE: the stage takes a lease so duplicate delivery is harmless", async () => {
   const { submissionId } = await newSubmission({ origin: nextOrigin() });

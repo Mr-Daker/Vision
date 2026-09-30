@@ -30,6 +30,8 @@ import {
   toCandidateView,
   toDiscoveryMapView,
   toReceiptLookupView,
+  toRoadmapView,
+  type RoadmapView,
   normalizeReceiptReference,
   type ReportPayload,
   type ReportRow,
@@ -55,7 +57,7 @@ import {
   geolocationErrorKey,
   isLocationStale,
   readingAgeMinutes,
-  validateCoordinates,
+  parseTypedCoordinates,
   type LocationReading,
 } from "./location.ts";
 import { DARK_MAP_STYLE, loadMaps, systemPrefersDark } from "./maps-loader.ts";
@@ -76,6 +78,13 @@ import {
   type CaptureForm,
 } from "./submission.ts";
 import { buildDemoIdentityViewModel, type DemoIdentityMetadata } from "./identity-ui.ts";
+import { mountShell, resolveView } from "./shell.ts";
+import {
+  DEFAULT_RESIDENT_VIEW,
+  RESIDENT_VIEWS,
+  RESIDENT_VIEW_TITLES,
+  type ResidentView,
+} from "./resident-views.ts";
 
 /** The locale catalogue. Adding a language is a change to this list only. */
 const CATALOGUE = { packs: [enIN, mrIN] as readonly LocalePack[], fallbackCode: enIN.code };
@@ -130,6 +139,26 @@ const state: AppState = {
 
 const t = (key: StringKey, params?: Readonly<Record<string, string | number>>): string =>
   state.translator.t(key, params);
+
+// ---------------------------------------------------------------------------
+// The resident dashboard's views (role dashboards design, 2026-09-29)
+// ---------------------------------------------------------------------------
+
+const shell = mountShell();
+let currentView: ResidentView = resolveView(location.hash, RESIDENT_VIEWS, DEFAULT_RESIDENT_VIEW);
+
+/**
+ * Puts one option on screen. The h1 names it, because the sidebar link that
+ * chose it is not where a screen reader lands; `focus` moves there when the
+ * change came from the person rather than from a script.
+ */
+const showView = (view: ResidentView, focus = false): void => {
+  currentView = view;
+  shell.showView(view);
+  el("page-title").textContent = t(RESIDENT_VIEW_TITLES[view]);
+  if (location.hash !== `#${view}`) history.replaceState(null, "", `#${view}`);
+  if (focus) el("page-title").focus();
+};
 
 // ---------------------------------------------------------------------------
 // Announcements and errors
@@ -206,6 +235,11 @@ const applyStaticText = (): void => {
 
   document.documentElement.lang = state.translator.pack.code;
   document.documentElement.dir = state.translator.pack.direction;
+
+  el("page-title").textContent = t(RESIDENT_VIEW_TITLES[currentView]);
+  el("shell-menu").setAttribute("aria-label", t("nav.menu"));
+  el("shell-nav").setAttribute("aria-label", t("nav.label"));
+  el("shell-sidebar").setAttribute("aria-label", t("nav.label"));
 
   el("photo-hint").textContent = t("photo.hint", { megabytes: MAX_UPLOAD_BYTES / MEGABYTE });
   el("description-hint").textContent = t("describe.text_hint", { max: MAX_TEXT_LENGTH });
@@ -365,6 +399,7 @@ const currentForm = (): CaptureForm => ({
   },
   interfaceLocale: state.translator.pack.code,
   idempotencyKey: state.idempotencyKey,
+  processingConsent: el<HTMLInputElement>("processing-consent").checked,
 });
 
 const renderSubmitAvailability = (): void => {
@@ -457,6 +492,8 @@ const saveDraftSoon = (): void => {
 
 /** Removes the device draft on request, leaving the form as it is on screen. */
 const discardDraft = (): void => {
+  if (draftTimer !== undefined) window.clearTimeout(draftTimer);
+  draftTimer = undefined;
   drafts.clear();
   el("draft-state").textContent = "";
   el("draft-expiry").hidden = true;
@@ -595,12 +632,12 @@ const initManualMapPicker = async (): Promise<void> => {
 
   const latInput = el<HTMLInputElement>("manual-lat");
   const lonInput = el<HTMLInputElement>("manual-lon");
-  const existingLat = Number(latInput.value.trim());
-  const existingLon = Number(lonInput.value.trim());
-  const hasExisting =
-    latInput.value.trim().length > 0 &&
-    lonInput.value.trim().length > 0 &&
-    validateCoordinates(existingLat, existingLon).length === 0;
+  const {
+    lat: existingLat,
+    lon: existingLon,
+    issues: existingIssues,
+  } = parseTypedCoordinates(latInput.value, lonInput.value);
+  const hasExisting = existingIssues.length === 0;
   const center = hasExisting ? { lat: existingLat, lng: existingLon } : MANUAL_MAP_DEFAULT_CENTER;
 
   manualMap = new result.maps.Map(container, {
@@ -635,9 +672,10 @@ const initManualMapPicker = async (): Promise<void> => {
   // Typed coordinates move the pin too, so the map never shows a place the
   // fields disagree with.
   const syncMarkerFromFields = (): void => {
-    const lat = Number(latInput.value.trim());
-    const lon = Number(lonInput.value.trim());
-    if (validateCoordinates(lat, lon).length > 0) return;
+    // Only when both fields hold a real coordinate: clearing one used to read
+    // as 0 and send the map to the Atlantic.
+    const { lat, lon, issues } = parseTypedCoordinates(latInput.value, lonInput.value);
+    if (issues.length > 0) return;
     manualMap?.panTo({ lat, lng: lon });
     placeManualMarker({ lat, lng: lon });
   };
@@ -648,22 +686,16 @@ const initManualMapPicker = async (): Promise<void> => {
 const applyManualLocation = (): void => {
   const latInput = el<HTMLInputElement>("manual-lat");
   const lonInput = el<HTMLInputElement>("manual-lon");
-  const lat = Number(latInput.value.trim());
-  const lon = Number(lonInput.value.trim());
-
-  const issues = validateCoordinates(lat, lon);
-  fieldError(
-    "manual-lat-error",
-    issues.some((issue) => issue.field === "lat") ? t("location.latitude") : undefined,
-    latInput,
-  );
-  fieldError(
-    "manual-lon-error",
-    issues.some((issue) => issue.field === "lon") ? t("location.longitude") : undefined,
-    lonInput,
-  );
+  const { lat, lon, issues } = parseTypedCoordinates(latInput.value, lonInput.value);
+  const latIssue = issues.find((issue) => issue.field === "lat");
+  const lonIssue = issues.find((issue) => issue.field === "lon");
+  fieldError("manual-lat-error", latIssue === undefined ? undefined : t(latIssue.key), latInput);
+  fieldError("manual-lon-error", lonIssue === undefined ? undefined : t(lonIssue.key), lonInput);
   if (issues.length > 0) {
-    announce(t("error.validation"));
+    announce(
+      (latIssue ?? lonIssue) === undefined ? t("error.validation") : t((latIssue ?? lonIssue)!.key),
+    );
+    (latIssue !== undefined ? latInput : lonInput).focus();
     return;
   }
 
@@ -884,6 +916,8 @@ const renderSignedIn = (label: string): void => {
   // rather than as emphasis. This line says strictly more — it states the
   // session as well as the provider — so it is the one that stays.
   el("capability-label").hidden = true;
+  shell.setSignedIn(true);
+  showView(currentView);
   renderAll();
 };
 
@@ -893,36 +927,43 @@ const renderLoginPanel = (metadata: CapabilityMetadata): void => {
   const model = buildDemoIdentityViewModel(metadata as unknown as DemoIdentityMetadata);
   el("capability-label").textContent = model.providerLabel;
   el("capability-label").hidden = false;
-  el("login-warning").textContent = model.warning;
-
-  const choices = el("login-choices");
-  choices.replaceChildren();
-  for (const principal of model.availablePrincipals) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "button";
-    button.textContent = t("login.choose", { label: principal.label });
-    button.addEventListener("click", () => void signIn(principal.credential, principal.label));
-    choices.append(button);
-  }
-
   el("login-panel").hidden = false;
   el("report-form").hidden = true;
+  shell.setSignedIn(false);
+
+  // No account list: a resident who chose "Residents" at the door is signed
+  // straight in, as the first account the server offers. A failure leaves
+  // the reason on screen and a way to try again, never a silent spinner.
+  const [account] = model.availablePrincipals;
+  const retry = el<HTMLButtonElement>("login-retry");
+  if (account === undefined) {
+    showErrors([t("error.server")]);
+    return;
+  }
+  const attempt = (): void => {
+    retry.hidden = true;
+    void signIn(account.credential, account.label).then((signedIn) => {
+      retry.hidden = signedIn;
+    });
+  };
+  retry.addEventListener("click", attempt);
+  attempt();
 };
 
-const signIn = async (credential: string, label: string): Promise<void> => {
+const signIn = async (credential: string, label: string): Promise<boolean> => {
   clearErrors();
   const result = await api.demoLogin(credential);
   if (!result.ok) {
     showErrors([result.offline ? t("error.offline") : result.message]);
-    return;
+    return false;
   }
   renderSignedIn(label);
   // The first load ran before a session existed. Fetch again now so the
   // citizen does not have to reload the page to reach tracking or lookup.
   void loadMyReports();
-  el<HTMLElement>("location-heading").scrollIntoView({ block: "nearest" });
+  showView(currentView, true);
   announce(t("login.signed_in_as"));
+  return true;
 };
 
 const signOut = async (): Promise<void> => {
@@ -930,7 +971,9 @@ const signOut = async (): Promise<void> => {
   // The server clears the session cookie; the client clears what it kept on
   // the device, because a shared phone must not leak the last person's draft.
   drafts.clearAll();
-  window.location.reload();
+  // Back to the two ways in. Reloading here would sign the resident straight
+  // back in, which is not what signing out means.
+  window.location.assign("/signin.html");
 };
 
 // ---------------------------------------------------------------------------
@@ -941,7 +984,13 @@ const showReceipt = (receipt: Receipt): void => {
   el("report-form").hidden = true;
   el("receipt-panel").hidden = false;
   el("receipt-reference").textContent = receipt.submission_id;
-  el("receipt-status").textContent = receipt.processing_status;
+  // In the resident's words, as "your reports" says it. `received` is the
+  // intake status; at this moment the report is exactly that, not yet grouped.
+  el("receipt-status").textContent = t("tracking.status_received");
+  el("receipt-track").onclick = () => {
+    showView("lookup", true);
+    void lookupReceipt(receipt.submission_id);
+  };
   el("receipt-received-at").textContent = new Date(receipt.server_received_at).toLocaleString(
     state.translator.pack.code,
   );
@@ -952,6 +1001,13 @@ const showReceipt = (receipt: Receipt): void => {
 
   // The draft is only cleared once the server has confirmed the report is
   // saved. Clearing it on send would lose the report if the send failed.
+  //
+  // The pending debounced save is cancelled too, and the key marked sent: a
+  // save that fired after this would write the sent report back as a draft,
+  // and the next report from this device would reuse its key and be discarded.
+  if (draftTimer !== undefined) window.clearTimeout(draftTimer);
+  draftTimer = undefined;
+  drafts.markSent(state.idempotencyKey);
   drafts.clear();
   el("draft-state").textContent = "";
   el("draft-expiry").hidden = true;
@@ -1038,6 +1094,7 @@ const startAnotherReport = (): void => {
   el("receipt-panel").hidden = true;
   el("report-form").hidden = false;
   el("draft-restored").hidden = true;
+  showView("report");
   renderAll();
   el("location-heading").scrollIntoView({ block: "nearest" });
   el<HTMLButtonElement>("use-location").focus();
@@ -1068,6 +1125,8 @@ const wire = (): void => {
     if (displayedDiscoveryRadiusMetres !== undefined) {
       renderDiscoveryMap(displayedDiscoveryRows, displayedDiscoveryRadiusMetres);
     }
+    if (lastRoadmap !== undefined) renderRoadmap(lastRoadmap);
+    if (lastIssueRoadmap !== undefined) renderIssueRoadmap(lastIssueRoadmap);
     announce(t("app.language_label"));
   });
 
@@ -1107,6 +1166,8 @@ const wire = (): void => {
 
   el("voice-record").addEventListener("click", () => void toggleRecording());
 
+  el("processing-consent").addEventListener("change", renderSubmitAvailability);
+
   const description = el<HTMLTextAreaElement>("description");
   description.addEventListener("input", () => {
     renderRemaining();
@@ -1131,6 +1192,12 @@ const wire = (): void => {
   el("consent-decline").addEventListener("click", () => {
     drafts.recordConsent("declined");
     el("consent-panel").hidden = true;
+  });
+
+  // The sidebar's links are plain hash links, so the back button, a reload
+  // and a shared link all go through here.
+  window.addEventListener("hashchange", () => {
+    showView(resolveView(location.hash, RESIDENT_VIEWS, DEFAULT_RESIDENT_VIEW), true);
   });
 
   // A location captured before the phone was pocketed may no longer be where
@@ -1239,7 +1306,10 @@ const renderMyReports = (rows: readonly ReportRow[]): void => {
     openReceipt.type = "button";
     openReceipt.className = "button-quiet";
     openReceipt.textContent = t("tracking.open_receipt");
-    openReceipt.addEventListener("click", () => void lookupReceipt(row.submissionId));
+    openReceipt.addEventListener("click", () => {
+      showView("lookup");
+      void lookupReceipt(row.submissionId);
+    });
     item.append(reference, status, evidence, receiptReference, openReceipt);
 
     if (row.hasIssue && row.reference !== undefined) {
@@ -1276,7 +1346,27 @@ const renderMyReports = (rows: readonly ReportRow[]): void => {
 const renderLookupReceipt = (receipt: Receipt): void => {
   const view = toReceiptLookupView(receipt);
   el("receipt-lookup-result-reference").textContent = view.reference;
-  el("receipt-lookup-result-status").textContent = view.status;
+  // Where the report is now, in the words "your reports" uses. A state this
+  // build has no wording for is shown as sent, and marked as English.
+  const status = el("receipt-lookup-result-status");
+  status.textContent = view.progressKey === undefined ? view.status : t(view.progressKey);
+  if (view.progressKey === undefined) status.lang = "en";
+  else status.removeAttribute("lang");
+
+  const issueLabel = el("receipt-lookup-result-issue-label");
+  const issue = el("receipt-lookup-result-issue");
+  issueLabel.hidden = view.issueReference === undefined;
+  issue.hidden = view.issueReference === undefined;
+  issue.replaceChildren();
+  if (view.issueReference !== undefined) {
+    const reference = view.issueReference;
+    const open = document.createElement("button");
+    open.type = "button";
+    open.className = "button-quiet";
+    open.textContent = `${reference} · ${t("discovery.open_detail")}`;
+    open.addEventListener("click", () => void openDetail(reference));
+    issue.append(open);
+  }
   el("receipt-lookup-result-received-at").textContent = new Date(view.receivedAt).toLocaleString(
     state.translator.pack.code,
   );
@@ -1305,6 +1395,9 @@ const lookupReceipt = async (reference?: string): Promise<void> => {
 
   fieldError("receipt-lookup-error", undefined, input);
   el("receipt-lookup-result").hidden = true;
+  // A previous receipt's roadmap must not stand under this one while it loads.
+  el("receipt-roadmap").hidden = true;
+  lastRoadmap = undefined;
   const normalized = normalizeReceiptReference(input.value);
   if (normalized === undefined) {
     fieldError("receipt-lookup-error", t("lookup.invalid"), input);
@@ -1333,11 +1426,132 @@ const lookupReceipt = async (reference?: string): Promise<void> => {
     }
     input.value = normalized;
     renderLookupReceipt(result.value);
+    void loadRoadmap(normalized);
   } finally {
     button.disabled = false;
     form.removeAttribute("aria-busy");
     if (buttonLabel !== null) buttonLabel.textContent = t("lookup.submit");
   }
+};
+
+// ---------------------------------------------------------------------------
+// Report roadmap (report roadmap design, 2026-09-30)
+// ---------------------------------------------------------------------------
+
+/** Kept so a language change can redraw them in the new language. */
+let lastRoadmap: RoadmapView | undefined;
+let lastIssueRoadmap: RoadmapView | undefined;
+
+const formatWhen = (iso: string, withTime: boolean): string =>
+  new Date(iso).toLocaleString(
+    state.translator.pack.code,
+    withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" },
+  );
+
+/** One roadmap block, found by its `data-roadmap-part` children. */
+const renderRoadmapInto = (root: HTMLElement, view: RoadmapView): void => {
+  const part = <T extends HTMLElement>(name: string): T => {
+    const node = root.querySelector<T>(`[data-roadmap-part="${name}"]`);
+    if (node === null) throw new Error(`roadmap block is missing its '${name}' part`);
+    return node;
+  };
+  // With every step done there is no current step, and the closing note
+  // ("you confirmed the repair") belongs under the last one.
+  const noteIndex = Math.max(
+    view.steps.findIndex((step) => step.state === "current"),
+    view.steps.every((step) => step.state === "done") ? view.steps.length - 1 : -1,
+  );
+  part("steps").replaceChildren(
+    ...view.steps.map((step, index) => {
+      const item = document.createElement("li");
+      item.className = `roadmap-step is-${step.state}`;
+      if (step.state === "current") item.setAttribute("aria-current", "step");
+      const label = document.createElement("span");
+      label.className = "roadmap-step-label";
+      label.textContent = t(step.labelKey);
+      item.append(label);
+      if (step.at !== undefined) {
+        const when = document.createElement("span");
+        when.className = "roadmap-step-when";
+        when.textContent = formatWhen(step.at, true);
+        item.append(when);
+      }
+      if (index === noteIndex) {
+        const note = document.createElement("span");
+        note.className = "roadmap-step-note";
+        note.textContent = t(view.noteKey);
+        item.append(note);
+      }
+      return item;
+    }),
+  );
+
+  const escalation = view.escalation;
+  part("escalation").hidden = escalation === undefined;
+  if (escalation !== undefined) {
+    part("day-count").textContent = t(
+      escalation.pastFirstWait ? "roadmap.day_count_past" : "roadmap.day_count",
+      { days: escalation.dayNumber, total: escalation.alertAfterDays },
+    );
+    // CSSOM, not a style attribute: the page's CSP refuses inline styles.
+    part("bar-fill").style.width = `${(escalation.progress * 100).toFixed(1)}%`;
+    part("bar-flag").style.left = `${(escalation.flagAt * 100).toFixed(1)}%`;
+    const line = (textContent: string): HTMLLIElement => {
+      const item = document.createElement("li");
+      item.textContent = textContent;
+      return item;
+    };
+    part("lines").replaceChildren(
+      line(
+        escalation.flaggedAt === undefined
+          ? t("roadmap.flag_due", {
+              date: formatWhen(escalation.flagDueAt, false),
+              days: escalation.alertAfterDays,
+            })
+          : t("roadmap.flagged", { date: formatWhen(escalation.flaggedAt, false) }),
+      ),
+      line(
+        escalation.escalatedAt === undefined
+          ? t("roadmap.escalate_due", {
+              date: formatWhen(escalation.escalateDueAt, false),
+              days: escalation.escalateAfterDays,
+            })
+          : t("roadmap.escalated", { date: formatWhen(escalation.escalatedAt, false) }),
+      ),
+    );
+    part("paused").hidden = !escalation.paused;
+  }
+  root.hidden = false;
+};
+
+const renderRoadmap = (view: RoadmapView): void => {
+  lastRoadmap = view;
+  renderRoadmapInto(el("receipt-roadmap"), view);
+};
+
+const renderIssueRoadmap = (view: RoadmapView): void => {
+  lastIssueRoadmap = view;
+  renderRoadmapInto(el("detail-roadmap"), view);
+};
+
+/** The public roadmap of an issue whose details have just opened. */
+const loadIssueRoadmap = async (publicReference: string): Promise<void> => {
+  const result = await api.issueRoadmap(publicReference);
+  if (!result.ok || openIssueReference !== publicReference) return;
+  const view = toRoadmapView(result.value);
+  if (view !== undefined) renderIssueRoadmap(view);
+};
+
+/**
+ * Reads the roadmap for a receipt that has just been found. A failure leaves
+ * the receipt as it is: the roadmap adds to it and is never the only record.
+ */
+const loadRoadmap = async (submissionId: string): Promise<void> => {
+  const result = await api.roadmap(submissionId);
+  if (!result.ok) return;
+  const view = toRoadmapView(result.value);
+  if (view === undefined) return;
+  renderRoadmap(view);
 };
 
 const loadMyReports = async (): Promise<void> => {
@@ -1352,6 +1566,14 @@ const loadMyReports = async (): Promise<void> => {
   const payload = result.value as { reports: ReportPayload[] };
   renderMyReports(toReportRows(payload.reports));
 };
+
+/**
+ * Category identifiers to the words the reader sees, from the taxonomy the
+ * server serves. Lists used to print `sanitation` and `water_supply` — the
+ * internal names — beside a filter that said "Sanitation and drainage".
+ */
+const categoryLabels = new Map<string, string>();
+const categoryLabel = (id: string): string => categoryLabels.get(id) ?? id;
 
 /** Cursor for the next discovery page, and the position it belongs to. */
 let discoveryCursor: string | undefined;
@@ -1378,10 +1600,10 @@ const renderDiscoveryMap = (rows: readonly DiscoveryRow[], radiusMetres: number)
         t("discovery.map_marker", {
           index: marker.index,
           reference: marker.reference,
-          category: marker.category,
+          category: categoryLabel(marker.category),
         }),
       );
-      button.title = `${marker.reference} · ${marker.category}`;
+      button.title = `${marker.reference} · ${categoryLabel(marker.category)}`;
       button.addEventListener("click", () => void openDetail(marker.reference));
       return button;
     }),
@@ -1417,7 +1639,14 @@ const renderDiscovery = (view: DiscoveryView, append: boolean): void => {
   displayedDiscoveryRadiusMetres = view.radiusMetres;
   list.replaceChildren();
 
-  el("discovery-bounds").textContent = view.boundsLabel;
+  el("discovery-bounds").textContent =
+    view.categoryFilter === undefined
+      ? t("discovery.bounds", { radius: view.radiusMetres, limit: view.limit })
+      : t("discovery.bounds_category", {
+          radius: view.radiusMetres,
+          limit: view.limit,
+          category: categoryLabel(view.categoryFilter),
+        });
   const empty = el("discovery-empty");
   empty.hidden = displayedDiscoveryRows.length > 0;
   empty.textContent = view.emptyMessage;
@@ -1425,7 +1654,7 @@ const renderDiscovery = (view: DiscoveryView, append: boolean): void => {
   for (const [index, issue] of displayedDiscoveryRows.entries()) {
     const item = document.createElement("li");
     const heading = document.createElement("p");
-    heading.textContent = `${String(index + 1)}. ${issue.reference} · ${issue.category}`;
+    heading.textContent = `${String(index + 1)}. ${issue.reference} · ${categoryLabel(issue.category)}`;
     const participants = document.createElement("p");
     participants.className = "disclosure";
     participants.textContent = issue.participantsLabel;
@@ -1463,6 +1692,9 @@ const loadDiscovery = async (append: boolean): Promise<void> => {
       showErrors([result.offline ? t("error.offline") : t("error.server")]);
       return;
     }
+    // A refusal from an earlier attempt (location denied) must not stay on
+    // screen beside the results that attempt's replacement just produced.
+    clearErrors();
     renderDiscovery(toDiscoveryView(result.value as DiscoveryPayload), append);
   } finally {
     state.nearbyLoading = false;
@@ -1471,8 +1703,18 @@ const loadDiscovery = async (append: boolean): Promise<void> => {
 };
 
 const renderDetail = (view: DetailView): void => {
-  el("detail-opened").textContent = view.openedAt;
-  el("detail-last-evidence").textContent = view.lastEvidenceAt ?? "—";
+  // Which issue this is: the panel used to open with dates and counts and
+  // never say what it was about.
+  const statusKey = reportStatusKey(view.status);
+  el("detail-summary").textContent = t("detail.summary", {
+    reference: view.reference,
+    category: categoryLabel(view.category),
+    status: statusKey === undefined ? view.status : t(statusKey),
+  });
+  // Dates as dates: these were the server's ISO strings, printed as they came.
+  el("detail-opened").textContent = formatWhen(view.openedAt, true);
+  el("detail-last-evidence").textContent =
+    view.lastEvidenceAt === undefined ? "—" : formatWhen(view.lastEvidenceAt, true);
   el("detail-participants").textContent = view.participantsLabel;
   el("detail-entries").textContent = view.entriesLabel;
 
@@ -1508,7 +1750,8 @@ const renderDetail = (view: DetailView): void => {
   history.replaceChildren();
   for (const entry of view.infrastructureHistory) {
     const item = document.createElement("li");
-    item.textContent = `${entry.at} · ${entry.what}`;
+    const when = Number.isNaN(Date.parse(entry.at)) ? entry.at : formatWhen(entry.at, true);
+    item.textContent = `${when} · ${entry.what}`;
     history.append(item);
   }
 
@@ -1655,7 +1898,10 @@ const answerClaim = async (decision: "confirmed" | "disputed"): Promise<void> =>
     t(decision === "confirmed" ? "resolution.saved_confirmed" : "resolution.saved_disputed"),
   );
   el<HTMLTextAreaElement>("resolution-comment").value = "";
-  await loadResolution(reference);
+  // The whole issue, not only the resolution block: the status line and the
+  // roadmap both moved with the answer, and leaving them as they were told the
+  // resident "You confirm it is fixed" straight after they had.
+  await openDetail(reference);
 };
 
 const reopenOpenIssue = async (): Promise<void> => {
@@ -1675,7 +1921,7 @@ const reopenOpenIssue = async (): Promise<void> => {
   }
   announce(t("resolution.saved_reopened"));
   el<HTMLTextAreaElement>("reopen-reason").value = "";
-  await loadResolution(reference);
+  await openDetail(reference);
 };
 
 const openDetail = async (publicReference: string): Promise<void> => {
@@ -1686,6 +1932,13 @@ const openDetail = async (publicReference: string): Promise<void> => {
   }
   openIssueReference = publicReference;
   el("resolution-error").hidden = true;
+  // Another issue's roadmap must not stand under this one while it loads.
+  el("detail-roadmap").hidden = true;
+  lastIssueRoadmap = undefined;
+  void loadIssueRoadmap(publicReference);
+  // Opened from Your reports as well as from the nearby list; either way the
+  // issue is shown where issues live.
+  showView("nearby");
   renderDetail(toDetailView(result.value as DetailPayload));
   await loadResolution(publicReference);
 };
@@ -1707,6 +1960,9 @@ const loadCategoryFilter = async (): Promise<void> => {
     state.translator.pack.code,
   );
 
+  for (const option of view.options) {
+    if (option.value.length > 0) categoryLabels.set(option.value, option.label);
+  }
   const select = el<HTMLSelectElement>("discovery-category");
   const previous = select.value;
   select.replaceChildren(
@@ -1789,6 +2045,7 @@ const openCandidateQuestion = async (
   );
 
   el("candidate-result").hidden = true;
+  showView("reports");
   el("candidate-panel").hidden = false;
   el("candidate-heading").focus();
 };
@@ -1860,7 +2117,11 @@ const wireTrackingAndDiscovery = (): void => {
       void loadDiscovery(false);
       return;
     }
-    if (navigator.geolocation === undefined) return;
+    if (navigator.geolocation === undefined) {
+      showErrors([t("location.unsupported")]);
+      openNearbyManualEntry();
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (position) => {
         discoveryOrigin = {
@@ -1870,12 +2131,36 @@ const wireTrackingAndDiscovery = (): void => {
         void loadDiscovery(false);
       },
       () => {
-        // Discovery needs a position and will not invent one; the existing
-        // location messages already explain a refused permission.
+        // Discovery needs a position and will not invent one. The message
+        // says the resident can enter one themselves, so the way to do that
+        // opens beside it instead of being somewhere else in the app.
         showErrors([t("location.permission_denied")]);
+        openNearbyManualEntry();
       },
     );
   });
+
+  el("nearby-apply").addEventListener("click", () => {
+    const latInput = el<HTMLInputElement>("nearby-lat");
+    const lonInput = el<HTMLInputElement>("nearby-lon");
+    const { lat, lon, issues } = parseTypedCoordinates(latInput.value, lonInput.value);
+    const latIssue = issues.find((issue) => issue.field === "lat");
+    const lonIssue = issues.find((issue) => issue.field === "lon");
+    fieldError("nearby-lat-error", latIssue === undefined ? undefined : t(latIssue.key), latInput);
+    fieldError("nearby-lon-error", lonIssue === undefined ? undefined : t(lonIssue.key), lonInput);
+    if (issues.length > 0) {
+      (latIssue !== undefined ? latInput : lonInput).focus();
+      return;
+    }
+    discoveryOrigin = { lon, lat };
+    void loadDiscovery(false);
+  });
+};
+
+/** Opens "enter a location instead" and puts the cursor in it. */
+const openNearbyManualEntry = (): void => {
+  el<HTMLDetailsElement>("nearby-manual").open = true;
+  el<HTMLInputElement>("nearby-lat").focus();
 };
 
 void start();

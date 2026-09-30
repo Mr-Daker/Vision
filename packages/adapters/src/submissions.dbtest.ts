@@ -343,6 +343,57 @@ test("V018: a saved submission stays discoverable while the worker is down", asy
   assert.equal(rows[0].pending, 1, "the work is still owed, and visibly so");
 });
 
+test("a receipt says where the report is now, not only that it was received", async () => {
+  // Found on the resident dashboard: "Find a saved receipt" showed
+  // `processing_status`, which records intake and stays 'received' long after
+  // the report has been grouped with an issue and routed. The resident could
+  // see that their report arrived and nothing about what happened next.
+  const participant = await newParticipant();
+  const objectReference = await acceptedUpload(participant);
+  const result = await service.create(inputFor(participant, objectReference), {
+    idempotencyKey: `submission-progress-${randomUUID()}`,
+    correlationId: randomUUID(),
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const submissionId = result.receipt.submission_id;
+  committed.push(submissionId);
+
+  const before = await service.readReceipt(submissionId, participant);
+  assert.ok(before);
+  assert.equal(before.issue_status, null, "not grouped yet, so there is no issue status to show");
+  assert.equal(before.issue_public_reference, null);
+
+  const issueId = randomUUID();
+  const reference = `VIS-RCPT-${issueId.slice(0, 6).toUpperCase()}`;
+  const { rows } = await client.query(
+    "select evidence_id from evidence_item where submission_id = $1",
+    [submissionId],
+  );
+  const evidenceId = String(rows[0]?.["evidence_id"]);
+  await client.query(
+    `insert into canonical_issue (issue_id, public_reference, category, current_status, opened_at)
+     values ($1, $2, 'sanitation', 'routed_internal', now())`,
+    [issueId, reference],
+  );
+  await client.query(
+    `insert into issue_evidence_link (issue_evidence_link_id, evidence_id, canonical_issue_id, effective_from)
+     values ($1, $2, $3, now())`,
+    [randomUUID(), evidenceId, issueId],
+  );
+  try {
+    const after = await service.readReceipt(submissionId, participant);
+    assert.ok(after);
+    assert.equal(after.issue_status, "routed_internal");
+    assert.equal(after.issue_public_reference, reference);
+    // Intake is still reported as it is; it is simply no longer the only thing.
+    assert.equal(after.processing_status, "received");
+  } finally {
+    await client.query("delete from issue_evidence_link where canonical_issue_id = $1", [issueId]);
+    await client.query("delete from canonical_issue where issue_id = $1", [issueId]);
+  }
+});
+
 test("V018: a receipt is readable only by its own participant", async () => {
   const owner = await newParticipant();
   const stranger = await newParticipant();

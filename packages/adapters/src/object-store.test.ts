@@ -511,3 +511,28 @@ test("V016: the capability is labelled simulated and claims nothing about authen
   assert.ok(capability.must_not_claim.some((claim) => /authentic/i.test(claim)));
   assert.equal(unsafeTimestamp("2026-09-09T10:00:00Z").length > 0, true);
 });
+
+test("another process on the same storage knows an accepted upload's type", async () => {
+  // The API finalizes an upload and the worker processes it, and they are
+  // two processes with two adapter instances. The worker's instance used to
+  // answer `undefined` here, the media stage fell back to
+  // 'application/octet-stream', and every photo a resident sent through the
+  // running system was rejected as an unsupported format.
+  const { root, store, clock, cleanup } = await setup();
+  try {
+    const { grant, token } = await grantFor(store, "image/png");
+    await store.putStagedObject(grant.object_reference, token, PNG, "image/png");
+    const finalized = await store.finalizeUpload(grant.object_reference, mutation("fin-0001"));
+    assert.equal(finalized.kind, "success");
+
+    const worker = new FilesystemObjectStoreAdapter(
+      { root, grantHmacKey: "test-only-grant-key", grantTtlSeconds: 900 },
+      clock.now,
+    );
+    assert.equal(worker.contentTypeOf(grant.object_reference), "image/png");
+    // Nothing is reported for an object that was never accepted.
+    assert.equal(worker.contentTypeOf("2026-09/never-uploaded"), undefined);
+  } finally {
+    await cleanup();
+  }
+});

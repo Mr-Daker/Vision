@@ -43,6 +43,7 @@ let baseUrl: string;
 let storeRoot: string;
 const issues: string[] = [];
 const submissions: string[] = [];
+const participants: string[] = [];
 
 const ORIGIN = { lon: 74.91, lat: 17.11 };
 
@@ -91,6 +92,11 @@ after(async () => {
       );
       await cleaner.query("delete from canonical_issue where issue_id = any($1::uuid[])", [issues]);
     }
+    if (participants.length > 0) {
+      await cleaner.query("delete from participant where participant_id = any($1::uuid[])", [
+        participants,
+      ]);
+    }
   } finally {
     await cleaner.end();
   }
@@ -121,6 +127,38 @@ const newIssue = async (metresEast: number, category = "sanitation"): Promise<st
     [issueId, `VIS-${issueId.slice(0, 8).toUpperCase()}`, category, lon, ORIGIN.lat],
   );
   issues.push(issueId);
+  return issueId;
+};
+
+/**
+ * An issue somebody reported: the only kind the public list shows. `newIssue`
+ * alone is bare, with no live report behind it, and is deliberately not listed.
+ */
+const newListedIssue = async (metresEast: number, category = "sanitation"): Promise<string> => {
+  const issueId = await newIssue(metresEast, category);
+  const participantId = randomUUID();
+  const submissionId = randomUUID();
+  const evidenceId = randomUUID();
+  await client.query("insert into participant (participant_id) values ($1)", [participantId]);
+  participants.push(participantId);
+  await client.query(
+    `insert into submission
+       (submission_id, participant_id, observed_at, interface_locale, locale_pack_version,
+        idempotency_key, taxonomy_version)
+     values ($1,$2,now(),'en-IN','test.v1',$3,'test.v1')`,
+    [submissionId, participantId, `cr-${submissionId}`],
+  );
+  submissions.push(submissionId);
+  await client.query(
+    `insert into evidence_item (evidence_id, submission_id, media_type, content_text)
+     values ($1,$2,'text','a test report')`,
+    [evidenceId, submissionId],
+  );
+  await client.query(
+    `insert into issue_evidence_link (issue_evidence_link_id, evidence_id, canonical_issue_id, effective_from)
+     values ($1,$2,$3,now())`,
+    [randomUUID(), evidenceId, issueId],
+  );
   return issueId;
 };
 
@@ -160,7 +198,7 @@ test("V030: my reports never sets a cacheable header for private data", async ()
 // ---------------------------------------------------------------------------
 
 test("V030: nearby discovery is public and needs no session", async () => {
-  await newIssue(20);
+  await newListedIssue(20);
 
   const response = await fetch(
     `${baseUrl}/v1/issues/nearby?lon=${String(ORIGIN.lon)}&lat=${String(ORIGIN.lat)}&radius_m=500`,
@@ -181,8 +219,8 @@ test("V030: discovery rejects a missing or unusable position rather than guessin
 
 test("V030: discovery paginates with an opaque cursor", async () => {
   const category = `http-${randomUUID().slice(0, 6)}`;
-  await newIssue(10, category);
-  await newIssue(12, category);
+  await newListedIssue(10, category);
+  await newListedIssue(12, category);
 
   const first = await fetch(
     `${baseUrl}/v1/issues/nearby?lon=${String(ORIGIN.lon)}&lat=${String(ORIGIN.lat)}&radius_m=500&category=${category}&limit=1`,

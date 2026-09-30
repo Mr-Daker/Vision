@@ -31,6 +31,7 @@ import {
   toReceiptLookupView,
   toReportRows,
   toResolutionView,
+  toRoadmapView,
 } from "./tracking.ts";
 
 const report = (overrides: Partial<ReportPayload> = {}): ReportPayload => ({
@@ -177,6 +178,16 @@ test("V030: the applied bounds are always shown, not just when empty", () => {
   assert.equal(view.hasMore, false);
 });
 
+test("the applied bounds are exposed as facts, so the screen can word them in the reader's language", () => {
+  const view = toDiscoveryView(
+    discovery({ applied_filters: { category: "sanitation", radius_m: 500 }, applied_limit: 25 }),
+  );
+  assert.equal(view.categoryFilter, "sanitation");
+  assert.equal(view.limit, 25);
+  assert.equal(view.radiusMetres, 500);
+  assert.equal(toDiscoveryView(discovery()).categoryFilter, undefined);
+});
+
 test("V030: more pages available is reported", () => {
   const view = toDiscoveryView(discovery({ next_cursor: "abc" }));
 
@@ -282,14 +293,46 @@ test("V030: a found receipt displays only facts returned by the receipt API", ()
     processing_status: "accepted",
     server_received_at: "2026-09-10T10:00:00.000Z",
     replayed: false,
+    issue_status: null,
+    issue_public_reference: null,
   });
 
   assert.deepEqual(view, {
     reference: "11111111-1111-4111-8111-111111111111",
     status: "accepted",
+    progressKey: "tracking.status_received",
+    issueReference: undefined,
     receivedAt: "2026-09-10T10:00:00.000Z",
     wasReplay: false,
   });
+});
+
+test("a found receipt says where the report is now, in the words 'your reports' uses", () => {
+  // The receipt's own status stays 'received' after the report has moved on,
+  // so the screen reads the issue's status for what the resident is shown.
+  const view = toReceiptLookupView({
+    submission_id: "11111111-1111-4111-8111-111111111111",
+    processing_status: "received",
+    server_received_at: "2026-09-10T10:00:00.000Z",
+    replayed: false,
+    issue_status: "work_planned",
+    issue_public_reference: "VIS-ABCD1234",
+  });
+  assert.equal(view.progressKey, "tracking.status_work_planned");
+  assert.equal(view.issueReference, "VIS-ABCD1234");
+
+  // A state this build does not know is shown as the server sent it rather
+  // than guessed into a neighbouring step.
+  const future = toReceiptLookupView({
+    submission_id: "11111111-1111-4111-8111-111111111111",
+    processing_status: "received",
+    server_received_at: "2026-09-10T10:00:00.000Z",
+    replayed: false,
+    issue_status: "handed_to_contractor",
+    issue_public_reference: "VIS-ABCD1234",
+  });
+  assert.equal(future.progressKey, undefined);
+  assert.equal(future.status, "handed_to_contractor");
 });
 
 // ---------------------------------------------------------------------------
@@ -898,4 +941,85 @@ test("V035: a reviewer override is not reported as the reporters agreeing", () =
     }),
   );
   assert.equal(agreed.stateKey, "resolution.state_confirmed");
+});
+
+// ---------------------------------------------------------------------------
+// Report roadmap (report roadmap design, 2026-09-30)
+// ---------------------------------------------------------------------------
+
+const roadmapPayload = (overrides: Record<string, unknown> = {}) => ({
+  steps: [
+    { id: "received", state: "done", at: "2026-09-29T04:15:59.000Z" },
+    { id: "checked", state: "done", at: "2026-09-29T04:16:30.000Z" },
+    { id: "grouped", state: "done", at: "2026-09-29T04:16:40.000Z" },
+    { id: "routed", state: "done", at: "2026-09-29T05:00:00.000Z" },
+    { id: "acknowledged", state: "current", at: null },
+    { id: "work_planned", state: "upcoming", at: null },
+    { id: "repair_claimed", state: "upcoming", at: null },
+    { id: "confirmed", state: "upcoming", at: null },
+  ],
+  note: "with_department",
+  issue: { public_reference: "VIS-A3F4F3EB", category: "sanitation", status: "routed_internal" },
+  escalation: {
+    department_since: "2026-09-29T05:00:00.000Z",
+    department_days: 2,
+    alert_after_days: 7,
+    escalate_after_days: 14,
+    flag_due_at: "2026-10-06T05:00:00.000Z",
+    escalate_due_at: "2026-10-13T05:00:00.000Z",
+    flagged_at: null,
+    escalated_at: null,
+    paused: false,
+    rule_source: "category",
+  },
+  ...overrides,
+});
+
+test("a roadmap payload becomes eight translated steps and the escalation track", () => {
+  const view = toRoadmapView(roadmapPayload());
+  assert.ok(view);
+  assert.equal(view.steps.length, 8);
+  assert.deepEqual(view.steps[0], {
+    labelKey: "roadmap.step_received",
+    state: "done",
+    at: "2026-09-29T04:15:59.000Z",
+  });
+  assert.equal(view.steps[4]?.state, "current");
+  assert.equal(view.noteKey, "roadmap.note_with_department");
+  assert.equal(view.escalation?.flagDueAt, "2026-10-06T05:00:00.000Z");
+  assert.equal(view.escalation?.departmentDays, 2);
+  // Counted like a calendar: the first day is day 1, so two full days in is day 3.
+  assert.equal(view.escalation?.dayNumber, 3);
+  assert.equal(
+    toRoadmapView(
+      roadmapPayload({ escalation: { ...roadmapPayload().escalation, department_days: 0.2 } }),
+    )?.escalation?.dayNumber,
+    1,
+  );
+  assert.equal(view.escalation?.pastFirstWait, false);
+  // Day 33 against a 7-day wait is not "day 33 of 7".
+  assert.equal(
+    toRoadmapView(
+      roadmapPayload({ escalation: { ...roadmapPayload().escalation, department_days: 32.4 } }),
+    )?.escalation?.pastFirstWait,
+    true,
+  );
+  // How far along the bar the department clock is, towards escalation.
+  assert.equal(view.escalation?.progress, 2 / 14);
+  assert.equal(view.escalation?.flagAt, 7 / 14);
+});
+
+test("a roadmap without a responsible department has no escalation track", () => {
+  const view = toRoadmapView(roadmapPayload({ escalation: null, note: "choosing_department" }));
+  assert.equal(view?.escalation, undefined);
+  assert.equal(view?.noteKey, "roadmap.note_choosing_department");
+});
+
+test("a malformed roadmap is refused rather than drawn half-right", () => {
+  assert.equal(toRoadmapView({ steps: "nope" }), undefined);
+  assert.equal(toRoadmapView(roadmapPayload({ note: "invented_state" })), undefined);
+  assert.equal(
+    toRoadmapView(roadmapPayload({ steps: [{ id: "teleported", state: "done", at: null }] })),
+    undefined,
+  );
 });

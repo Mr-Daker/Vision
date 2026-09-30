@@ -114,6 +114,10 @@ export type DiscoveryView = {
   readonly isEmpty: boolean;
   readonly emptyMessage: string;
   readonly boundsLabel: string;
+  /** The category filter the server applied, as its identifier, if any. */
+  readonly categoryFilter: string | undefined;
+  /** The page size the server applied. */
+  readonly limit: number;
   /** The radius the server actually applied, never a client-side assumption. */
   readonly radiusMetres: number;
   readonly hasMore: boolean;
@@ -133,9 +137,10 @@ export type DiscoveryView = {
  * Zero gets its own wording, because "0 people reported this" is a statement
  * the interface knows to be false: the issue exists *because* somebody
  * reported it. What zero actually means is that no contribution has been
- * counted — counting one needs `demo_processing` consent (V014), and nothing
- * records that consent yet (V044 owns the capture notices), so zero is the
- * ordinary case today rather than an edge one.
+ * counted — counting one needs `demo_processing` consent (V014). The report
+ * form now asks for it and sends it with the report, but a report filed before
+ * that, or by a client that did not ask, was saved and never counted, so zero
+ * still happens and still needs its own wording.
  *
  * The distinction matters beyond tidiness: a reader who sees "0 people
  * reported this" on a real problem learns that the numbers here are wrong, and
@@ -164,6 +169,8 @@ export const toDiscoveryView = (payload: DiscoveryPayload): DiscoveryView => {
     // stops an empty result being read as an all-clear.
     emptyMessage: `Nothing was found within the area searched. ${payload.note}`,
     boundsLabel: `Searched within ${String(filters.radius_m)} m${categoryPart}, up to ${String(payload.applied_limit)} results`,
+    categoryFilter: filters.category ?? undefined,
+    limit: payload.applied_limit,
     radiusMetres: filters.radius_m,
     hasMore: payload.next_cursor !== null,
     nextCursor: payload.next_cursor ?? undefined,
@@ -280,22 +287,41 @@ export type ReceiptPayload = {
   readonly processing_status: string;
   readonly server_received_at: string;
   readonly replayed: boolean;
+  /** The issue this report was grouped with, once it has been. */
+  readonly issue_status?: string | null;
+  readonly issue_public_reference?: string | null;
 };
 
 export type ReceiptLookupView = {
   readonly reference: string;
+  /** What the server said, shown only when no translated wording exists. */
   readonly status: string;
+  /** Where the report is now, as "your reports" words it. */
+  readonly progressKey: StringKey | undefined;
+  readonly issueReference: string | undefined;
   readonly receivedAt: string;
   readonly wasReplay: boolean;
 };
 
-/** Keeps the screen bound to server-returned receipt facts only. */
-export const toReceiptLookupView = (receipt: ReceiptPayload): ReceiptLookupView => ({
-  reference: receipt.submission_id,
-  status: receipt.processing_status,
-  receivedAt: receipt.server_received_at,
-  wasReplay: receipt.replayed,
-});
+/**
+ * Keeps the screen bound to server-returned receipt facts only.
+ *
+ * The status shown is the report's issue status when there is one, because
+ * `processing_status` records intake and stays `received` after the report
+ * has been grouped and routed — the resident could see that it arrived and
+ * nothing about what happened next.
+ */
+export const toReceiptLookupView = (receipt: ReceiptPayload): ReceiptLookupView => {
+  const issueStatus = receipt.issue_status ?? undefined;
+  return {
+    reference: receipt.submission_id,
+    status: issueStatus ?? receipt.processing_status,
+    progressKey: reportStatusKey(issueStatus),
+    issueReference: receipt.issue_public_reference ?? undefined,
+    receivedAt: receipt.server_received_at,
+    wasReplay: receipt.replayed,
+  };
+};
 
 export type DetailEvidencePayload = {
   readonly media_type: string;
@@ -724,3 +750,141 @@ export const toResolutionView = (payload: ResolutionPayload): ResolutionView => 
     comment: entry.comment ?? undefined,
   })),
 });
+
+// ---------------------------------------------------------------------------
+// Report roadmap (report roadmap design, 2026-09-30)
+// ---------------------------------------------------------------------------
+
+const ROADMAP_STEP_KEYS: Readonly<Record<string, StringKey>> = {
+  received: "roadmap.step_received",
+  checked: "roadmap.step_checked",
+  grouped: "roadmap.step_grouped",
+  routed: "roadmap.step_routed",
+  acknowledged: "roadmap.step_acknowledged",
+  work_planned: "roadmap.step_work_planned",
+  repair_claimed: "roadmap.step_repair_claimed",
+  confirmed: "roadmap.step_confirmed",
+};
+
+const ROADMAP_NOTE_KEYS: Readonly<Record<string, StringKey>> = {
+  being_checked: "roadmap.note_being_checked",
+  being_grouped: "roadmap.note_being_grouped",
+  your_answer_needed: "roadmap.note_your_answer_needed",
+  being_routed: "roadmap.note_being_routed",
+  choosing_department: "roadmap.note_choosing_department",
+  with_department: "roadmap.note_with_department",
+  work_planned: "roadmap.note_work_planned",
+  your_confirmation_needed: "roadmap.note_your_confirmation_needed",
+  repair_disputed: "roadmap.note_repair_disputed",
+  reopened: "roadmap.note_reopened",
+  fixed: "roadmap.note_fixed",
+};
+
+export type RoadmapStepView = {
+  readonly labelKey: StringKey;
+  readonly state: "done" | "current" | "upcoming";
+  readonly at: string | undefined;
+};
+
+export type RoadmapEscalationView = {
+  readonly departmentSince: string;
+  readonly departmentDays: number;
+  /** The day the department is on, counted like a calendar: the first day is day 1. */
+  readonly dayNumber: number;
+  /** Past the first configured wait, where "day N of M" would read as nonsense. */
+  readonly pastFirstWait: boolean;
+  readonly alertAfterDays: number;
+  readonly escalateAfterDays: number;
+  readonly flagDueAt: string;
+  readonly escalateDueAt: string;
+  readonly flaggedAt: string | undefined;
+  readonly escalatedAt: string | undefined;
+  readonly paused: boolean;
+  /** How far the department clock is towards escalation, 0–1, for the bar. */
+  readonly progress: number;
+  /** Where the flag threshold sits on the same bar, 0–1. */
+  readonly flagAt: number;
+};
+
+export type RoadmapView = {
+  readonly steps: readonly RoadmapStepView[];
+  readonly noteKey: StringKey;
+  readonly issueReference: string | undefined;
+  readonly escalation: RoadmapEscalationView | undefined;
+};
+
+const text = (value: unknown): string | undefined =>
+  typeof value === "string" && value.length > 0 ? value : undefined;
+const count = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
+
+/**
+ * The roadmap for one report, or `undefined` when the payload is not one.
+ *
+ * Fails closed: a step or note this build has no words for means the payload
+ * is from a different version, and a roadmap drawn half-right would tell the
+ * resident something about their report that the server did not say.
+ */
+export const toRoadmapView = (payload: unknown): RoadmapView | undefined => {
+  if (typeof payload !== "object" || payload === null) return undefined;
+  const root = payload as Record<string, unknown>;
+  if (!Array.isArray(root["steps"])) return undefined;
+
+  const steps: RoadmapStepView[] = [];
+  for (const entry of root["steps"] as unknown[]) {
+    if (typeof entry !== "object" || entry === null) return undefined;
+    const step = entry as Record<string, unknown>;
+    const labelKey = ROADMAP_STEP_KEYS[String(step["id"])];
+    const state = step["state"];
+    if (labelKey === undefined) return undefined;
+    if (state !== "done" && state !== "current" && state !== "upcoming") return undefined;
+    steps.push({ labelKey, state, at: text(step["at"]) });
+  }
+  const noteKey = ROADMAP_NOTE_KEYS[String(root["note"])];
+  if (noteKey === undefined || steps.length === 0) return undefined;
+
+  const issue = root["issue"] as Record<string, unknown> | null | undefined;
+  const raw = root["escalation"] as Record<string, unknown> | null | undefined;
+  let escalation: RoadmapEscalationView | undefined;
+  if (raw !== null && raw !== undefined) {
+    const departmentDays = count(raw["department_days"]);
+    const alertAfterDays = count(raw["alert_after_days"]);
+    const escalateAfterDays = count(raw["escalate_after_days"]);
+    const departmentSince = text(raw["department_since"]);
+    const flagDueAt = text(raw["flag_due_at"]);
+    const escalateDueAt = text(raw["escalate_due_at"]);
+    if (
+      departmentDays === undefined ||
+      alertAfterDays === undefined ||
+      escalateAfterDays === undefined ||
+      escalateAfterDays === 0 ||
+      departmentSince === undefined ||
+      flagDueAt === undefined ||
+      escalateDueAt === undefined
+    ) {
+      return undefined;
+    }
+    escalation = {
+      departmentSince,
+      departmentDays,
+      dayNumber: Math.floor(departmentDays) + 1,
+      pastFirstWait: departmentDays >= alertAfterDays,
+      alertAfterDays,
+      escalateAfterDays,
+      flagDueAt,
+      escalateDueAt,
+      flaggedAt: text(raw["flagged_at"]),
+      escalatedAt: text(raw["escalated_at"]),
+      paused: raw["paused"] === true,
+      progress: Math.min(1, departmentDays / escalateAfterDays),
+      flagAt: Math.min(1, alertAfterDays / escalateAfterDays),
+    };
+  }
+
+  return {
+    steps,
+    noteKey,
+    issueReference: text(issue?.["public_reference"]),
+    escalation,
+  };
+};

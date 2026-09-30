@@ -273,6 +273,11 @@ export const discoverNearbyIssues = async (
                        ST_SetSRID(ST_MakePoint($1,$2),4326)::geography, $3)
         and ($5::text is null or i.category = $5)
         and ($6::text is null or i.public_reference > $6)
+        -- A problem somebody reported. An issue with no live report behind it
+        -- has nothing to show and nothing to follow, and listing it sent
+        -- residents to empty pages.
+        and exists (select 1 from issue_evidence_link link
+                     where link.canonical_issue_id = i.issue_id and link.effective_to is null)
         -- Retired by a merge: its reference still resolves, but it must not
         -- appear twice in a public list alongside its survivor.
         and not exists (select 1 from issue_alias a

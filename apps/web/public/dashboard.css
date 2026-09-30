@@ -34,10 +34,11 @@
   display: block;
   margin-bottom: 0.3rem;
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .dashboard-banner p {
@@ -64,7 +65,7 @@
 .dashboard-section-heading {
   margin: 2rem 0 0.6rem;
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -95,8 +96,8 @@
 
 .dashboard-table thead th {
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.64rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -132,10 +133,11 @@
 .tone-absent .cell-figure,
 .cell.tone-absent {
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 /* A ward with nothing projected at all. Marked on the row as well as the
@@ -171,10 +173,11 @@
 
 .legend-absent {
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .untracked-list {
@@ -197,8 +200,8 @@
 
 .untracked-category {
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 0.68rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.04em;
 }
 
@@ -226,7 +229,7 @@
 .metric-value {
   margin: 0.5rem 0 0.35rem;
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 1.35rem;
   line-height: 1.2;
 }
@@ -282,10 +285,11 @@
 
 .evidence-kind {
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 0.64rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .evidence-availability {
@@ -316,8 +320,8 @@
 .context-ward-heading {
   margin: 0 0 0.5rem;
   color: var(--dim);
-  font-family: var(--font-display);
-  font-size: 0.64rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -343,7 +347,7 @@
 .context-figure {
   margin: 0.4rem 0 0;
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 1.25rem;
   line-height: 1.2;
 }
@@ -359,10 +363,11 @@
   display: inline-block;
   margin-top: 0.4rem;
   color: var(--caution);
-  font-family: var(--font-display);
-  font-size: 0.6rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 /* The lineage sits in the card, not in a tooltip: a claim a reader has to

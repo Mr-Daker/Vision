@@ -22,6 +22,7 @@ import {
   type FieldIssue,
 } from "@vision/contracts";
 
+import { recordConsent, KNOWN_CONSENT_PURPOSES } from "./consent.ts";
 import { appendEventWithOutbox, type Queryable } from "./outbox.ts";
 import type { FilesystemObjectStoreAdapter } from "./object-store.ts";
 
@@ -43,6 +44,17 @@ export type SubmissionInput = {
     readonly observedAt: string;
   };
   readonly interfaceLocale: string;
+  /**
+   * What the person agreed to when they sent this, if they were asked. It is
+   * written in the same transaction as the report, before any worker can pick
+   * the report up, so the first time the system decides whether this person
+   * counts, the agreement is already there. Absent means they were not asked
+   * (an API client): the report is saved and simply never counted.
+   */
+  readonly consent?: {
+    readonly noticeVersion: string;
+    readonly purposes: readonly string[];
+  };
   readonly languageHint?: string;
   readonly text?: string;
   /** References to uploads already finalized through V016. */
@@ -59,6 +71,20 @@ export type SubmissionReceipt = {
   readonly server_received_at: string;
   /** True when this receipt was replayed rather than freshly created. */
   readonly replayed: boolean;
+};
+
+/**
+ * A receipt read back later, with where the report is now.
+ *
+ * `processing_status` records intake and stays `received` once the work has
+ * moved on to an issue, so on its own it told a resident that their report
+ * arrived and nothing about what happened next. The issue it was grouped
+ * with — the same one "your reports" shows — carries the rest. Both are null
+ * until the report has been grouped.
+ */
+export type SubmissionReceiptWithProgress = SubmissionReceipt & {
+  readonly issue_status: string | null;
+  readonly issue_public_reference: string | null;
 };
 
 export type CreateSubmissionResult =
@@ -206,6 +232,30 @@ export class SubmissionService {
       );
     }
 
+    // An agreement is either complete and known or refused outright: guessing
+    // at what a garbled one meant would put words in the person's mouth.
+    if (input.consent !== undefined) {
+      if (input.consent.noticeVersion.trim().length === 0) {
+        issues.push(
+          issue("consent.notice_version", "required", "name the notice the person was shown"),
+        );
+      }
+      const unknown = input.consent.purposes.filter(
+        (purpose) => !(KNOWN_CONSENT_PURPOSES as readonly string[]).includes(purpose),
+      );
+      if (input.consent.purposes.length === 0 || unknown.length > 0) {
+        issues.push(
+          issue(
+            "consent.purposes",
+            "unknown_purpose",
+            unknown.length > 0
+              ? `not a purpose this service asks for: ${unknown.join(", ")}`
+              : "an agreement must name at least one purpose",
+          ),
+        );
+      }
+    }
+
     // Every referenced upload must already be accepted evidence (V016).
     for (const [index, item] of input.evidence.entries()) {
       const accepted = await this.objectStore
@@ -311,6 +361,17 @@ export class SubmissionService {
         ],
       );
 
+      // The agreement is part of the same commit, so a report never exists
+      // without the agreement that came with it (or the agreement without it).
+      if (input.consent !== undefined) {
+        await recordConsent(this.client, {
+          participantId: input.participantId,
+          noticeVersion: input.consent.noticeVersion,
+          noticeLocale: input.interfaceLocale,
+          grantedPurposes: input.consent.purposes,
+        });
+      }
+
       // Text description is evidence in its own right (V003 EvidenceItem).
       if (text.length > 0) {
         await this.client.query(
@@ -391,12 +452,35 @@ export class SubmissionService {
   async readReceipt(
     submissionId: string,
     participantId: string,
-  ): Promise<SubmissionReceipt | undefined> {
+  ): Promise<SubmissionReceiptWithProgress | undefined> {
+    // The issue is found the way `listMyReports` finds it — through the live
+    // evidence link — so a receipt and the reports list never disagree about
+    // where the same report is.
     const { rows } = await this.client.query(
-      `select submission_id, processing_status, server_received_at
-         from submission where submission_id = $1 and participant_id = $2`,
+      `select s.submission_id, s.processing_status, s.server_received_at,
+              grouped.current_status as issue_status,
+              grouped.public_reference as issue_public_reference
+         from submission s
+         left join lateral (
+           select i.current_status, i.public_reference
+             from evidence_item e
+             join issue_evidence_link link
+               on link.evidence_id = e.evidence_id and link.effective_to is null
+             join canonical_issue i on i.issue_id = link.canonical_issue_id
+            where e.submission_id = s.submission_id
+            order by link.effective_from desc
+            limit 1
+         ) grouped on true
+        where s.submission_id = $1 and s.participant_id = $2`,
       [submissionId, participantId],
     );
-    return rows.length === 0 ? undefined : this.receiptFrom(rows[0]!, false);
+    const row = rows[0];
+    if (row === undefined) return undefined;
+    return {
+      ...this.receiptFrom(row, false),
+      issue_status: row["issue_status"] === null ? null : String(row["issue_status"]),
+      issue_public_reference:
+        row["issue_public_reference"] === null ? null : String(row["issue_public_reference"]),
+    };
   }
 }

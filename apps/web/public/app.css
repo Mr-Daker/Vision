@@ -29,19 +29,21 @@
    computed, not estimated. `contrast.test.ts` re-checks all of them against
    this file. */
 :root {
-  --page: #ffffff;
-  --ink: #16191d; /* 17.6:1 on --page */
-  --ink-muted: #4a5157; /* 8.1:1 on --page, 7.3:1 on --panel */
-  --line: #b9c0c7;
-  --panel: #f4f4f5;
-  --accent: #16191d; /* 17.6:1 with --accent-ink */
+  /* Signal (theme.css). Literal here because contrast.test.ts measures
+     this file's hex values; they must stay equal to the --sg-* tokens. */
+  --page: #f8f7fb;
+  --ink: #15131d; /* 17.2:1 on --page */
+  --ink-muted: #4f4b5e; /* 7.9:1 on --page, 8.4:1 on --panel */
+  --line: #d6d2e3;
+  --panel: #ffffff;
+  --accent: #4b3fc4; /* 7.5:1 with --accent-ink */
   --accent-ink: #ffffff;
-  --accent-hover: #000000;
+  --accent-hover: #3b30a6;
   --danger: #a4231b; /* 7.4:1 on --page */
   --danger-bg: #fdf3f2;
   --warning-ink: #6b4300; /* 8.2:1 on --warning-bg */
   --warning-bg: #fff8e6;
-  --focus: #1f6feb; /* 4.6:1 on --page */
+  --focus: #1f6feb; /* 4.3:1 on --page */
   --radius: 0.5rem;
 
   /* The native chevron is drawn by the platform and, on a fully-rounded
@@ -57,19 +59,19 @@
   /* Exactly the landing page's ground and accent, so moving from the front
      door into the app is not a change of product. */
   :root {
-    --page: #000000;
-    --ink: #ffffff; /* 21:1 on --page */
-    --ink-muted: #b4b4b4; /* 10.1:1 on --page, 8.9:1 on --panel */
-    --line: #3a3a3d;
-    --panel: #141416;
-    --accent: #ffffff; /* 21:1 with --accent-ink */
-    --accent-ink: #000000;
-    --accent-hover: #e4e4e4;
+    --page: #0d0c10;
+    --ink: #eeeef2; /* 16.9:1 on --page */
+    --ink-muted: #a9a7b3; /* 8.2:1 on --page, 7.6:1 on --panel */
+    --line: #2c2a36;
+    --panel: #17161d;
+    --accent: #b9b1ff; /* 9.3:1 with --accent-ink */
+    --accent-ink: #16132b;
+    --accent-hover: #cdc7ff;
     --danger: #ff8a80; /* 9.2:1 on --page */
     --danger-bg: #2b1a18;
     --warning-ink: #f2cf7a; /* 10.5:1 on --warning-bg */
     --warning-bg: #2a2116;
-    --focus: #9ec5ff; /* 11.9:1 on --page */
+    --focus: #9ec5ff; /* 11.0:1 on --page */
 
     --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23b4b4b4' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
@@ -222,60 +224,10 @@ body {
   display: none !important;
 }
 
-/* ── Header ───────────────────────────────────────────────── */
-
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem clamp(1rem, 4vw, 2rem);
-  background: color-mix(in srgb, var(--page) 86%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--hairline);
-}
-
-/* The same circular mark the landing and sign-in pages carry, so the three
-   read as one product — and a way back to the front door. */
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  min-height: var(--target-min);
-  margin: 0;
-  color: inherit;
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-  text-decoration: none;
-}
-
-/* Height-driven with an automatic width: the mark is ~1.77:1, so a square
-   plate shrank it to the point where the map inside stopped resolving. */
-.brand-mark {
-  width: auto;
-  height: 2rem;
-  border-radius: 999px;
-  background: #ffffff;
-  /* A ring as well as a shadow: the plate is white, and on the light scheme's
-     white page a shadow alone left it with no edge at all. */
-  border: 1px solid var(--hairline);
-  box-shadow: var(--nav-shadow);
-  padding: 0.22rem 0.4rem;
-  object-fit: contain;
-}
-
-.header-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
-  align-items: center;
-}
+/* ── Header ───────────────────────────────────────────────
+   The header became the sidebar shell (shell.css): the wordmark, the
+   language control and Sign out now live in the sidebar, and on a phone
+   in its drawer. */
 
 .language-label {
   color: var(--ink-muted);
@@ -288,7 +240,13 @@ body {
   width: 100%;
   max-width: var(--measure);
   margin: 0 auto;
-  padding: clamp(2rem, 6vw, 3.5rem) clamp(1rem, 4vw, 2rem) 4rem;
+  padding: clamp(1.75rem, 5vw, 3.5rem) clamp(1rem, 4vw, 2.5rem) 4rem;
+}
+
+/* The view heading takes focus when a sidebar option is chosen; it is a
+   landing point for a screen reader, not a control, so no ring. */
+#page-title:focus {
+  outline: 2px solid transparent;
 }
 
 h1 {
@@ -331,6 +289,11 @@ p {
   border-left: 2px solid var(--hairline);
   color: var(--ink-muted);
   font-size: 0.875rem;
+}
+
+/* The receipt caveat belongs to a report; before a session there is none. */
+.shell[data-signed-in="false"] .app-footer {
+  display: none;
 }
 
 .signed-in {
@@ -415,6 +378,27 @@ p {
   border: 0;
 }
 
+/* The agreement to processing: a real, visible checkbox and the words next to
+   it, large enough to tap, never pre-ticked. */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--sg-ink);
+  cursor: pointer;
+}
+
+.check-row input {
+  flex: none;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--sg-accent);
+}
+
 .field-group > legend,
 .field-group > h2 {
   display: flex;
@@ -435,7 +419,7 @@ p {
   /* Latin digits in the display face, matching the landing's stat glyphs.
      Numerals only: this font has no Devanagari, and everything else here can
      be translated. */
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.95rem;
   font-weight: 400;
   color: var(--ink-muted);
@@ -754,6 +738,14 @@ progress {
   overflow-wrap: anywhere;
 }
 
+/* A link to the issue sits in the value column like the other values do,
+   not centred in it as a free-standing button would be. */
+.receipt-fields dd .button-quiet {
+  justify-content: flex-start;
+  margin-left: -0.75rem;
+  text-align: left;
+}
+
 .record-list {
   margin: 1rem 0 0;
   padding: 0;
@@ -833,7 +825,7 @@ progress {
 
 .record-reference {
   overflow-wrap: anywhere;
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.76rem;
 }
 
@@ -864,7 +856,7 @@ progress {
 .coordinate-map-north {
   flex: none;
   color: var(--ink-muted);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.78rem;
 }
 
@@ -940,7 +932,7 @@ progress {
   border-radius: 50%;
   background: var(--accent);
   color: var(--accent-ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.78rem;
   cursor: pointer;
   box-shadow: 0 0.2rem 0.8rem color-mix(in srgb, var(--ink) 22%, transparent);
@@ -1053,8 +1045,8 @@ progress {
 .rail-label {
   margin: 0 0 0.75rem;
   color: var(--ink-muted);
-  font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1096,7 +1088,7 @@ progress {
 
 .rail-row dd {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 0.78rem;
   text-align: right;
   /* Coordinates and byte counts read as instrument output, which is the one
@@ -1125,7 +1117,7 @@ progress {
 
 .rail-figure-count {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 1.5rem;
   line-height: 1.2;
 }
@@ -1208,7 +1200,7 @@ progress {
 
 .sp-grid-label {
   fill: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-size: 7px;
   opacity: 0.45;
 }
@@ -1333,7 +1325,7 @@ progress {
    was previously 400px of empty ground either side. Sticky, because the rail
    is context for whatever step you are on. */
 
-@media (min-width: 1100px) {
+@media (min-width: 1360px) {
   .app-main {
     max-width: calc(var(--measure) + var(--rail-width) + var(--rail-gap) + 4rem);
     display: grid;
@@ -1344,15 +1336,16 @@ progress {
 
   .evidence-rail {
     position: sticky;
-    /* Clears the sticky header rather than sliding under it. */
-    top: 5.5rem;
+    /* No sticky header above it any more at this width; the sidebar is
+       beside the page, not over it. */
+    top: 2rem;
     margin: 0;
     /* A sticky element taller than the viewport pins at its top and the rest
        becomes unreachable — with both hero cards filled the rail runs to about
        1170px, so on a 900px screen the pipeline simply could not be seen. It
        scrolls itself instead. `contain` stops that scroll chaining to the page
        and dragging the form away under the pointer. */
-    max-height: calc(100dvh - 7rem);
+    max-height: calc(100dvh - 4rem);
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -1367,14 +1360,14 @@ progress {
    two-column breakpoint the target device is a phone, where `backdrop-filter`
    is an expensive way to tint a panel, so the hero cards fall back to a flat
    surface. */
-@media (min-width: 1100px) {
+@media (min-width: 1360px) {
   .rail-card-hero {
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
 }
 
-@media (max-width: 1099px) {
+@media (max-width: 1359px) {
   .rail-card-hero {
     background: var(--surface);
   }
@@ -1402,4 +1395,190 @@ progress {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Report roadmap (report roadmap design, 2026-09-30) ──────
+   Under a saved receipt: the eight steps a report goes through, dotted
+   like the rest of the Signal theme, and the department's clock against
+   the configured waits. */
+
+.roadmap {
+  margin: 1.5rem 0 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.roadmap > h3 {
+  margin-top: 0;
+}
+
+.roadmap-layout {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .roadmap-layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.roadmap-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roadmap-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0 0 1.1rem 1.9rem;
+}
+
+/* The dot. */
+.roadmap-step::before {
+  content: "";
+  position: absolute;
+  top: 0.3rem;
+  left: 0.2rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--page);
+  box-sizing: border-box;
+}
+
+/* The line down to the next step. */
+.roadmap-step::after {
+  content: "";
+  position: absolute;
+  top: 1.2rem;
+  bottom: -0.15rem;
+  left: calc(0.6rem - 1px);
+  width: 2px;
+  background: var(--hairline);
+}
+
+.roadmap-step:last-child::after {
+  content: none;
+}
+
+.roadmap-step.is-done::before {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.roadmap-step.is-done::after {
+  background: var(--accent);
+}
+
+.roadmap-step.is-current::before {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.roadmap-step-label {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.roadmap-step.is-current .roadmap-step-label {
+  color: var(--sg-accent-text);
+}
+
+.roadmap-step.is-upcoming .roadmap-step-label {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.roadmap-step-when {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.roadmap-step-note {
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.roadmap-escalation {
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.roadmap-escalation h4 {
+  margin: 0 0 0.5rem;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.roadmap-day-count {
+  margin: 0;
+  font-weight: 600;
+}
+
+.roadmap-bar {
+  position: relative;
+  height: 0.5rem;
+  margin: 0.8rem 0 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.roadmap-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+/* Where the first threshold sits: amber means "a configured promise", as in
+   the supervisor view, never "danger". */
+.roadmap-bar-mark {
+  position: absolute;
+  top: -0.25rem;
+  width: 2px;
+  height: 1rem;
+  border-radius: 1px;
+  background: var(--sg-warning-ink);
+  transform: translateX(-1px);
+}
+
+.roadmap-lines {
+  margin: 0.4rem 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* ── "Enter a location instead" on the nearby view ────────────
+   For a resident who declines location sharing, which is a normal choice and
+   used to leave this view with nothing to do. */
+
+.nearby-manual {
+  margin: 0.75rem 0 0.25rem;
+}
+
+.nearby-manual > summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--sg-accent-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nearby-manual[open] > summary {
+  margin-bottom: 0.5rem;
 }

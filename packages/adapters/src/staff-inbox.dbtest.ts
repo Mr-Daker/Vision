@@ -515,6 +515,76 @@ test("V034: staff can assign an issue, with a reason", async () => {
   assert.equal(rows[0]?.["valid_to"], null);
 });
 
+const ACK_INPUT = {
+  kind: "recipient_acknowledgment" as const,
+  provenance: {
+    providerMode: "simulated" as const,
+    authenticity: "simulated_fixture" as const,
+    providerReference: "SIM-ACK-ORDER",
+  },
+};
+
+test("work is planned once an issue is both assigned and acknowledged, in either order", async () => {
+  // The natural order for a person working down the card is accept, assign,
+  // then the recipient replies. Planning used to happen only inside
+  // `assignIssue`, so that order left the issue acknowledged and assigned
+  // with nothing able to plan it and the completion claim permanently
+  // disabled — a repair that could not be completed by following the buttons.
+  const assignThenAcknowledge = await routedIssue();
+  await assignIssue(client, {
+    principal: staff(),
+    issueId: assignThenAcknowledge,
+    departmentId: DEPARTMENT,
+    assignedStaffId: randomUUID(),
+    reason: "Crew nearest the site.",
+  });
+  assert.equal(await statusOf(assignThenAcknowledge), "routed_internal");
+  await recordAcknowledgment(client, {
+    principal: staff(),
+    issueId: assignThenAcknowledge,
+    departmentId: DEPARTMENT,
+    ...ACK_INPUT,
+  });
+  assert.equal(await statusOf(assignThenAcknowledge), "work_planned");
+
+  const acknowledgeThenAssign = await routedIssue();
+  await recordAcknowledgment(client, {
+    principal: staff(),
+    issueId: acknowledgeThenAssign,
+    departmentId: DEPARTMENT,
+    ...ACK_INPUT,
+  });
+  assert.equal(await statusOf(acknowledgeThenAssign), "agency_ack_received");
+  await assignIssue(client, {
+    principal: staff(),
+    issueId: acknowledgeThenAssign,
+    departmentId: DEPARTMENT,
+    assignedStaffId: randomUUID(),
+    reason: "Crew nearest the site.",
+  });
+  assert.equal(await statusOf(acknowledgeThenAssign), "work_planned");
+
+  // One work_planned event each, not two.
+  for (const issueId of [assignThenAcknowledge, acknowledgeThenAssign]) {
+    const { rows } = await client.query(
+      "select count(*)::int as n from status_event where aggregate_id = $1 and event_type = 'work_planned'",
+      [issueId],
+    );
+    assert.equal(rows[0]?.["n"], 1);
+  }
+});
+
+test("an acknowledgment with nobody assigned leaves the work unplanned", async () => {
+  const issueId = await routedIssue();
+  await recordAcknowledgment(client, {
+    principal: staff(),
+    issueId,
+    departmentId: DEPARTMENT,
+    ...ACK_INPUT,
+  });
+  assert.equal(await statusOf(issueId), "agency_ack_received");
+});
+
 test("V034: reassigning supersedes the previous assignment rather than deleting it", async () => {
   const issueId = await routedIssue();
   const principal = staff();

@@ -463,16 +463,15 @@ test("V017: a second report of the same problem joins the first issue", async ()
   assert.equal(rows[0]?.["n"], 2);
 });
 
-test("V017: with no embedder configured, duplicates are never grouped", async () => {
-  // Not a defect — the domain says it outright: "no semantic comparison was
-  // available, and proximity on its own is not enough to call two reports the
-  // same problem" (V027). Two people standing in the same place may be
-  // reporting two different things.
+test("V017: with no embedder configured, a likely duplicate is put to the resident, never split or merged silently", async () => {
+  // Without a text comparison, "near, same category" cannot decide a match on
+  // its own (V027: two people standing in one place may be reporting two
+  // things). This test used to pin the consequence: no issue was ever grouped
+  // and duplicate detection simply did not exist without an embedding provider.
   //
-  // But the operational consequence is large and worth a test of its own: a
-  // deployment with no embedding provider gets one issue per report, and
-  // duplicate detection does not merely degrade, it does not happen. The
-  // embedder is effectively required for the feature to exist.
+  // The matcher now asks instead. The second report is not merged (nothing here
+  // can authorise that), and it is not quietly made a separate issue either:
+  // it waits on the resident's answer, with the first issue as the candidate.
   const words = `the same words with no embedder ${randomUUID()}`;
   const spot = nextOrigin();
   const first = await arrivingReport(words, spot);
@@ -481,16 +480,16 @@ test("V017: with no embedder configured, duplicates are never grouped", async ()
 
   const second = await arrivingReport(words, spot);
   await drain({ withEmbedder: false });
-  const secondIssue = await issueOf(second);
 
-  assert.notEqual(secondIssue, firstIssue);
+  assert.equal(await issueOf(second), undefined, "not silently made a separate issue");
   const { rows } = await client.query(
-    `select m.state, m.decision_basis from issue_match m where m.submission_id = $1`,
+    `select m.state, m.candidate_issue_ids, m.decision_basis from issue_match m where m.submission_id = $1`,
     [second],
   );
-  assert.equal(rows[0]?.["state"], "no_match");
+  assert.equal(rows[0]?.["state"], "ambiguous");
+  assert.deepEqual(rows[0]?.["candidate_issue_ids"], [firstIssue]);
   const reasons = ((rows[0]?.["decision_basis"] as { reasons?: string[] }).reasons ?? []).join(" ");
-  assert.match(reasons, /no semantic comparison was available/);
+  assert.match(reasons, /no text comparison was available/);
 });
 
 test("V017: running the relay twice over the same report changes nothing", async () => {

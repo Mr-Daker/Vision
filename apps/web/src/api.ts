@@ -66,6 +66,9 @@ export type Receipt = {
   readonly processing_status: string;
   readonly server_received_at: string;
   readonly replayed: boolean;
+  /** Present on a receipt read back later: the issue it was grouped with. */
+  readonly issue_status?: string | null;
+  readonly issue_public_reference?: string | null;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -298,6 +301,16 @@ export class ApiClient {
 
   receipt(submissionId: string): Promise<ApiResult<Receipt>> {
     return this.send("GET", `/v1/submissions/${encodeURIComponent(submissionId)}`);
+  }
+
+  /** Where a public issue is, and when its department's wait runs out. */
+  issueRoadmap(publicReference: string): Promise<ApiResult<unknown>> {
+    return this.send("GET", `/v1/issues/${encodeURIComponent(publicReference)}/roadmap`);
+  }
+
+  /** Where one of this resident's own reports is, and when it escalates. */
+  roadmap(submissionId: string): Promise<ApiResult<unknown>> {
+    return this.send("GET", `/v1/me/reports/${encodeURIComponent(submissionId)}/roadmap`);
   }
 
   /**

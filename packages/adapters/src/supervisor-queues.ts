@@ -237,8 +237,13 @@ const loadIssues = async (
   }));
 };
 
-/** Every pause, override and standing alert for a set of issues, in three reads. */
-const loadAgeingContext = async (
+/**
+ * Every pause, override and standing alert for a set of issues, in three reads.
+ *
+ * Exported so a resident's roadmap (report-roadmap.ts) measures the department
+ * clock exactly as this view does, rather than by a second copy of the rules.
+ */
+export const loadAgeingContext = async (
   tx: Queryable,
   issueIds: readonly string[],
 ): Promise<{

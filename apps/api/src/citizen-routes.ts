@@ -29,6 +29,9 @@ import {
   findIssueIdByReference,
   getIssueDetail,
   listMyReports,
+  readIssueRoadmap,
+  readReportRoadmap,
+  type ReportRoadmap,
   presentCandidate,
   readCitizenResolutionView,
   rejectMatch,
@@ -39,7 +42,7 @@ import {
   type Queryable,
 } from "@vision/adapters";
 import { newCorrelationId, type CorrelationId } from "@vision/contracts";
-import type { ConfirmationPolicyPack } from "@vision/domain";
+import type { AgeingPolicyPack, ConfirmationPolicyPack } from "@vision/domain";
 
 import { parseCookies, readJsonBody, sendError, sendJson, type ApiConfig } from "./app.ts";
 
@@ -75,6 +78,46 @@ export type CitizenRouteDependencies = {
    * be quoting a policy somebody wrote, not a constant in this file.
    */
   readonly confirmationPolicy: ConfirmationPolicyPack;
+  /**
+   * The loaded ageing policy (V036), so a resident's roadmap shows the same
+   * configured waits a supervisor is held to.
+   */
+  readonly ageingPolicy: AgeingPolicyPack;
+};
+
+/** A submission id, as a receipt prints it. */
+const SUBMISSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/** One JSON shape for a roadmap, whether a resident's report or a public issue. */
+const roadmapJson = (roadmap: ReportRoadmap): Record<string, unknown> => {
+  const escalation = roadmap.escalation;
+  return {
+    steps: roadmap.steps.map((step) => ({ id: step.id, state: step.state, at: step.at ?? null })),
+    note: roadmap.note,
+    issue:
+      roadmap.issue === undefined
+        ? null
+        : {
+            public_reference: roadmap.issue.publicReference,
+            category: roadmap.issue.category,
+            status: roadmap.issue.status,
+          },
+    escalation:
+      escalation === undefined
+        ? null
+        : {
+            department_since: escalation.departmentSince,
+            department_days: escalation.departmentDays,
+            alert_after_days: escalation.alertAfterDays,
+            escalate_after_days: escalation.escalateAfterDays,
+            flag_due_at: escalation.flagDueAt,
+            escalate_due_at: escalation.escalateDueAt,
+            flagged_at: escalation.flaggedAt ?? null,
+            escalated_at: escalation.escalatedAt ?? null,
+            paused: escalation.paused,
+            rule_source: escalation.ruleSource,
+          },
+  };
 };
 
 /** Cursors are base64url. Anything else is a caller error, not something to ignore. */
@@ -641,6 +684,38 @@ export const createCitizenRoutes = (deps: CitizenRouteDependencies) => {
       return true;
     }
 
+    // ---- GET /v1/me/reports/:id/roadmap : private, session-bound ----
+    //
+    // Where one of the resident's own reports is, what happens next, and when
+    // the department's configured wait runs out (report roadmap design,
+    // 2026-09-30). Another participant's report answers exactly as a missing
+    // one does, so an id cannot be used to learn about somebody else's report.
+    const roadmapMatch = /^\/v1\/me\/reports\/([^/]+)\/roadmap$/.exec(path);
+    if (roadmapMatch !== null) {
+      const participantId = await deps.resolveParticipantId(request);
+      if (participantId === undefined) {
+        sendError(response, "unauthenticated", "no active session", correlationId);
+        return true;
+      }
+      const submissionId = decodeURIComponent(roadmapMatch[1] ?? "");
+      if (!SUBMISSION_ID_PATTERN.test(submissionId)) {
+        sendError(response, "not_found", "no such report", correlationId);
+        return true;
+      }
+      const roadmap = await readReportRoadmap(deps.client, {
+        participantId,
+        submissionId,
+        policy: deps.ageingPolicy,
+        asOf: new Date(),
+      });
+      if (roadmap === undefined) {
+        sendError(response, "not_found", "no such report", correlationId);
+        return true;
+      }
+      sendJson(response, 200, roadmapJson(roadmap), correlationId);
+      return true;
+    }
+
     // ---- GET /v1/me/reports : private, session-bound ----
     if (path === "/v1/me/reports") {
       const participantId = await deps.resolveParticipantId(request);
@@ -816,6 +891,31 @@ export const createCitizenRoutes = (deps: CitizenRouteDependencies) => {
         "referrer-policy": "no-referrer",
       });
       response.end(bytes);
+      return true;
+    }
+
+    // ---- GET /v1/issues/:publicReference/roadmap : public ----
+    //
+    // The issue's steps and its department's clock against the configured
+    // waits (report roadmap design, 2026-09-30). Public like the issue page,
+    // and like it names no reporter.
+    const issueRoadmapMatch = /^\/v1\/issues\/([^/]+)\/roadmap$/.exec(path);
+    if (issueRoadmapMatch !== null) {
+      const reference = decodeURIComponent(issueRoadmapMatch[1] ?? "");
+      const issueId = await findIssueIdByReference(deps.client, reference);
+      const roadmap =
+        issueId === undefined
+          ? undefined
+          : await readIssueRoadmap(deps.client, {
+              issueId,
+              policy: deps.ageingPolicy,
+              asOf: new Date(),
+            });
+      if (roadmap === undefined) {
+        sendError(response, "not_found", "no such issue", correlationId);
+        return true;
+      }
+      sendJson(response, 200, roadmapJson(roadmap), correlationId);
       return true;
     }
 

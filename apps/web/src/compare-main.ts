@@ -12,6 +12,13 @@
  */
 
 import { SupervisorApiClient } from "./supervisor-api.ts";
+import { mountShell } from "./shell.ts";
+import {
+  SIGN_IN_DID_NOT_STICK,
+  confirmSignedIn,
+  leaveToSignIn,
+  sendToStaffDoor,
+} from "./staff-door.ts";
 import type { ApiResult } from "./api.ts";
 import {
   ASSUMPTION_HEADINGS,
@@ -33,6 +40,7 @@ import {
 } from "./compare-view.ts";
 
 const auth = new SupervisorApiClient();
+const shell = mountShell();
 let payload: ComparisonPayload | undefined;
 let scenario = "";
 
@@ -356,40 +364,10 @@ const load = async (): Promise<void> => {
 };
 
 const showWorkspace = async (): Promise<void> => {
-  el("compare-login").hidden = true;
   el("compare-workspace").hidden = false;
   el("compare-signout").hidden = false;
+  shell.setSignedIn(true);
   await load();
-};
-
-const renderLoginChoices = async (): Promise<void> => {
-  const capabilities = await auth.capabilities();
-  const host = el("compare-login-choices");
-  if (!capabilities.ok) {
-    host.replaceChildren(element("p", "queue-note", capabilities.message));
-    return;
-  }
-  host.replaceChildren(
-    ...capabilities.value.demo_principals.map((principal) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "login-choice";
-      button.textContent = principal.label;
-      button.addEventListener("click", () => {
-        void (async () => {
-          button.disabled = true;
-          const result = await auth.login(principal.credential);
-          button.disabled = false;
-          if (!result.ok) {
-            showError(result.message);
-            return;
-          }
-          await showWorkspace();
-        })();
-      });
-      return button;
-    }),
-  );
 };
 
 el("refresh-compare").addEventListener("click", () => {
@@ -411,16 +389,16 @@ for (const id of ["left-select", "right-select"]) {
 el("compare-signout").addEventListener("click", () => {
   void (async () => {
     await auth.logout();
-    el("compare-workspace").hidden = true;
-    el("compare-signout").hidden = true;
-    el("compare-login").hidden = false;
-    payload = undefined;
-    await renderLoginChoices();
+    leaveToSignIn();
   })();
 });
 
 void (async () => {
-  await renderLoginChoices();
   const session = await auth.session();
-  if (session.ok && session.value.authenticated) await showWorkspace();
+  if (session.ok && session.value.authenticated) {
+    confirmSignedIn();
+    await showWorkspace();
+    return;
+  }
+  if (!sendToStaffDoor()) showError(SIGN_IN_DID_NOT_STICK);
 })();

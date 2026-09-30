@@ -1,366 +1,283 @@
 /* ============================================================
-   Sign in — layered on styles.css, same tokens and type scale.
-   Only what the auth screen adds lives here.
+   The doors: sign-in (signin.html) and the staff door (team.html).
+   Role dashboards design, 2026-09-29 — direction C, "Signal".
+
+   Solid ground rather than the landing page's video: the video is
+   the front door's moment, and behind a headline in a dot-matrix
+   face it made the words the thing you could not read. The ground is
+   the same faint dot grid every dashboard uses, so walking through a
+   door does not change product.
    ============================================================ */
 
-/* A scrim behind the auth column.
-   The video's upper half is bright — pale digits on near-white — and white
-   display type sat straight on it was close to unreadable. The landing page
-   escapes this because its headline falls in the dark band lower down; the
-   sign-in title sits higher, right in the bright region. So this page gets a
-   soft vertical wash that darkens only the column the text occupies, rather
-   than a full-screen overlay that would flatten the video everywhere.
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-   Behind the content and non-interactive, so nothing here can swallow a click
-   on the form. */
-.hero.auth {
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
   position: relative;
-  /* `.hero`'s own 14vh top padding is sized for the landing page's header and
-     trust row, both absent here. Without this override the panels centre in
-     whatever space is left under that padding rather than in the actual
-     viewport — visibly off-centre now that nothing occupies the space above
-     them. */
-  padding-top: 0;
-  /* Was 460px, sized for one column of accounts. Two panels need room to sit
-     side by side on a desktop; the grid below still collapses them to one
-     column on anything narrow, so the phone layout is unchanged. */
-  max-width: min(56rem, 100%);
-  gap: 0;
-}
-
-.hero.auth::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  /* Sized to the two panels rather than the old single column, and wider than
-     it is tall so the falloff leaves the frame at the sides instead of ending
-     on screen as a visible edge. */
-  width: min(1240px, 136vw);
-  height: min(880px, 116vh);
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 0, 0.74) 0%,
-    rgba(0, 0, 0, 0.62) 38%,
-    rgba(0, 0, 0, 0.34) 64%,
-    rgba(0, 0, 0, 0.1) 84%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  pointer-events: none;
-  z-index: -1;
-}
-
-.auth-title {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  color: #ffffff;
-  /* A step below the landing headline: this is a room, not the front door. */
-  font-size: clamp(26px, 4.6vw, 52px);
-  letter-spacing: -0.04em;
-  line-height: 1.12;
-  white-space: nowrap;
-}
-
-.auth-sub {
-  margin: clamp(10px, 1.6vh, 16px) 0 clamp(18px, 2.6vh, 26px);
-  color: #d0d0d0;
-  opacity: 0.8;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--sg-page);
+  background-image:
+    radial-gradient(
+      56rem 38rem at 12% 0%,
+      color-mix(in srgb, var(--sg-accent) 12%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40rem 30rem at 100% 100%,
+      color-mix(in srgb, var(--sg-accent) 6%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(color-mix(in srgb, var(--sg-ink) 8%, transparent) 1px, transparent 1.3px);
+  background-size:
+    auto,
+    auto,
+    22px 22px;
+  background-attachment: fixed;
+  color: var(--sg-ink);
   font-family: var(--font-sans);
-  font-weight: 400;
-  font-size: clamp(13.5px, 1.4vw, 15px);
+  font-size: 1rem;
   line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* The one card on either page. The landing hero is deliberately
-   card-free; a form needs a surface to sit on. */
-.auth-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  padding: clamp(20px, 3vh, 28px) clamp(18px, 3vw, 26px);
-  border-radius: 24px;
-  background: rgba(40, 40, 42, 0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--trust-border);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-  text-align: left;
-}
-
-/* The notice sits above the choices, not below them: somebody about to pick
-   an account should read what the account is before choosing, not after. */
-.auth-notice {
-  margin: 0 0 4px;
-  color: var(--trust-text);
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.principal-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.principal-loading {
-  margin: 0;
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 13px;
-}
-
-.principal {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  width: 100%;
-  /* 44px is the minimum target the interface holds itself to (V019). */
-  min-height: 52px;
-  padding: 10px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.34);
-  color: #ffffff;
-  font-family: var(--font-sans);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.principal:hover {
-  background: rgba(0, 0, 0, 0.5);
-  border-color: rgba(255, 255, 255, 0.45);
-  transform: translateY(-1px);
-}
-
-.principal:focus-visible {
-  outline: 3px solid #9ec5ff;
-  outline-offset: 2px;
-}
-
-.principal.is-busy {
-  opacity: 0.6;
-  cursor: progress;
-}
-
-.principal-label {
-  font-weight: 500;
-  font-size: 14.5px;
-  letter-spacing: -0.01em;
-}
-
-/* The issuer is shown, not hidden: naming it is what lets a reader check the
-   simulation claim rather than take it on trust. */
-.principal-meta {
-  color: var(--muted);
-  font-size: 11.5px;
-  letter-spacing: -0.01em;
-}
-
-.field-error {
-  margin: 0;
-  color: #ff8a80;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  letter-spacing: -0.01em;
-}
-
-.auth-link {
-  color: #ffffff;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-  transition: border-color 0.2s ease;
-}
-
-.auth-link:hover {
-  border-bottom-color: #ffffff;
-}
-
-.auth-note {
-  max-width: 380px;
-  margin: clamp(14px, 2vh, 20px) 0 0;
-  /* Lifted off `--muted`: this sentence is the page's honesty disclosure —
-     that nothing here creates an account or verifies anybody — and it was the
-     hardest thing on the screen to read. A disclosure nobody can read is not
-     a disclosure. */
-  color: #b4b4b4;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-/* The sign-in link is the current page here rather than a control. */
-.sign-in.is-current {
-  background: #ffffff;
-  color: #000000;
-}
-
-.sign-in.is-current:hover {
-  background: #ffffff;
-  color: #000000;
-  transform: none;
-}
-
-@media (max-width: 420px) {
-  .auth-title {
-    letter-spacing: -0.06em;
-  }
-}
-
-/* ── Close ────────────────────────────────────────────────────
-   Always present, at every width. Below 720px the nav and the
-   Sign in pill are both hidden, and without this the page was a
-   card you could not dismiss: the logo and the burger were the
-   only exits, and neither of them says "leave". */
-
-.auth-close {
+.skip-link {
   position: absolute;
-  /* Was flush to the edge (0, 0), which read fine while a header sat above
-     it. With the header gone the pill is the first thing at the top of the
-     viewport, and 0 put it touching the very top edge of the screen. */
-  top: clamp(16px, 2.4vh, 24px);
-  right: clamp(16px, 2.4vw, 24px);
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  border-radius: var(--sg-radius);
+  background: var(--sg-accent);
+  color: var(--sg-accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--sg-focus);
+  outline-offset: 3px;
+}
+
+/* ── Frame ─────────────────────────────────────────────────── */
+
+.door {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  width: min(100%, 70rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 5rem 1.25rem clamp(5rem, 10vw, 7rem);
+}
+
+.door-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  /* 44px minimum target (V019). */
-  min-height: var(--target-min);
-  padding: 0 14px;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border: 1px solid var(--sg-line);
   border-radius: var(--radius-pill);
-  background: rgba(40, 40, 42, 0.82);
-  border: 1px solid var(--trust-border);
-  color: var(--trust-text);
-  font-family: var(--font-sans);
+  background: color-mix(in srgb, var(--sg-panel) 80%, transparent);
+  color: var(--sg-ink-muted);
+  font-size: var(--sg-text-sm);
   font-weight: 500;
-  font-size: 13px;
-  letter-spacing: -0.01em;
   text-decoration: none;
   transition:
-    background 0.2s ease,
-    color 0.2s ease;
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
-.auth-close:hover {
-  background: var(--pill-dark-hover);
-  color: #ffffff;
+.door-close:hover {
+  color: var(--sg-ink);
+  border-color: color-mix(in srgb, var(--sg-ink) 30%, transparent);
 }
 
-.auth-close:focus-visible {
-  outline: 3px solid #9ec5ff;
-  outline-offset: 2px;
+.door-head {
+  max-width: 46rem;
 }
 
-@media (max-width: 720px) {
-  .hero.auth {
-    /* The full-viewport centering that suits a desktop puts the title right
-       under the close pill on a phone, where there is far less height to
-       divide up. This clears the pill (44px tall, starting ~24px from the
-       top) with room to spare, while still leaving noticeably less empty
-       space above the title than the 14vh the landing page reserves for its
-       own header. */
-    padding-top: 92px;
+.door-eyebrow {
+  margin: 0 0 1rem;
+  color: var(--sg-accent-text);
+  font-size: var(--sg-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.door-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: clamp(2.75rem, 1.6rem + 5vw, 4.75rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+.door-sub {
+  max-width: 44ch;
+  margin: 1.25rem 0 0;
+  color: var(--sg-ink-muted);
+  font-size: 1.0625rem;
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+
+.door-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .door-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
   }
 }
 
-/* ── Two doors ─────────────────────────────────────────────────
-   A resident and a ward engineer arrive at the same address
-   wanting different things. The two panels are equal in weight on
-   purpose: neither audience is the guest of the other. Stacks on
-   a narrow screen with the resident panel first, because that is
-   the larger audience and the one likelier to be on a phone. */
-.auth-split {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1.1rem;
-  /* Stretch, not start: two panels of visibly different height read as one
-     finished and one unfinished rather than as two equal choices. */
-  align-items: stretch;
-  width: 100%;
-  margin-inline: auto;
-}
-
-.auth-role {
+.door-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.75rem;
+  min-height: 17rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  overflow: hidden;
+  border: 1px solid var(--sg-line);
+  border-radius: var(--sg-radius-lg);
+  background: color-mix(in srgb, var(--sg-panel) 88%, transparent);
+  color: var(--sg-ink);
+  font: inherit;
   text-align: left;
-}
-
-.auth-role-eyebrow {
-  margin: 0;
-  font-family: var(--font-display, inherit);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.66;
-}
-
-.auth-role-title {
-  margin: 0;
-  font-size: 1.22rem;
-  line-height: 1.25;
-}
-
-.auth-role-copy {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  opacity: 0.76;
-}
-
-.auth-role-note {
-  margin: 0.35rem 0 0;
-  font-size: 0.88rem;
-}
-
-.auth-role-note span {
-  display: block;
-  margin-top: 0.35rem;
-  opacity: 0.76;
-}
-
-.role-links {
-  margin: 0.35rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.role-link {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 0.85rem;
   text-decoration: none;
-  color: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease;
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
-.role-link:hover,
-.role-link:focus-visible {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.06);
+.door-card:hover {
+  border-color: var(--sg-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 28px 60px -32px color-mix(in srgb, var(--sg-accent) 60%, transparent);
 }
 
-.role-link-title {
+.door-card-index {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  color: color-mix(in srgb, var(--sg-ink) 14%, transparent);
+  font-family: var(--font-headline);
+  font-size: var(--sg-text-2xl);
+  line-height: 1;
+  transition: color 200ms ease;
+}
+
+.door-card:hover .door-card-index {
+  color: color-mix(in srgb, var(--sg-accent) 55%, transparent);
+}
+
+.door-card-eyebrow {
+  color: var(--sg-accent-text);
+  font-size: var(--sg-text-xs);
   font-weight: 600;
-  font-size: 0.98rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-.role-link-copy {
-  font-size: 0.83rem;
-  line-height: 1.45;
-  opacity: 0.72;
+.door-card-title {
+  max-width: 20ch;
+  /* Clear of the index numeral in the corner at every width. */
+  padding-right: 3.25rem;
+  font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.door-card-copy {
+  max-width: 40ch;
+  color: var(--sg-ink-muted);
+}
+
+.door-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  color: var(--sg-accent-text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.door-card-cta::after {
+  content: "→";
+  transition: transform 200ms ease;
+}
+
+.door-card:hover .door-card-cta::after {
+  transform: translateX(4px);
+}
+
+/* ── Credit ────────────────────────────────────────────────── */
+
+.font-credit {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  margin: 0;
+  color: var(--sg-ink-dim);
+  font-size: var(--sg-text-xs);
+  text-align: center;
+}
+
+.font-credit a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door-card,
+  .door-card-index,
+  .door-card-cta::after {
+    transition: none;
+  }
+
+  .door-card:hover {
+    transform: none;
+  }
+
+  .door-card:hover .door-card-cta::after {
+    transform: none;
+  }
 }
