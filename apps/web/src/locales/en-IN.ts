@@ -19,6 +19,8 @@ export const enIN: LocalePack = {
     "nav.role": "Resident",
     "nav.report": "Report a problem",
     "nav.nearby": "Problems nearby",
+    "nav.across_india": "Across India",
+    "nav.intelligence": "Public intelligence",
     "login.heading": "Signing you in…",
     "login.retry": "Try again",
     "login.signed_in_as":

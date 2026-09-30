@@ -29,6 +29,8 @@ export const mrIN: LocalePack = {
     "nav.role": "रहिवासी",
     "nav.report": "समस्या नोंदवा",
     "nav.nearby": "जवळपासच्या समस्या",
+    "nav.across_india": "संपूर्ण भारत",
+    "nav.intelligence": "सार्वजनिक माहिती",
     "login.heading": "साइन इन करत आहे…",
     "login.retry": "पुन्हा प्रयत्न करा",
     "login.signed_in_as": "ओळख पडताळणीशिवाय साइन इन केले आहे. या आवृत्तीत DigiLocker जोडलेले नाही.",

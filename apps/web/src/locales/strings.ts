@@ -25,6 +25,8 @@ export type StringKey =
   | "nav.role"
   | "nav.report"
   | "nav.nearby"
+  | "nav.across_india"
+  | "nav.intelligence"
   | "login.heading"
   | "login.retry"
   | "login.signed_in_as"
