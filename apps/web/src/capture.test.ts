@@ -13,6 +13,7 @@ import assert from "node:assert/strict";
 
 import { enIN } from "./locales/en-IN.ts";
 import { mrIN } from "./locales/mr-IN.ts";
+import { CATALOGUE } from "./locales/catalogue.ts";
 import type { LocalePack, StringKey } from "./locales/strings.ts";
 import {
   createTranslator,
@@ -51,8 +52,6 @@ import {
   type CaptureForm,
 } from "./submission.ts";
 import { DRAFT_TTL_HOURS, DraftStore, restoreFormState, type KeyValueStore } from "./drafts.ts";
-
-const CATALOGUE = { packs: [enIN, mrIN], fallbackCode: enIN.code };
 
 /**
  * `Partial<T>` refuses an explicit `undefined` under `exactOptionalPropertyTypes`,
@@ -116,22 +115,34 @@ test("V019: every locale pack defines exactly the same keys", () => {
     );
     for (const [key, value] of Object.entries(pack.strings)) {
       assert.equal(value.trim().length > 0, true, `${pack.code}:${key} must not be empty`);
+      assert.deepEqual(
+        (value.match(/\{\w+\}/g) ?? []).sort(),
+        (enIN.strings[key as StringKey].match(/\{\w+\}/g) ?? []).sort(),
+        `${pack.code}:${key} must preserve every source placeholder`,
+      );
     }
   }
 });
 
 test("V019: a pack drafted without a native reviewer says so", () => {
-  const marathi = createTranslator(mrIN);
-  assert.equal(
-    marathi.disclosesTranslationStatus,
-    true,
-    "an unreviewed translation must be disclosed, not presented as finished",
-  );
+  for (const pack of CATALOGUE.packs.filter((pack) => pack.code !== enIN.code)) {
+    assert.equal(
+      createTranslator(pack).disclosesTranslationStatus,
+      true,
+      `${pack.code}: an unreviewed translation must be disclosed`,
+    );
+    assert.equal(pack.translation_status, "machine_drafted_pending_native_review");
+  }
   assert.equal(createTranslator(enIN).disclosesTranslationStatus, false);
-  assert.equal(mrIN.translation_status, "machine_drafted_pending_native_review");
 });
 
 test("V019: locale resolution falls back without silently mislabelling", () => {
+  for (const pack of CATALOGUE.packs) {
+    assert.equal(resolveLocale(pack.code, CATALOGUE).code, pack.code);
+    assert.equal(resolveLocale(pack.code.split("-")[0], CATALOGUE).code, pack.code);
+    assert.equal(resolveLocale(pack.code.toUpperCase(), CATALOGUE).code, pack.code);
+    assert.equal(resolvePreferredLocale(["fr-FR", pack.code], CATALOGUE).code, pack.code);
+  }
   assert.equal(resolveLocale("mr-IN", CATALOGUE).code, mrIN.code);
   assert.equal(resolveLocale("mr", CATALOGUE).code, mrIN.code, "a primary subtag must match");
   assert.equal(resolveLocale("MR-in", CATALOGUE).code, mrIN.code, "matching is case-insensitive");

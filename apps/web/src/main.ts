@@ -49,9 +49,8 @@ import {
   resolvePreferredLocale,
   type Translator,
 } from "./i18n.ts";
-import { enIN } from "./locales/en-IN.ts";
-import { mrIN } from "./locales/mr-IN.ts";
-import type { LocalePack, StringKey } from "./locales/strings.ts";
+import { CATALOGUE } from "./locales/catalogue.ts";
+import type { StringKey } from "./locales/strings.ts";
 import {
   describeLocation,
   geolocationErrorKey,
@@ -85,9 +84,6 @@ import {
   RESIDENT_VIEW_TITLES,
   type ResidentView,
 } from "./resident-views.ts";
-
-/** The locale catalogue. Adding a language is a change to this list only. */
-const CATALOGUE = { packs: [enIN, mrIN] as readonly LocalePack[], fallbackCode: enIN.code };
 
 const MEGABYTE = 1024 * 1024;
 const DRAFT_SAVE_DEBOUNCE_MS = 700;

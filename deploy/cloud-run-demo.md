@@ -10,6 +10,12 @@
 - Private evidence bucket: `gs://vision-new-india-media-716180242189`
 - Docker repository: `asia-south1-docker.pkg.dev/vision-new-india/vision-repo`
 - BigQuery datasets: `voice_analytics` and `voice_eval` (keep their access controls separate)
+- Citizen interface languages: English, Marathi, Hindi, Tamil, Telugu and Kannada
+- API setting: `SUPPORTED_LOCALES=en-IN,mr-IN,hi-IN,ta-IN,te-IN,kn-IN`
+
+The language catalogue covers reporting, receipt tracking and repair confirmation.
+Non-English interface translations are machine-drafted pending native-speaker
+review. These UI packs do not imply evaluated AI accuracy in each language.
 
 The old `vision-508301` deployment is retained as a rollback and must not be
 changed or removed without explicit approval. This new environment was seeded
